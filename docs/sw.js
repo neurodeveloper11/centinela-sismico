@@ -1,5 +1,5 @@
 // Service Worker for Centinela Sísmico Offline PWA
-const CACHE_NAME = 'centinela-cache-v5';
+const CACHE_NAME = 'centinela-cache-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

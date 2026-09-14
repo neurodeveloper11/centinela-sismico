@@ -1377,24 +1377,37 @@
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
     let demoChimeInterval = null;
-    function playGentleChime(freq = 528, durationMs = 280) {
+    function playGentleChime(freq = 528, durationMs = 450, peakGain = 0.65) {
       initAudio();
       if (!audioCtx) return;
       try {
+        const now = audioCtx.currentTime;
+        
+        // Tono fundamental (senoidal puro cálido con presencia acústica)
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.value = freq;
-        
-        const now = audioCtx.currentTime;
+        osc.frequency.setValueAtTime(freq, now);
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.25, now + 0.04);
+        gain.gain.linearRampToValueAtTime(peakGain, now + 0.025);
         gain.gain.exponentialRampToValueAtTime(0.001, now + (durationMs / 1000));
-        
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
         osc.stop(now + (durationMs / 1000));
+
+        // Armónico de campana (quinta justa: freq * 1.5) para definición en altavoces de celular
+        const oscH = audioCtx.createOscillator();
+        const gainH = audioCtx.createGain();
+        oscH.type = 'sine';
+        oscH.frequency.setValueAtTime(freq * 1.5, now);
+        gainH.gain.setValueAtTime(0, now);
+        gainH.gain.linearRampToValueAtTime(peakGain * 0.28, now + 0.02);
+        gainH.gain.exponentialRampToValueAtTime(0.001, now + (durationMs * 0.75 / 1000));
+        oscH.connect(gainH);
+        gainH.connect(audioCtx.destination);
+        oscH.start(now);
+        oscH.stop(now + (durationMs / 1000));
       } catch (e) {}
     }
 
@@ -1402,14 +1415,14 @@
       initAudio();
       stopEmergencySiren();
       if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
-      // Gentle opening chord: 440 Hz (A4) then 528 Hz ("frequency of serenity")
-      playGentleChime(440, 240);
-      setTimeout(() => playGentleChime(528, 350), 140);
+      // Campanada inicial armónica de dos notas (528 Hz -> 660 Hz)
+      playGentleChime(528, 480, 0.70);
+      setTimeout(() => playGentleChime(660, 520, 0.65), 180);
 
       clearInterval(demoChimeInterval);
       demoChimeInterval = setInterval(() => {
-        playGentleChime(528, 220);
-      }, 2000);
+        playGentleChime(528, 380, 0.60);
+      }, 1500);
     }
 
     function stopDemoAudioSequence() {
@@ -1786,6 +1799,11 @@
           stopEmergencySiren();
 
           if (isDemo) {
+            // Acorde sereno de resolución exitosa (Do-Mi-Sol armónico)
+            playGentleChime(528, 400, 0.60);
+            setTimeout(() => playGentleChime(660, 420, 0.55), 140);
+            setTimeout(() => playGentleChime(792, 550, 0.50), 280);
+
             if (countdownSec) countdownSec.textContent = `✅ 0s`;
             if (alertMainTitle) {
               alertMainTitle.textContent = currentLang === 'es' 
