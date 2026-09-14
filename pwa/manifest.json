@@ -1,0 +1,17 @@
+{
+  "name": "QuakeMind Global - Offline Emergency Survival Hub",
+  "short_name": "QuakeMind",
+  "description": "Zero-network offline emergency toolkit: SOS acoustic rescue beacon, visual strobe, 72h checklist and crisis triage.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+cache_quakes.json
+*.log
+.DS_Store

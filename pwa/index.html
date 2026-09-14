@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#dc2626">
+  <meta name="description" content="QuakeMind Global - Offline Emergency Survival Hub & Acoustic Rescue Beacon">
+  <link rel="manifest" href="manifest.json">
+  <title>QuakeMind Global — Zero-Network Survival Hub</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #ef4444;
+      --primary-hover: #dc2626;
+      --accent: #38bdf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --border: #334155;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 2px solid var(--primary);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .brand span {
+      background: var(--primary);
+      color: white;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Emergency Buttons */
+    .btn-emergency {
+      width: 100%;
+      padding: 18px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .btn-emergency:active {
+      transform: scale(0.98);
+    }
+
+    .btn-sound {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-sound.active {
+      background: #7f1d1d;
+      animation: pulse-red 1s infinite;
+    }
+
+    .btn-strobe {
+      background: #d97706;
+      color: white;
+      margin-top: 10px;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      50% { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0); }
+    }
+
+    /* Fullscreen Strobe Overlay */
+    #strobeOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      cursor: pointer;
+    }
+
+    /* Checklist */
+    .checklist-group {
+      margin-bottom: 16px;
+    }
+
+    .group-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .checklist-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .checklist-item span {
+      font-size: 0.9rem;
+    }
+
+    .checklist-item.checked span {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    /* Form Inputs */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    /* Canvas Card */
+    #cardCanvas {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .btn-action {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 700;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* Grounding Pacer */
+    .pacer-box {
+      border: 2px dashed var(--accent);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .pacer-bubble {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin: 16px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 1.1rem;
+      transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pacer-bubble.inhale { transform: scale(1.4); }
+    .pacer-bubble.hold { transform: scale(1.4); background: var(--warning); }
+    .pacer-bubble.exhale { transform: scale(1.0); background: var(--success); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>QuakeMind</h1>
+      <span id="offlineBadge">Offline Ready</span>
+    </div>
+    <div class="controls">
+      <button class="btn-sm" id="langToggle">ES / EN</button>
+      <button class="btn-sm" id="themeToggle">🌓</button>
+    </div>
+  </header>
+
+  <!-- Strobe full-screen overlay -->
+  <div id="strobeOverlay"></div>
+
+  <main class="container">
+
+    <!-- 1. SOS ACOUSTIC & VISUAL BEACON -->
+    <section class="card" style="border: 2px solid var(--primary);">
+      <h2 class="card-title" id="beaconTitle">🔊 Baliza de Rescate Acústica y Visual (SOS)</h2>
+      <p class="card-subtitle" id="beaconSubtitle">
+        Emite una señal acústica penetrante de 3.500 Hz en código Morse (S-O-S) y destellos de pantalla para guiar a rescatistas sin agotar tu voz.
+      </p>
+
+      <button class="btn-emergency btn-sound" id="btnSound">
+        <span id="soundIcon">📢</span>
+        <span id="soundText">ACTIVAR SILBATO SOS ACÚSTICO (3.5 kHz)</span>
+      </button>
+
+      <button class="btn-emergency btn-strobe" id="btnStrobe">
+        <span>⚡</span>
+        <span id="strobeText">ACTIVAR BALIZA ESTROBOSCÓPICA (PANTALLA)</span>
+      </button>
+    </section>
+
+    <!-- 2. AUTONOMIC BREATHING & GROUNDING (PAP) -->
+    <section class="card">
+      <h2 class="card-title" id="papTitle">🫁 Regulación Inmediata del Pánico (Primeros Auxilios)</h2>
+      <p class="card-subtitle" id="papSubtitle">
+        Suspiro Cíclico para frenar la taquicardia y desescalar el sistema simpático en 60 segundos.
+      </p>
+
+      <div class="pacer-box">
+        <h3 id="pacerState">Listo para iniciar</h3>
+        <div class="pacer-bubble" id="pacerBubble">PAZ</div>
+        <button class="btn-action" id="btnStartBreathing" style="background: var(--success); color: white;">
+          Iniciar Ciclo Vagal (4-4-7)
+        </button>
+      </div>
+
+      <div style="margin-top: 16px; background: rgba(56, 189, 248, 0.1); padding: 12px; border-radius: 8px;">
+        <h4 style="color: var(--accent); margin-bottom: 6px;" id="groundingTitle">Enraizamiento Sensorial Rápido (5-4-3-2-1):</h4>
+        <p style="font-size: 0.85rem;" id="groundingText">
+          Mira a tu alrededor: Nombra <strong>5</strong> cosas que ves, toca <strong>4</strong> cosas firmes, escucha <strong>3</strong> sonidos, identifica <strong>2</strong> olores y recuerda <strong>1</strong> motivo de esperanza.
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. EMERGENCY CONTACT ID CARD GENERATOR -->
+    <section class="card">
+      <h2 class="card-title" id="cardGenTitle">💳 Tarjeta Familiar de Emergencia (Sin Conexión)</h2>
+      <p class="card-subtitle" id="cardGenSubtitle">
+        Ingresa tus datos clave y genera una tarjeta en imagen PNG para guardar en la galería de tu celular sin internet.
+      </p>
+
+      <div class="form-group">
+        <label id="lblCardName">Nombre Completo y Documento:</label>
+        <input type="text" class="form-input" id="cardName" placeholder="Ej: Fabio Torres - ID: 12345678">
+      </div>
+      <div class="form-group">
+        <label id="lblCardAssembly">Punto de Encuentro Familiar:</label>
+        <input type="text" class="form-input" id="cardAssembly" placeholder="Ej: Parque Principal / Cancha del Barrio">
+      </div>
+      <div class="form-group">
+        <label id="lblCardPhone">Contacto Telefónico Fuera de la Ciudad:</label>
+        <input type="text" class="form-input" id="cardPhone" placeholder="Ej: +57 300 000 0000 (Tía Marta - Bogotá)">
+      </div>
+      <div class="form-group">
+        <label id="lblCardMed">Tipo de Sangre y Alergias / Medicinas Crónicas:</label>
+        <input type="text" class="form-input" id="cardMed" placeholder="Ej: O+, Alérgico a Penicilina, Insulina">
+      </div>
+
+      <button class="btn-action" id="btnGenerateCard">Generar y Descargar Tarjeta PNG</button>
+      <canvas id="cardCanvas" width="800" height="450" style="display: none;"></canvas>
+    </section>
+
+    <!-- 4. 72-HOUR SURVIVAL BACKPACK CHECKLIST -->
+    <section class="card">
+      <h2 class="card-title" id="backpackTitle">🎒 Mochila de las 72 Horas (Guardado Offline)</h2>
+      <p class="card-subtitle" id="backpackSubtitle">
+        Marca los elementos que ya tienes empacados. Tu progreso se guarda automáticamente en el dispositivo.
+      </p>
+
+      <div id="checklistContainer">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- 5. CRITICAL ACTION TRIAGE -->
+    <section class="card" style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3);">
+      <h2 class="card-title" style="color: var(--primary);" id="triageQuickTitle">⚠️ Triaje Rápido de Grietas (ATC-20)</h2>
+      <ul style="padding-left: 20px; font-size: 0.88rem; display: flex; flex-direction: column; gap: 8px;" id="triageList">
+        <li><strong>🟢 Fisuras Superficiales (&lt; 2 mm):</strong> Solo pintura o revoque. No hay peligro estructural. Puedes permanecer.</li>
+        <li><strong>🟡 Grietas Horizontales / Tabiques:</strong> Daño moderado en paredes divisorias. Uso restringido, no duermas allí.</li>
+        <li><strong>🔴 Grietas Diagonales en 'X' o Columnas Quebradas:</strong> PELIGRO CRÍTICO DE COLAPSO. Corta el gas y la luz, y EVACÚA INMEDIATAMENTE.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <script>
+    // ==========================================
+    // I18N STRINGS
+    // ==========================================
+    let currentLang = 'es';
+
+    const STRINGS = {
+      es: {
+        beaconTitle: "🔊 Baliza de Rescate Acústica y Visual (SOS)",
+        beaconSubtitle: "Emite una señal acústica penetrante de 3.500 Hz en código Morse (S-O-S) y destellos de pantalla para guiar a rescatistas sin agotar tu voz.",
+        soundStart: "ACTIVAR SILBATO SOS ACÚSTICO (3.5 kHz)",
+        soundStop: "DETENER SILBATO SOS (SILENCIO)",
+        strobeStart: "ACTIVAR BALIZA ESTROBOSCÓPICA (PANTALLA)",
+        strobeStop: "DETENER BALIZA ESTROBOSCÓPICA",
+        papTitle: "🫁 Regulación Inmediata del Pánico (Primeros Auxilios)",
+        papSubtitle: "Suspiro Cíclico para frenar la taquicardia y desescalar el sistema simpático en 60 segundos.",
+        pacerReady: "Listo para iniciar",
+        pacerInhale: "INHALA POR LA NARIZ (4s)",
+        pacerHold: "RETÉN EL AIRE (4s)",
+        pacerExhale: "EXHALA LENTAMENTE (7s)",
+        btnBreathing: "Iniciar Ciclo Vagal (4-4-7)",
+        groundingTitle: "Enraizamiento Sensorial Rápido (5-4-3-2-1):",
+        groundingText: "Mira a tu alrededor: Nombra 5 cosas que ves, toca 4 cosas firmes, escucha 3 sonidos, identifica 2 olores y recuerda 1 motivo de esperanza.",
+        cardGenTitle: "💳 Tarjeta Familiar de Emergencia (Sin Conexión)",
+        cardGenSubtitle: "Ingresa tus datos clave y genera una tarjeta en imagen PNG para guardar en la galería de tu celular sin internet.",
+        lblCardName: "Nombre Completo y Documento:",
+        lblCardAssembly: "Punto de Encuentro Familiar:",
+        lblCardPhone: "Contacto Telefónico Fuera de la Ciudad:",
+        lblCardMed: "Tipo de Sangre y Alergias / Medicinas Crónicas:",
+        btnGenCard: "Generar y Descargar Tarjeta PNG",
+        backpackTitle: "🎒 Mochila de las 72 Horas (Guardado Offline)",
+        backpackSubtitle: "Marca los elementos que ya tienes empacados. Tu progreso se guarda automáticamente en el dispositivo.",
+        groups: {
+          water: "Agua y Alimentos",
+          tools: "Herramientas y Comunicación",
+          meds: "Salud y Primeros Auxilios",
+          docs: "Documentos y Valores"
+        },
+        items: [
+          { id: "w1", group: "water", text: "4 litros de agua embotellada por persona (ración para 72h)" },
+          { id: "w2", group: "water", text: "Comida enlatada o no perecedera con abrelatas manual" },
+          { id: "w3", group: "water", text: "Pastillas de purificación de agua o gotero con cloro" },
+          { id: "t1", group: "tools", text: "Linterna de baterías o dinamo con pilas de repuesto" },
+          { id: "t2", group: "tools", text: "Radio portátil AM/FM a baterías para escuchar boletines oficiales" },
+          { id: "t3", group: "tools", text: "Silbato de alta penetración acústica" },
+          { id: "t4", group: "tools", text: "Navaja multiusos y cinta adhesiva reforzada (duct tape)" },
+          { id: "m1", group: "meds", text: "Botiquín básico: gasas, vendas, alcohol, analgésicos" },
+          { id: "m2", group: "meds", text: "Medicamentos recetados crónicos para al menos 7 días" },
+          { id: "m3", group: "meds", text: "Mascarillas N95 para polvo o escombros" },
+          { id: "d1", group: "docs", text: "Fotocopias plastificadas de cédulas, escrituras y pólizas" },
+          { id: "d2", group: "docs", text: "Dinero en efectivo en billetes de baja denominación" },
+          { id: "d3", group: "docs", text: "Copia de llaves de la vivienda y del vehículo" }
+        ]
+      },
+      en: {
+        beaconTitle: "🔊 Acoustic & Visual Rescue Beacon (SOS)",
+        beaconSubtitle: "Emits a penetrating 3,500 Hz acoustic Morse code signal (S-O-S) and high-visibility screen strobe to guide rescuers without vocal exhaustion.",
+        soundStart: "ACTIVATE ACOUSTIC SOS WHISTLE (3.5 kHz)",
+        soundStop: "STOP ACOUSTIC SOS WHISTLE",
+        strobeStart: "ACTIVATE SCREEN DISTRESS STROBE",
+        strobeStop: "STOP SCREEN DISTRESS STROBE",
+        papTitle: "🫁 Rapid Panic De-escalation (Psychological First Aid)",
+        papSubtitle: "Cyclic Sighing to suppress tachycardia and reset the sympathetic nervous system within 60 seconds.",
+        pacerReady: "Ready to start",
+        pacerInhale: "INHALE THROUGH NOSE (4s)",
+        pacerHold: "HOLD BREATH (4s)",
+        pacerExhale: "EXHALE SLOWLY (7s)",
+        btnBreathing: "Start Vagal Cycle (4-4-7)",
+        groundingTitle: "Rapid Sensory Grounding (5-4-3-2-1):",
+        groundingText: "Look around: Name 5 things you see, touch 4 solid objects, identify 3 sounds, detect 2 smells, recall 1 positive memory.",
+        cardGenTitle: "💳 Offline Emergency Family ID Card",
+        cardGenSubtitle: "Fill in vital emergency information and render a downloadable high-res PNG image directly on your phone.",
+        lblCardName: "Full Name & Official ID:",
+        lblCardAssembly: "Family Designated Assembly Meeting Point:",
+        lblCardPhone: "Out-of-Town Emergency Phone Contact:",
+        lblCardMed: "Blood Type, Allergies & Chronic Medications:",
+        btnGenCard: "Generate & Download Card PNG",
+        backpackTitle: "🎒 72-Hour Survival Backpack (Saved Offline)",
+        backpackSubtitle: "Check off packed items. Your checklist status is saved permanently in your browser storage.",
+        groups: {
+          water: "Water & Sustenance",
+          tools: "Tools & Communication",
+          meds: "Medical & First Aid",
+          docs: "Vital Documents & Cash"
+        },
+        items: [
+          { id: "w1", group: "water", text: "4 Liters (1 Gallon) of bottled water per person (72h supply)" },
+          { id: "w2", group: "water", text: "Non-perishable canned food with manual can opener" },
+          { id: "w3", group: "water", text: "Water purification tablets or household bleach dropper" },
+          { id: "t1", group: "tools", text: "Battery-powered or crank flashlight with extra batteries" },
+          { id: "t2", group: "tools", text: "Portable AM/FM battery radio for official emergency alerts" },
+          { id: "t3", group: "tools", text: "High-pitch acoustic rescue whistle" },
+          { id: "t4", group: "tools", text: "Multi-tool pocketknife and heavy-duty duct tape" },
+          { id: "m1", group: "meds", text: "First aid kit: sterile gauze, bandages, antiseptic, pain relief" },
+          { id: "m2", group: "meds", text: "7-day supply of personal prescription medications" },
+          { id: "m3", group: "meds", text: "N95 particulate masks for dust and airborne debris" },
+          { id: "d1", group: "docs", text: "Laminated copies of passports, deeds, insurance and IDs" },
+          { id: "d2", group: "docs", text: "Emergency cash in small bills" },
+          { id: "d3", group: "docs", text: "Spare house and vehicle keys" }
+        ]
+      }
+    };
+
+    // ==========================================
+    // WEB AUDIO API - 3,500 Hz MORSE SOS BEACON
+    // ==========================================
+    let audioCtx = null;
+    let isBeeping = false;
+    let morseTimeout = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, durationMs) {
+      return new Promise((resolve) => {
+        if (!isBeeping) return resolve();
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc.type = 'sine'; // pure penetrating acoustic wave
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+          gain.gain.setValueAtTime(0, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.85, audioCtx.currentTime + 0.01);
+          gain.gain.setValueAtTime(0.85, audioCtx.currentTime + (durationMs / 1000) - 0.01);
+          gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + (durationMs / 1000));
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + (durationMs / 1000));
+
+          osc.onended = () => resolve();
+        } catch (e) {
+          resolve();
+        }
+      });
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function runMorseSosLoop() {
+      const FREQ = 3500; // Optimal ear canal resonance frequency for penetration
+      const DIT = 120;
+      const DAH = 360;
+      const INTRA = 100;
+      const INTER_CHAR = 300;
+      const INTER_WORD = 1000;
+
+      while (isBeeping) {
+        // S: . . .
+        for (let i = 0; i < 3 && isBeeping; i++) {
+          await playTone(FREQ, DIT);
+          await sleep(INTRA);
+        }
+        await sleep(INTER_CHAR);
+
+        // O: - - -
+        for (let i = 0; i < 3 && isBeeping; i++) {
+          await playTone(FREQ, DAH);
+          await sleep(INTRA);
+        }
+        await sleep(INTER_CHAR);
+
+        // S: . . .
+        for (let i = 0; i < 3 && isBeeping; i++) {
+          await playTone(FREQ, DIT);
+          await sleep(INTRA);
+        }
+        await sleep(INTER_WORD);
+      }
+    }
+
+    const btnSound = document.getElementById('btnSound');
+    const soundText = document.getElementById('soundText');
+
+    btnSound.addEventListener('click', () => {
+      initAudio();
+      isBeeping = !isBeeping;
+
+      if (isBeeping) {
+        btnSound.classList.add('active');
+        soundText.textContent = STRINGS[currentLang].soundStop;
+        runMorseSosLoop();
+      } else {
+        btnSound.classList.remove('active');
+        soundText.textContent = STRINGS[currentLang].soundStart;
+      }
+    });
+
+    // ==========================================
+    // VISUAL SCREEN STROBE
+    // ==========================================
+    let isStrobing = false;
+    let strobeInterval = null;
+    const strobeOverlay = document.getElementById('strobeOverlay');
+    const btnStrobe = document.getElementById('btnStrobe');
+    const strobeText = document.getElementById('strobeText');
+
+    function toggleStrobe() {
+      isStrobing = !isStrobing;
+      if (isStrobing) {
+        strobeOverlay.style.display = 'block';
+        btnStrobe.classList.add('active');
+        strobeText.textContent = STRINGS[currentLang].strobeStop;
+
+        let flip = false;
+        strobeInterval = setInterval(() => {
+          strobeOverlay.style.backgroundColor = flip ? '#ffffff' : '#dc2626';
+          flip = !flip;
+        }, 120);
+      } else {
+        clearInterval(strobeInterval);
+        strobeOverlay.style.display = 'none';
+        btnStrobe.classList.remove('active');
+        strobeText.textContent = STRINGS[currentLang].strobeStart;
+      }
+    }
+
+    btnStrobe.addEventListener('click', toggleStrobe);
+    strobeOverlay.addEventListener('click', toggleStrobe);
+
+    // ==========================================
+    // AUTONOMIC VAGAL PACER (4-4-7 CYCLIC SIGHING)
+    // ==========================================
+    let breathingInterval = null;
+    let isPacing = false;
+    const pacerBubble = document.getElementById('pacerBubble');
+    const pacerState = document.getElementById('pacerState');
+    const btnStartBreathing = document.getElementById('btnStartBreathing');
+
+    function runBreathingSession() {
+      if (isPacing) return;
+      isPacing = true;
+      btnStartBreathing.disabled = true;
+
+      const langData = STRINGS[currentLang];
+      let step = 0; // 0: inhale, 1: hold, 2: exhale
+
+      function stepCycle() {
+        if (step === 0) {
+          pacerState.textContent = langData.pacerInhale;
+          pacerBubble.className = 'pacer-bubble inhale';
+          pacerBubble.textContent = '4s';
+          setTimeout(() => { step = 1; stepCycle(); }, 4000);
+        } else if (step === 1) {
+          pacerState.textContent = langData.pacerHold;
+          pacerBubble.className = 'pacer-bubble hold';
+          pacerBubble.textContent = '4s';
+          setTimeout(() => { step = 2; stepCycle(); }, 4000);
+        } else {
+          pacerState.textContent = langData.pacerExhale;
+          pacerBubble.className = 'pacer-bubble exhale';
+          pacerBubble.textContent = '7s';
+          setTimeout(() => {
+            step = 0;
+            // 4 full cycles total (~60s)
+            cycleCount++;
+            if (cycleCount < 4) {
+              stepCycle();
+            } else {
+              isPacing = false;
+              btnStartBreathing.disabled = false;
+              pacerState.textContent = langData.pacerReady;
+              pacerBubble.className = 'pacer-bubble';
+              pacerBubble.textContent = 'PAZ';
+            }
+          }, 7000);
+        }
+      }
+
+      let cycleCount = 0;
+      stepCycle();
+    }
+
+    btnStartBreathing.addEventListener('click', runBreathingSession);
+
+    // ==========================================
+    // 72-HOUR SURVIVAL CHECKLIST (LOCALSTORAGE)
+    // ==========================================
+    function renderChecklist() {
+      const container = document.getElementById('checklistContainer');
+      container.innerHTML = '';
+      const langData = STRINGS[currentLang];
+
+      const grouped = {};
+      langData.items.forEach(it => {
+        if (!grouped[it.group]) grouped[it.group] = [];
+        grouped[it.group].push(it);
+      });
+
+      for (const [grpKey, items] of Object.entries(grouped)) {
+        const grpDiv = document.createElement('div');
+        grpDiv.className = 'checklist-group';
+
+        const grpTitle = document.createElement('div');
+        grpTitle.className = 'group-title';
+        grpTitle.textContent = langData.groups[grpKey] || grpKey;
+        grpDiv.appendChild(grpTitle);
+
+        items.forEach(it => {
+          const itemDiv = document.createElement('label');
+          itemDiv.className = 'checklist-item';
+
+          const isChecked = localStorage.getItem('qm_' + it.id) === 'true';
+          if (isChecked) itemDiv.classList.add('checked');
+
+          const chk = document.createElement('input');
+          chk.type = 'checkbox';
+          chk.checked = isChecked;
+          chk.addEventListener('change', () => {
+            localStorage.setItem('qm_' + it.id, chk.checked);
+            itemDiv.classList.toggle('checked', chk.checked);
+          });
+
+          const span = document.createElement('span');
+          span.textContent = it.text;
+
+          itemDiv.appendChild(chk);
+          itemDiv.appendChild(span);
+          grpDiv.appendChild(itemDiv);
+        });
+
+        container.appendChild(grpDiv);
+      }
+    }
+
+    // ==========================================
+    // EMERGENCY CANVAS CARD GENERATOR
+    // ==========================================
+    const btnGenerateCard = document.getElementById('btnGenerateCard');
+    const cardCanvas = document.getElementById('cardCanvas');
+
+    btnGenerateCard.addEventListener('click', () => {
+      const name = document.getElementById('cardName').value || 'TITULAR NO ESPECIFICADO';
+      const assembly = document.getElementById('cardAssembly').value || 'PUNTO PENDIENTE';
+      const phone = document.getElementById('cardPhone').value || 'NO REGISTRADO';
+      const med = document.getElementById('cardMed').value || 'SIN DATOS MÉDICOS';
+
+      const ctx = cardCanvas.getContext('2d');
+
+      // Background gradient
+      const grad = ctx.createLinearGradient(0, 0, 800, 450);
+      grad.addColorStop(0, '#0f172a');
+      grad.addColorStop(1, '#1e293b');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 800, 450);
+
+      // Header Banner
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(0, 0, 800, 70);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 26px Arial, sans-serif';
+      ctx.fillText('TARJETA DE EMERGENCIA SÍSMICA — QUAKEMIND GLOBAL', 30, 45);
+
+      // Card Body
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('NOMBRE COMPLETO Y DOCUMENTO:', 40, 115);
+      ctx.font = '22px Arial, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(name, 40, 145);
+
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('PUNTO DE ENCUENTRO FAMILIAR:', 40, 195);
+      ctx.font = '20px Arial, sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText(assembly, 40, 225);
+
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('CONTACTO TELEFÓNICO FUERA DE LA CIUDAD:', 40, 275);
+      ctx.font = '20px Arial, sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText(phone, 40, 305);
+
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('DATOS MÉDICOS / TIPO DE SANGRE / ALERGIAS:', 40, 355);
+      ctx.font = '18px Arial, sans-serif';
+      ctx.fillStyle = '#fcd34d';
+      ctx.fillText(med, 40, 385);
+
+      // Footer
+      ctx.fillStyle = '#64748b';
+      ctx.font = '13px Arial, sans-serif';
+      ctx.fillText('Generado sin internet por QuakeMind Global • Protocolo Human-Centric Disaster Response', 40, 430);
+
+      // Display & Download
+      cardCanvas.style.display = 'block';
+      const link = document.createElement('a');
+      link.download = `Emergencia_${name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+      link.href = cardCanvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // ==========================================
+    // THEME & LANGUAGE SWITCHERS
+    // ==========================================
+    const langToggle = document.getElementById('langToggle');
+    const themeToggle = document.getElementById('themeToggle');
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const d = STRINGS[lang];
+      document.getElementById('beaconTitle').textContent = d.beaconTitle;
+      document.getElementById('beaconSubtitle').textContent = d.beaconSubtitle;
+      soundText.textContent = isBeeping ? d.soundStop : d.soundStart;
+      strobeText.textContent = isStrobing ? d.strobeStop : d.strobeStart;
+      document.getElementById('papTitle').textContent = d.papTitle;
+      document.getElementById('papSubtitle').textContent = d.papSubtitle;
+      btnStartBreathing.textContent = d.btnBreathing;
+      document.getElementById('groundingTitle').textContent = d.groundingTitle;
+      document.getElementById('groundingText').textContent = d.groundingText;
+      document.getElementById('cardGenTitle').textContent = d.cardGenTitle;
+      document.getElementById('cardGenSubtitle').textContent = d.cardGenSubtitle;
+      document.getElementById('lblCardName').textContent = d.lblCardName;
+      document.getElementById('lblCardAssembly').textContent = d.lblCardAssembly;
+      document.getElementById('lblCardPhone').textContent = d.lblCardPhone;
+      document.getElementById('lblCardMed').textContent = d.lblCardMed;
+      btnGenerateCard.textContent = d.btnGenCard;
+      document.getElementById('backpackTitle').textContent = d.backpackTitle;
+      document.getElementById('backpackSubtitle').textContent = d.backpackSubtitle;
+      renderChecklist();
+    }
+
+    langToggle.addEventListener('click', () => {
+      applyLanguage(currentLang === 'es' ? 'en' : 'es');
+    });
+
+    themeToggle.addEventListener('click', () => {
+      const curTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = curTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+    });
+
+    // Register Service Worker for offline capability
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('SW registration error:', err);
+        });
+      });
+    }
+
+    // Initialize UI
+    applyLanguage('es');
+  </script>
+</body>
+</html>
