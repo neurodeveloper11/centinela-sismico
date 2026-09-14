@@ -962,7 +962,7 @@
           El Centinela evalúa la Intensidad Mercalli percibida (MMI) en tus coordenadas exactas. Sismos lejanos o imperceptibles (MMI I-II) se procesan en silencio total para evitar sobresaltos.
         </p>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
           <div>
             <label style="font-size: 0.78rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 4px;" id="lblThreshold">
               Umbral de Activación:
@@ -982,6 +982,22 @@
               <option value="sound_vibrate" selected id="optModeSound">🔊 Sirena Acústica + Vibración</option>
               <option value="silent_vibrate" id="optModeSilent">🔕 Modo Silencioso (Solo Vibración Discreta)</option>
               <option value="visual_only" id="optModeVisual">👁️ Solo Notificación en Pantalla</option>
+            </select>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text);" id="lblAlertTone">
+                Tono de Alerta Temprana:
+              </label>
+              <button type="button" id="btnPreviewAlertTone" class="btn-sm" style="padding: 2px 7px; font-size: 0.72rem; margin: 0; line-height: 1;" title="Escuchar muestra">
+                ▶️ Probar
+              </button>
+            </div>
+            <select id="selectAlertTone" class="form-input" style="padding: 7px 10px; font-size: 0.82rem;">
+              <option value="siren_tactical" selected id="optToneSiren">🚨 Sirena Táctica Bi-Tono (Urgente)</option>
+              <option value="official_sasmex" id="optToneSasmex">📡 Alerta Civil Sonora (SASMEX / J-Alert)</option>
+              <option value="sonar_pulse" id="optToneSonar">⚡ Pulso Sonar Penetrante</option>
+              <option value="harmonic_chime" id="optToneHarmonic">🔔 Carrillón Dinámico Mayor</option>
             </select>
           </div>
         </div>
@@ -1030,13 +1046,33 @@
         </button>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Sensibilidad:</label>
-        <select id="sentinelSens" class="form-input" style="max-width: 180px; padding: 6px 10px; font-size: 0.82rem;">
-          <option value="0.15">Alta (0.15 m/s²)</option>
-          <option value="0.25" selected>Normal (0.25 m/s²)</option>
-          <option value="0.40">Baja (0.40 m/s²)</option>
-        </select>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px;">
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 4px;" id="lblSentinelSens">
+            Sensibilidad de Reposo:
+          </label>
+          <select id="sentinelSens" class="form-input" style="padding: 7px 10px; font-size: 0.82rem;">
+            <option value="0.15" id="optSensHigh">Alta (0.15 m/s²)</option>
+            <option value="0.25" selected id="optSensMed">Normal (0.25 m/s²)</option>
+            <option value="0.40" id="optSensLow">Baja (0.40 m/s²)</option>
+          </select>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label style="font-size: 0.78rem; font-weight: 600; color: var(--text);" id="lblSentinelTone">
+              Tono Nocturno de Reposo:
+            </label>
+            <button type="button" id="btnPreviewSentinelTone" class="btn-sm" style="padding: 2px 7px; font-size: 0.72rem; margin: 0; line-height: 1;" title="Escuchar muestra">
+              ▶️ Probar
+            </button>
+          </div>
+          <select id="selectSentinelTone" class="form-input" style="padding: 7px 10px; font-size: 0.82rem;">
+            <option value="progressive_bell" selected id="optSentBell">🔕 Campana Progresiva (Anti-Pánico / Despertar Sereno)</option>
+            <option value="heavy_siren" id="optSentSiren">🚨 Sirena Continua (Sueño Pesado / Máxima Alerta)</option>
+            <option value="radar_ping" id="optSentPing">📡 Pulsos de Radar Sonoro</option>
+            <option value="tibetan_gong" id="optSentGong">🧘 Cuenco / Gong Resonante Profundo</option>
+          </select>
+        </div>
       </div>
     </section>
 
@@ -1317,7 +1353,24 @@
         adviceVehicle: "Detente a un costado en zona despejada sin bloquear la vía y permanece dentro.",
         // Multi-source badge
         pulseBadgeMulti: "Red USGS + EMSC en Vivo",
-        feedSourcesActive: "fuentes activas (USGS + EMSC)"
+        feedSourcesActive: "fuentes activas (USGS + EMSC)",
+        // Custom Tone Selection
+        lblAlertTone: "Tono de Alerta Temprana:",
+        optToneSiren: "🚨 Sirena Táctica Bi-Tono (Urgente)",
+        optToneSasmex: "📡 Alerta Civil Sonora (SASMEX / J-Alert)",
+        optToneSonar: "⚡ Pulso Sonar Penetrante",
+        optToneHarmonic: "🔔 Carrillón Dinámico Mayor",
+        lblSentinelTone: "Tono Nocturno de Reposo:",
+        optSentBell: "🔕 Campana Progresiva (Anti-Pánico / Despertar Sereno)",
+        optSentSiren: "🚨 Sirena Continua (Sueño Pesado / Máxima Alerta)",
+        optSentPing: "📡 Pulsos de Radar Sonoro",
+        optSentGong: "🧘 Cuenco / Gong Resonante Profundo",
+        lblSentinelSens: "Sensibilidad de Reposo:",
+        optSensHigh: "Alta (0.15 m/s²)",
+        optSensMed: "Normal (0.25 m/s²)",
+        optSensLow: "Baja (0.40 m/s²)",
+        btnPreview: "▶️ Probar",
+        btnStopPreview: "⏹️ Detener"
       },
       en: {
         themeBtnGray: "🏛️ Grayish White",
@@ -1446,7 +1499,24 @@
         adviceVehicle: "Pull over to a clear area without blocking the road and stay inside.",
         // Multi-source badge
         pulseBadgeMulti: "Live USGS + EMSC Network",
-        feedSourcesActive: "active sources (USGS + EMSC)"
+        feedSourcesActive: "active sources (USGS + EMSC)",
+        // Custom Tone Selection
+        lblAlertTone: "Early Warning Tone:",
+        optToneSiren: "🚨 Tactical Two-Tone Siren (Urgent)",
+        optToneSasmex: "📡 Civil Seismic Tone (SASMEX / J-Alert)",
+        optToneSonar: "⚡ Penetrating Sonar Pulse",
+        optToneHarmonic: "🔔 Dynamic Major Chime",
+        lblSentinelTone: "Nighttime Resting Tone:",
+        optSentBell: "🔕 Progressive Chime (Calm Awakening)",
+        optSentSiren: "🚨 Continuous Siren (Heavy Sleepers)",
+        optSentPing: "📡 Sonar Radar Pulses",
+        optSentGong: "🧘 Deep Resonant Gong",
+        lblSentinelSens: "Resting Sensitivity:",
+        optSensHigh: "High (0.15 m/s²)",
+        optSensMed: "Normal (0.25 m/s²)",
+        optSensLow: "Low (0.40 m/s²)",
+        btnPreview: "▶️ Test",
+        btnStopPreview: "⏹️ Stop"
       }
     };
 
@@ -1578,34 +1648,237 @@
       demoChimeInterval = null;
     }
 
-    function triggerEmergencySiren() {
+    function playToneProcedural(toneId) {
       initAudio();
-      if (isSirenPlaying) return;
+      stopEmergencySiren();
+      if (!audioCtx) return;
       isSirenPlaying = true;
       if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 800]);
 
-      let freqToggle = false;
-      sirenInterval = setInterval(() => {
-        if (!isSirenPlaying) return;
-        try {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.value = freqToggle ? 1200 : 750;
-          gain.gain.value = 0.85;
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.14);
-          freqToggle = !freqToggle;
-        } catch(e) {}
-      }, 150);
+      if (toneId === 'siren_tactical') {
+        // 1. Sirena Táctica Bi-Tono (Urgente: 1200 / 750 Hz)
+        let freqToggle = false;
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.value = freqToggle ? 1200 : 750;
+            gain.gain.value = 0.85;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.14);
+            freqToggle = !freqToggle;
+          } catch(e) {}
+        }, 150);
+
+      } else if (toneId === 'official_sasmex') {
+        // 2. Alerta Civil Sísmica (SASMEX / J-Alert bi-tono 880 / 1046 Hz)
+        let noteToggle = false;
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const f = noteToggle ? 1046.5 : 880.0;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, now);
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(f * 2, now);
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.75, now + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+            osc.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc2.start(now);
+            osc.stop(now + 0.23);
+            osc2.stop(now + 0.23);
+            noteToggle = !noteToggle;
+          } catch(e) {}
+        }, 240);
+
+      } else if (toneId === 'sonar_pulse') {
+        // 3. Pulso Sonar Penetrante (Barrido 600 -> 1400 Hz)
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(1400, now + 0.18);
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.80, now + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.26);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.27);
+          } catch(e) {}
+        }, 360);
+
+      } else if (toneId === 'harmonic_chime') {
+        // 4. Carrillón Dinámico Mayor (Arpegio rápido C-E-G-C)
+        const notes = [528, 660, 792, 1056];
+        let noteIdx = 0;
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            playGentleChime(notes[noteIdx % notes.length], 280, 0.70);
+            noteIdx++;
+          } catch(e) {}
+        }, 220);
+
+      } else if (toneId === 'progressive_bell') {
+        // 5. Centinela: Campana de Despertar Progresivo (Anti-Pánico)
+        let step = 0;
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            const vol = Math.min(0.85, 0.35 + (step * 0.08));
+            playGentleChime(432, 650, vol);
+            setTimeout(() => {
+              if (isSirenPlaying) playGentleChime(528, 550, vol * 0.85);
+            }, 180);
+            step++;
+          } catch(e) {}
+        }, 850);
+
+      } else if (toneId === 'heavy_siren') {
+        // 6. Centinela: Sirena Continua Modulada (Sueño Pesado)
+        let up = false;
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            const fStart = up ? 700 : 1200;
+            const fEnd = up ? 1200 : 700;
+            osc.frequency.setValueAtTime(fStart, now);
+            osc.frequency.linearRampToValueAtTime(fEnd, now + 0.38);
+            gain.gain.setValueAtTime(0.75, now);
+            gain.gain.linearRampToValueAtTime(0.75, now + 0.38);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.38);
+            up = !up;
+          } catch(e) {}
+        }, 390);
+
+      } else if (toneId === 'radar_ping') {
+        // 7. Centinela: Pulsos de Radar Sonoro
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1000, now);
+            gain.gain.setValueAtTime(0.8, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.13);
+
+            setTimeout(() => {
+              if (!isSirenPlaying) return;
+              try {
+                const now2 = audioCtx.currentTime;
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(1250, now2);
+                gain2.gain.setValueAtTime(0.75, now2);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now2 + 0.12);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(now2);
+                osc2.stop(now2 + 0.13);
+              } catch(e) {}
+            }, 160);
+          } catch(e) {}
+        }, 800);
+
+      } else if (toneId === 'tibetan_gong') {
+        // 8. Centinela: Cuenco / Gong Resonante Profundo
+        sirenInterval = setInterval(() => {
+          if (!isSirenPlaying) return;
+          try {
+            const now = audioCtx.currentTime;
+            [220, 440, 660].forEach((freq, idx) => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now);
+              const peak = [0.8, 0.4, 0.2][idx];
+              gain.gain.setValueAtTime(0, now);
+              gain.gain.linearRampToValueAtTime(peak, now + 0.04);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              osc.start(now);
+              osc.stop(now + 1.25);
+            });
+          } catch(e) {}
+        }, 1300);
+      }
+    }
+
+    function triggerEmergencySiren(target = 'alert') {
+      const tone = target === 'sentinel'
+        ? (localStorage.getItem('qm_sentinel_tone') || 'progressive_bell')
+        : (localStorage.getItem('qm_alert_tone') || 'siren_tactical');
+      playToneProcedural(tone);
     }
 
     function stopEmergencySiren() {
       isSirenPlaying = false;
       clearInterval(sirenInterval);
+      sirenInterval = null;
       stopDemoAudioSequence();
+    }
+
+    let activePreviewTimer = null;
+    let activePreviewBtn = null;
+
+    function previewTone(toneId, btnElement) {
+      initAudio();
+      if (isSirenPlaying) {
+        stopEmergencySiren();
+        if (activePreviewTimer) {
+          clearTimeout(activePreviewTimer);
+          activePreviewTimer = null;
+        }
+        if (activePreviewBtn) {
+          activePreviewBtn.textContent = STRINGS[currentLang].btnPreview || "▶️ Probar";
+          activePreviewBtn = null;
+        }
+        return;
+      }
+      playToneProcedural(toneId);
+      activePreviewBtn = btnElement;
+      if (btnElement) btnElement.textContent = STRINGS[currentLang].btnStopPreview || "⏹️ Detener";
+
+      activePreviewTimer = setTimeout(() => {
+        stopEmergencySiren();
+        if (activePreviewBtn) {
+          activePreviewBtn.textContent = STRINGS[currentLang].btnPreview || "▶️ Probar";
+          activePreviewBtn = null;
+        }
+        activePreviewTimer = null;
+      }, 2600);
     }
 
     async function runMorseSosLoop() {
@@ -1699,6 +1972,24 @@
       if (savedMode) selectAlertMode.value = savedMode;
       selectAlertMode.addEventListener('change', (e) => {
         localStorage.setItem('qm_alert_mode', e.target.value);
+      });
+    }
+
+    const selectAlertTone = document.getElementById('selectAlertTone');
+    const btnPreviewAlertTone = document.getElementById('btnPreviewAlertTone');
+
+    if (selectAlertTone) {
+      const savedTone = localStorage.getItem('qm_alert_tone');
+      if (savedTone) selectAlertTone.value = savedTone;
+      selectAlertTone.addEventListener('change', (e) => {
+        localStorage.setItem('qm_alert_tone', e.target.value);
+        if (btnPreviewAlertTone) previewTone(e.target.value, btnPreviewAlertTone);
+      });
+    }
+
+    if (btnPreviewAlertTone && selectAlertTone) {
+      btnPreviewAlertTone.addEventListener('click', () => {
+        previewTone(selectAlertTone.value, btnPreviewAlertTone);
       });
     }
 
@@ -2298,7 +2589,7 @@
 
       const threshold = parseFloat(sentinelSens.value);
       if (delta > threshold) {
-        triggerEmergencySiren();
+        triggerEmergencySiren('sentinel');
         alertBanner.style.display = 'block';
         alertDetails.textContent = STRINGS[currentLang].sentinelAlertText || '🌙 ¡SACUDIDA MECÁNICA DETECTADA EN LA SUPERFICIE DE REPOSO!';
         countdownSec.textContent = `¡ALERTA!`;
@@ -2332,12 +2623,30 @@
       }
     });
 
+    const selectSentinelTone = document.getElementById('selectSentinelTone');
+    const btnPreviewSentinelTone = document.getElementById('btnPreviewSentinelTone');
+
+    if (selectSentinelTone) {
+      const savedTone = localStorage.getItem('qm_sentinel_tone');
+      if (savedTone) selectSentinelTone.value = savedTone;
+      selectSentinelTone.addEventListener('change', (e) => {
+        localStorage.setItem('qm_sentinel_tone', e.target.value);
+        if (btnPreviewSentinelTone) previewTone(e.target.value, btnPreviewSentinelTone);
+      });
+    }
+
+    if (btnPreviewSentinelTone && selectSentinelTone) {
+      btnPreviewSentinelTone.addEventListener('click', () => {
+        previewTone(selectSentinelTone.value, btnPreviewSentinelTone);
+      });
+    }
+
     btnTestSiren.addEventListener('click', () => {
       if (isSirenPlaying) {
         stopEmergencySiren();
         btnTestSiren.textContent = "🔊 Probar Tono de Alarma";
       } else {
-        triggerEmergencySiren();
+        triggerEmergencySiren('sentinel');
         btnTestSiren.textContent = "⏹️ Detener Tono";
         setTimeout(() => {
           stopEmergencySiren();
@@ -2908,6 +3217,44 @@
       const optSound = document.getElementById('optModeSound'); if (optSound) optSound.textContent = d.optModeSound;
       const optSilent = document.getElementById('optModeSilent'); if (optSilent) optSilent.textContent = d.optModeSilent;
       const optVisual = document.getElementById('optModeVisual'); if (optVisual) optVisual.textContent = d.optModeVisual;
+
+      // Early Warning Tone Labels
+      const lblAlertToneEl = document.getElementById('lblAlertTone');
+      if (lblAlertToneEl) lblAlertToneEl.textContent = d.lblAlertTone;
+      const optToneSirenEl = document.getElementById('optToneSiren');
+      if (optToneSirenEl) optToneSirenEl.textContent = d.optToneSiren;
+      const optToneSasmexEl = document.getElementById('optToneSasmex');
+      if (optToneSasmexEl) optToneSasmexEl.textContent = d.optToneSasmex;
+      const optToneSonarEl = document.getElementById('optToneSonar');
+      if (optToneSonarEl) optToneSonarEl.textContent = d.optToneSonar;
+      const optToneHarmonicEl = document.getElementById('optToneHarmonic');
+      if (optToneHarmonicEl) optToneHarmonicEl.textContent = d.optToneHarmonic;
+
+      // Nighttime Sentinel Tone Labels
+      const lblSentinelToneEl = document.getElementById('lblSentinelTone');
+      if (lblSentinelToneEl) lblSentinelToneEl.textContent = d.lblSentinelTone;
+      const optSentBellEl = document.getElementById('optSentBell');
+      if (optSentBellEl) optSentBellEl.textContent = d.optSentBell;
+      const optSentSirenEl = document.getElementById('optSentSiren');
+      if (optSentSirenEl) optSentSirenEl.textContent = d.optSentSiren;
+      const optSentPingEl = document.getElementById('optSentPing');
+      if (optSentPingEl) optSentPingEl.textContent = d.optSentPing;
+      const optSentGongEl = document.getElementById('optSentGong');
+      if (optSentGongEl) optSentGongEl.textContent = d.optSentGong;
+
+      const lblSentinelSensEl = document.getElementById('lblSentinelSens');
+      if (lblSentinelSensEl) lblSentinelSensEl.textContent = d.lblSentinelSens;
+      const optSensHighEl = document.getElementById('optSensHigh');
+      if (optSensHighEl) optSensHighEl.textContent = d.optSensHigh;
+      const optSensMedEl = document.getElementById('optSensMed');
+      if (optSensMedEl) optSensMedEl.textContent = d.optSensMed;
+      const optSensLowEl = document.getElementById('optSensLow');
+      if (optSensLowEl) optSensLowEl.textContent = d.optSensLow;
+
+      const btnPreviewAlertToneEl = document.getElementById('btnPreviewAlertTone');
+      if (btnPreviewAlertToneEl && !isSirenPlaying) btnPreviewAlertToneEl.textContent = d.btnPreview;
+      const btnPreviewSentinelToneEl = document.getElementById('btnPreviewSentinelTone');
+      if (btnPreviewSentinelToneEl && !isSirenPlaying) btnPreviewSentinelToneEl.textContent = d.btnPreview;
 
       // World Pulse Labels
       const pulseTitleEl = document.getElementById('pulseTitle');
