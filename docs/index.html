@@ -427,6 +427,137 @@
       color: var(--text);
       user-select: none;
     }
+
+    /* World Pulse & Zero-Fatigue UI */
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .filter-pills::-webkit-scrollbar { display: none; }
+    .pill-btn {
+      background: var(--inner-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .pill-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .pulse-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .pulse-card {
+      background: var(--inner-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.15s;
+    }
+    .pulse-card:hover {
+      border-color: var(--primary);
+    }
+    .pulse-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .mag-badge {
+      font-size: 0.86rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+    }
+    .mag-low { background: #dcfce7; color: #166534; }
+    .mag-med { background: #fef3c7; color: #92400e; }
+    .mag-high { background: #fee2e2; color: #991b1b; }
+    .pulse-place {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pulse-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .pulse-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .pulse-impact {
+      font-size: 0.78rem;
+      padding: 5px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+    .pulse-impact.calm {
+      background: rgba(16, 185, 129, 0.1);
+      color: #065f46;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    [data-theme="dark"] .pulse-impact.calm {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+    .pulse-impact.warning {
+      background: rgba(245, 158, 11, 0.12);
+      color: #92400e;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    [data-theme="dark"] .pulse-impact.warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+    }
+    .pulse-impact.danger {
+      background: rgba(220, 38, 38, 0.12);
+      color: #991b1b;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    [data-theme="dark"] .pulse-impact.danger {
+      background: rgba(220, 38, 38, 0.2);
+      color: #f87171;
+    }
   </style>
 </head>
 <body>
@@ -533,6 +664,45 @@
         Última comprobación de sismos: En espera...
       </div>
 
+      <!-- Sub-Box: Configuración de Cero Fatiga de Alarma & Umbral Geodésico -->
+      <div style="background: var(--inner-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin: 12px 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px;" id="fatigueTitle">
+            🛡️ Filtro de Cero Fatiga de Alarma
+          </span>
+          <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 2px 8px; border-radius: 10px; font-weight: 700;" id="fatigueBadge">
+            Geodesia Activa
+          </span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;" id="fatigueDesc">
+          El Centinela evalúa la Intensidad Mercalli percibida (MMI) en tus coordenadas exactas. Sismos lejanos o imperceptibles (MMI I-II) se procesan en silencio total para evitar sobresaltos.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 4px;" id="lblThreshold">
+              Umbral de Activación:
+            </label>
+            <select id="selectThreshold" class="form-input" style="padding: 7px 10px; font-size: 0.82rem;">
+              <option value="4.0" selected id="optThresh4">🛡️ MMI IV+ (Perceptible / Recomendado)</option>
+              <option value="5.0" id="optThresh5">⚡ MMI V+ (Solo Alertas Severas)</option>
+              <option value="3.0" id="optThresh3">🔍 MMI III+ (Cualquier Movimiento Leve)</option>
+              <option value="6.0" id="optThresh6">🚨 MMI VI+ (Solo Emergencia Crítica)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 4px;" id="lblAlertMode">
+              Tipo de Alerta:
+            </label>
+            <select id="selectAlertMode" class="form-input" style="padding: 7px 10px; font-size: 0.82rem;">
+              <option value="sound_vibrate" selected id="optModeSound">🔊 Sirena Acústica + Vibración</option>
+              <option value="silent_vibrate" id="optModeSilent">🔕 Modo Silencioso (Solo Vibración Discreta)</option>
+              <option value="visual_only" id="optModeVisual">👁️ Solo Notificación en Pantalla</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <details>
         <summary id="physicsSummary">🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)</summary>
         <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;" id="physicsBody">
@@ -578,7 +748,43 @@
       </div>
     </section>
 
-    <!-- 5. GUÍA DE INSTALACIÓN PASO A PASO EN EL CELULAR -->
+    <!-- 5. PANEL SÍSMICO MUNDIAL EN TIEMPO REAL (WORLD PULSE) -->
+    <section class="card" id="worldPulseSection" style="border-top: 4px solid #6366f1;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+        <h2 class="card-title" id="pulseTitle">🌍 Pulso Sísmico Mundial (24 Horas)</h2>
+        <span class="badge-status badge-blue" id="pulseBadge">Red USGS en Vivo</span>
+      </div>
+      <p class="card-subtitle" id="pulseSubtitle">
+        Monitoreo sereno e informativo de la actividad telúrica global. Estos eventos lejanos no disparan alarmas en tu dispositivo, pero te permiten conocer con rigor la dinámica de la Tierra.
+      </p>
+
+      <!-- Region Filter Pills -->
+      <div class="filter-pills" id="pulseFilters">
+        <button class="pill-btn active" data-region="all" id="pillAll">🌍 Mundo</button>
+        <button class="pill-btn" data-region="latam" id="pillLatam">🌎 Latinoamérica</button>
+        <button class="pill-btn" data-region="asia" id="pillAsia">🌏 Asia / Pacífico</button>
+        <button class="pill-btn" data-region="europe" id="pillEurope">🏛️ Europa / Med</button>
+        <button class="pill-btn" data-region="northam" id="pillNortham">🏔️ Norteamérica</button>
+      </div>
+
+      <!-- Search Box & Refresh Counter -->
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <input type="text" id="pulseSearchInput" class="form-input" placeholder="🔍 Buscar por país, ciudad o región..." style="font-size: 0.82rem; padding: 8px 12px;">
+        <button class="btn-sm" id="btnRefreshPulse" title="Actualizar feed global" style="padding: 0 12px;">🔄</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px; flex-wrap: wrap; gap: 4px;">
+        <span id="pulseCountText">Cargando eventos globales...</span>
+        <span id="pulseDistanceRef">Ref: Coordenadas del usuario</span>
+      </div>
+
+      <!-- List Container -->
+      <div class="pulse-list" id="pulseListContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- 6. GUÍA DE INSTALACIÓN PASO A PASO EN EL CELULAR -->
     <details>
       <summary style="font-weight: 700; color: var(--primary);">📲 ¿Cómo instalar Centinela en tu teléfono sin tiendas de aplicaciones?</summary>
       <div style="padding-top: 12px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
@@ -738,6 +944,32 @@
         backpackTitle: "🎒 Mochila de las 72 Horas (Checklist)",
         backpackSubtitle: "Prepara con calma los elementos esenciales de tu hogar. Tu progreso se guarda automáticamente en el teléfono.",
         triageQuickTitle: "🏡 Cuidado del Hogar: Guía Serena de Grietas (ATC-20)",
+        fatigueTitle: "🛡️ Filtro de Cero Fatiga de Alarma",
+        fatigueBadge: "Geodesia Activa",
+        fatigueDesc: "El Centinela evalúa la Intensidad Mercalli percibida (MMI) en tus coordenadas exactas. Sismos lejanos o imperceptibles (MMI I-II) se procesan en silencio total para evitar sobresaltos.",
+        lblThreshold: "Umbral de Activación:",
+        optThresh4: "🛡️ MMI IV+ (Perceptible / Recomendado)",
+        optThresh5: "⚡ MMI V+ (Solo Alertas Severas)",
+        optThresh3: "🔍 MMI III+ (Cualquier Movimiento Leve)",
+        optThresh6: "🚨 MMI VI+ (Solo Emergencia Crítica)",
+        lblAlertMode: "Tipo de Alerta:",
+        optModeSound: "🔊 Sirena Acústica + Vibración",
+        optModeSilent: "🔕 Modo Silencioso (Solo Vibración Discreta)",
+        optModeVisual: "👁️ Solo Notificación en Pantalla",
+        pulseTitle: "🌍 Pulso Sísmico Mundial (24 Horas)",
+        pulseSubtitle: "Monitoreo sereno e informativo de la actividad telúrica global. Estos eventos lejanos no disparan alarmas en tu dispositivo, pero te permiten conocer con rigor la dinámica de la Tierra.",
+        pulseBadge: "Red USGS en Vivo",
+        pulseRegAll: "🌍 Mundo",
+        pulseRegLatam: "🌎 Latinoamérica",
+        pulseRegAsia: "🌏 Asia / Pacífico",
+        pulseRegEurope: "🏛️ Europa / Med",
+        pulseRegNortham: "🏔️ Norteamérica",
+        pulseSearchPlaceholder: "🔍 Buscar por país, ciudad o región...",
+        pulseDistanceRef: "Ref: Ubicación del usuario",
+        pulseLoading: "Cargando eventos globales...",
+        pulseCountSuffix: "eventos en la Tierra",
+        pulseImpactCalm: "Imperceptible en tu zona (MMI I) — Tu entorno está a salvo 🛡️",
+        pulseDistPrefix: "Distancia a ti:",
         groups: { water: "Agua y Alimentos", tools: "Herramientas y Comunicación", meds: "Salud y Primeros Auxilios", docs: "Documentos y Valores" },
         items: [
           { id: "w1", group: "water", text: "4 litros de agua embotellada por persona (ración para 72h)" },
@@ -801,6 +1033,32 @@
         backpackTitle: "🎒 72-Hour Survival Backpack (Checklist)",
         backpackSubtitle: "Calmly prepare household essentials. Your checklist progress saves automatically in your phone.",
         triageQuickTitle: "🏡 Home Care: Serene Crack Triage Guide (ATC-20)",
+        fatigueTitle: "🛡️ Zero-Alarm Fatigue Filter",
+        fatigueBadge: "Active Geodesy",
+        fatigueDesc: "The Sentinel evaluates perceived Modified Mercalli Intensity (MMI) at your exact coordinates. Distant or imperceptible quakes (MMI I-II) are processed in complete silence to prevent panic.",
+        lblThreshold: "Activation Threshold:",
+        optThresh4: "🛡️ MMI IV+ (Perceptible / Recommended)",
+        optThresh5: "⚡ MMI V+ (Severe Alerts Only)",
+        optThresh3: "🔍 MMI III+ (Light Shaking)",
+        optThresh6: "🚨 MMI VI+ (Critical Emergency Only)",
+        lblAlertMode: "Alert Type:",
+        optModeSound: "🔊 Acoustic Siren + Vibration",
+        optModeSilent: "🔕 Silent Mode (Discreet Vibration Only)",
+        optModeVisual: "👁️ On-Screen Notification Only",
+        pulseTitle: "🌍 Global Seismic Pulse (24 Hours)",
+        pulseSubtitle: "Serene and informative monitoring of global seismic activity. These distant events do not trigger alarms on your device, allowing you to calmly understand Earth's dynamics.",
+        pulseBadge: "Live USGS Network",
+        pulseRegAll: "🌍 World",
+        pulseRegLatam: "🌎 Latin America",
+        pulseRegAsia: "🌏 Asia / Pacific",
+        pulseRegEurope: "🏛️ Europe / Med",
+        pulseRegNortham: "🏔️ North America",
+        pulseSearchPlaceholder: "🔍 Search by country, city or region...",
+        pulseDistanceRef: "Ref: Your GPS coordinates",
+        pulseLoading: "Loading global events...",
+        pulseCountSuffix: "events on Earth",
+        pulseImpactCalm: "Imperceptible at your area (MMI I) — Your home is safe 🛡️",
+        pulseDistPrefix: "Distance to you:",
         groups: { water: "Water & Sustenance", tools: "Tools & Communication", meds: "Medical & First Aid", docs: "Vital Documents & Cash" },
         items: [
           { id: "w1", group: "water", text: "4 Liters (1 Gallon) of bottled water per person (72h supply)" },
@@ -975,6 +1233,48 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
+    function hypocentralDistance(epicentralKm, depthKm) {
+      const h = Math.max(depthKm || 10.0, 1.0);
+      return Math.sqrt(epicentralKm * epicentralKm + h * h);
+    }
+
+    function calculateEstimatedMMI(magnitude, hypoDistKm) {
+      const R = Math.max(hypoDistKm, 3.0);
+      const raw = 1.5 * magnitude - 2.5 * Math.log10(R) + 1.2;
+      return Math.min(12.0, Math.max(1.0, raw));
+    }
+
+    function getMmiLabel(mmi) {
+      const val = Math.round(mmi);
+      const isEs = currentLang === 'es';
+      if (val <= 2) return { text: isEs ? "I-II. Imperceptible / Débil" : "I-II. Imperceptible / Weak", level: "calm" };
+      if (val === 3) return { text: isEs ? "III. Leve (Sentido en reposo)" : "III. Light (Felt at rest)", level: "calm" };
+      if (val === 4) return { text: isEs ? "IV. Moderado (Vibran ventanas)" : "IV. Moderate (Windows rattle)", level: "warning" };
+      if (val === 5) return { text: isEs ? "V. Poco Fuerte (Despierta a muchos)" : "V. Rather Strong (Wakes people)", level: "warning" };
+      if (val === 6) return { text: isEs ? "VI. Fuerte (Muebles se mueven)" : "VI. Strong (Furniture moves)", level: "danger" };
+      return { text: isEs ? "VII+. Severo a Destructivo" : "VII+. Severe to Destructive", level: "danger" };
+    }
+
+    // Zero-Fatigue User Controls
+    const selectThreshold = document.getElementById('selectThreshold');
+    const selectAlertMode = document.getElementById('selectAlertMode');
+
+    if (selectThreshold) {
+      const savedThresh = localStorage.getItem('qm_alert_threshold');
+      if (savedThresh) selectThreshold.value = savedThresh;
+      selectThreshold.addEventListener('change', (e) => {
+        localStorage.setItem('qm_alert_threshold', e.target.value);
+      });
+    }
+
+    if (selectAlertMode) {
+      const savedMode = localStorage.getItem('qm_alert_mode');
+      if (savedMode) selectAlertMode.value = savedMode;
+      selectAlertMode.addEventListener('change', (e) => {
+        localStorage.setItem('qm_alert_mode', e.target.value);
+      });
+    }
+
     btnGetLocation.addEventListener('click', () => {
       if (!navigator.geolocation) {
         alert("Tu navegador no soporta geolocalización.");
@@ -989,12 +1289,14 @@
         locationInfo.textContent = `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`;
         radarBadge.textContent = "🟢 Monitoreo Activo";
         radarBadge.className = "badge-status badge-green";
-        checkLiveQuakesFeed();
-        if (!radarInterval) radarInterval = setInterval(checkLiveQuakesFeed, 12000);
+        startAdaptiveMonitoring();
+        fetchWorldPulse();
       }, (err) => {
         locationInfo.textContent = `📍 Ubicación de referencia: Cali / Valle del Cauca.`;
       });
     });
+
+    let lastNearbyCalmEventId = null;
 
     async function checkLiveQuakesFeed() {
       try {
@@ -1002,25 +1304,61 @@
         const data = await res.json();
         lastFeedCheck.textContent = `Última revisión: ${new Date().toLocaleTimeString()} • ${data.features.length} eventos monitoreados en la Tierra`;
 
+        const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
+        let nearbyImperceptibleFound = null;
+
         for (const feat of data.features) {
           const props = feat.properties;
           const coords = feat.geometry.coordinates;
-          const qLat = coords[1];
           const qLon = coords[0];
+          const qLat = coords[1];
+          const qDepth = coords[2] || 10.0;
           const mag = props.mag;
           const originTime = props.time;
-          const distKm = haversine(userLat, userLon, qLat, qLon);
 
-          if (mag >= 4.0 && distKm <= 400 && feat.id !== lastAlertedId) {
+          if (mag === null || isNaN(mag)) continue;
+
+          const distKm = haversine(userLat, userLon, qLat, qLon);
+          const hypoDist = hypocentralDistance(distKm, qDepth);
+          const localMMI = calculateEstimatedMMI(mag, hypoDist);
+
+          // CERO FATIGA DE ALARMA: Solo disparar sirena/alerta si la intensidad local percibida >= umbral
+          if (localMMI >= userThreshold && feat.id !== lastAlertedId) {
             const elapsedSec = (Date.now() - originTime) / 1000;
-            const sWaveTravelTime = distKm / 3.5;
+            const sWaveTravelTime = hypoDist / 3.5;
             const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
 
             if (remainingSec > 0) {
               lastAlertedId = feat.id;
-              fireEarlyWarning(props.title, distKm, mag, remainingSec);
+              fireEarlyWarning(props.title, distKm, mag, remainingSec, localMMI);
               break;
             }
+          } else if (distKm <= 500 && localMMI < userThreshold) {
+            // Sismo regional cercano pero matemáticamente imperceptible: mantener serenidad activa
+            if (!nearbyImperceptibleFound) {
+              nearbyImperceptibleFound = {
+                id: feat.id,
+                title: props.title,
+                distKm: distKm,
+                mag: mag,
+                localMMI: localMMI
+              };
+            }
+          }
+        }
+
+        // Si hay un sismo cercano pero imperceptible, actualizar el Escudo de Tranquilidad para evitar pánico
+        if (nearbyImperceptibleFound && nearbyImperceptibleFound.id !== lastNearbyCalmEventId) {
+          lastNearbyCalmEventId = nearbyImperceptibleFound.id;
+          const sTitle = document.getElementById('shieldStatusTitle');
+          const sDesc = document.getElementById('shieldStatusDesc');
+          if (sTitle && sDesc) {
+            sTitle.textContent = currentLang === 'es' 
+              ? "Todo en Orden: Sismo Regional Imperceptible en tu Zona" 
+              : "All is Well: Regional Quake Imperceptible in Your Area";
+            sDesc.textContent = currentLang === 'es'
+              ? `Registrado ${nearbyImperceptibleFound.title} a ${Math.round(nearbyImperceptibleFound.distKm)} km (M${nearbyImperceptibleFound.mag.toFixed(1)}). En tus coordenadas la intensidad estimada es MMI ${nearbyImperceptibleFound.localMMI.toFixed(1)} (Imperceptible). Tu familia y tu hogar no corren ningún riesgo.`
+              : `Recorded ${nearbyImperceptibleFound.title} at ${Math.round(nearbyImperceptibleFound.distKm)} km (M${nearbyImperceptibleFound.mag.toFixed(1)}). At your coordinates the estimated intensity is MMI ${nearbyImperceptibleFound.localMMI.toFixed(1)} (Imperceptible). Your family and home are completely safe.`;
           }
         }
       } catch (e) {
@@ -1029,11 +1367,19 @@
     }
 
     let alertCountdownTimer = null;
-    function fireEarlyWarning(title, distKm, mag, remainingSec) {
+    function fireEarlyWarning(title, distKm, mag, remainingSec, localMMI) {
       alertBanner.style.display = 'block';
-      alertDetails.textContent = `${title} • Distancia: ${Math.round(distKm)} km • Magnitud: M${mag.toFixed(1)}`;
+      const mmiStr = localMMI ? ` • Intensidad local: MMI ${localMMI.toFixed(1)} (${getMmiLabel(localMMI).text})` : '';
+      alertDetails.textContent = `${title} • Distancia: ${Math.round(distKm)} km • Magnitud: M${mag.toFixed(1)}${mmiStr}`;
       countdownSec.textContent = `${remainingSec}s`;
-      triggerEmergencySiren();
+
+      const alertMode = localStorage.getItem('qm_alert_mode') || 'sound_vibrate';
+      if (alertMode === 'sound_vibrate') {
+        triggerEmergencySiren();
+      } else if (alertMode === 'silent_vibrate') {
+        if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 800]);
+      }
+      // If 'visual_only', no sound or vibration is emitted
 
       let rem = remainingSec;
       clearInterval(alertCountdownTimer);
@@ -1055,7 +1401,8 @@
     });
 
     btnSimulateAlert.addEventListener('click', () => {
-      fireEarlyWarning("DEMO Sismo Regional Magnitud 6.2", 110, 6.2, 16);
+      const demoMMI = 5.8;
+      fireEarlyWarning("DEMO Sismo Regional Magnitud 6.2", 110, 6.2, 16, demoMMI);
     });
 
     // ==========================================
@@ -1340,6 +1687,255 @@
     });
 
     // ==========================================
+    // WORLD PULSE (GLOBAL SEISMIC FEED - 24H)
+    // ==========================================
+    let worldPulseEvents = [];
+    let currentPulseRegion = 'all';
+    let pulseSearchQuery = '';
+
+    const pulseListContainer = document.getElementById('pulseListContainer');
+    const pulseCountText = document.getElementById('pulseCountText');
+    const pulseDistanceRef = document.getElementById('pulseDistanceRef');
+    const pulseSearchInput = document.getElementById('pulseSearchInput');
+    const btnRefreshPulse = document.getElementById('btnRefreshPulse');
+
+    function isEventInRegion(region, lat, lon, place) {
+      if (region === 'all') return true;
+      const p = (place || '').toLowerCase();
+
+      if (region === 'latam') {
+        const inLatamBox = (lat >= -56 && lat <= 33 && lon >= -120 && lon <= -34);
+        const latamKeywords = ['colombia', 'venezuela', 'chile', 'mexico', 'méxico', 'peru', 'perú', 'ecuador', 
+          'argentina', 'bolivia', 'guatemala', 'costa rica', 'panama', 'panamá', 'el salvador', 'honduras', 
+          'nicaragua', 'dominican', 'puerto rico', 'cuba', 'haiti', 'chocó', 'santander', 'cauca', 'antioquia', 
+          'valle del cauca', 'oaxaca', 'guerrero', 'chiapas', 'michoacan', 'coquimbo', 'atacama', 'maule', 'caribbean', 'puerto armuelles'];
+        return inLatamBox || latamKeywords.some(k => p.includes(k));
+      }
+
+      if (region === 'asia') {
+        const inAsiaBox = (lat >= -50 && lat <= 65 && ((lon >= 60 && lon <= 180) || (lon >= -180 && lon <= -160)));
+        const asiaKeywords = ['japan', 'japón', 'tokyo', 'indonesia', 'philippines', 'filipinas', 'taiwan', 'taiwán', 
+          'china', 'tonga', 'fiji', 'papua', 'vanuatu', 'new zealand', 'solomon', 'kuril', 'kamchatka', 'kermadec', 'mariana'];
+        return inAsiaBox || asiaKeywords.some(k => p.includes(k));
+      }
+
+      if (region === 'europe') {
+        const inEuropeBox = (lat >= 30 && lat <= 72 && lon >= -25 && lon <= 50);
+        const europeKeywords = ['italy', 'italia', 'greece', 'grecia', 'turkey', 'turquía', 'turkiye', 'iceland', 
+          'islandia', 'spain', 'españa', 'portugal', 'albania', 'croatia', 'cyprus', 'romania', 'crete', 'dodecanese'];
+        return inEuropeBox || europeKeywords.some(k => p.includes(k));
+      }
+
+      if (region === 'northam') {
+        const inNorthamBox = (lat >= 24 && lat <= 75 && lon >= -170 && lon <= -50);
+        const northamKeywords = ['alaska', 'california', 'nevada', 'washington', 'oregon', 'canada', 'canadá', 
+          'hawaii', 'oklahoma', 'montana', 'wyoming', 'idaho', 'utah', 'texas', 'baja california'];
+        return inNorthamBox || northamKeywords.some(k => p.includes(k));
+      }
+
+      return true;
+    }
+
+    function formatRelativeTime(timeMs) {
+      const sec = Math.max(0, Math.floor((Date.now() - timeMs) / 1000));
+      const isEs = currentLang === 'es';
+      if (sec < 60) return isEs ? `Hace ${sec}s` : `${sec}s ago`;
+      const min = Math.floor(sec / 60);
+      if (min < 60) return isEs ? `Hace ${min} min` : `${min}m ago`;
+      const hours = Math.floor(min / 60);
+      if (hours < 24) return isEs ? `Hace ${hours} h` : `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      return isEs ? `Hace ${days} d` : `${days}d ago`;
+    }
+
+    function renderWorldPulseCards() {
+      if (!pulseListContainer) return;
+      const isEs = currentLang === 'es';
+      const query = pulseSearchQuery.trim().toLowerCase();
+
+      const filtered = worldPulseEvents.filter(ev => {
+        const matchesRegion = isEventInRegion(currentPulseRegion, ev.lat, ev.lon, ev.place);
+        const matchesQuery = !query || ev.place.toLowerCase().includes(query) || ev.title.toLowerCase().includes(query);
+        return matchesRegion && matchesQuery;
+      });
+
+      pulseCountText.textContent = `${filtered.length} ${STRINGS[currentLang].pulseCountSuffix || 'eventos'} (${currentPulseRegion.toUpperCase()})`;
+      pulseDistanceRef.textContent = `${STRINGS[currentLang].pulseDistanceRef || 'Ref: Ubicación'}: ${userLat.toFixed(2)}°, ${userLon.toFixed(2)}°`;
+
+      if (filtered.length === 0) {
+        pulseListContainer.innerHTML = `
+          <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.88rem;">
+            🌱 ${isEs ? 'No se registran eventos sísmicos en esta región en las últimas 24 horas.' : 'No seismic events recorded in this region in the last 24 hours.'}
+          </div>
+        `;
+        return;
+      }
+
+      // Render top 35 events for optimal DOM rendering speed
+      const displayEvents = filtered.slice(0, 35);
+      let html = '';
+
+      for (const ev of displayEvents) {
+        const distKm = haversine(userLat, userLon, ev.lat, ev.lon);
+        const hypoDist = hypocentralDistance(distKm, ev.depth);
+        const localMMI = calculateEstimatedMMI(ev.mag, hypoDist);
+
+        let magClass = 'mag-low';
+        if (ev.mag >= 6.0) magClass = 'mag-high';
+        else if (ev.mag >= 4.5) magClass = 'mag-med';
+
+        let impactBadge = '';
+        if (localMMI < 3.0) {
+          impactBadge = `<span class="pulse-impact calm">🛡️ ${isEs ? 'Imperceptible en tu zona (MMI ' + localMMI.toFixed(1) + ') • Tu hogar está en calma' : 'Imperceptible at your area (MMI ' + localMMI.toFixed(1) + ') • Safe'}</span>`;
+        } else if (localMMI < 4.5) {
+          impactBadge = `<span class="pulse-impact warning">⚠️ ${isEs ? 'Movimiento Leve en tu ubicación (MMI ' + localMMI.toFixed(1) + ')' : 'Light Shaking at your area (MMI ' + localMMI.toFixed(1) + ')'}</span>`;
+        } else {
+          impactBadge = `<span class="pulse-impact danger">🚨 ${isEs ? 'Movimiento Fuerte esperado (MMI ' + localMMI.toFixed(1) + ')' : 'Strong Shaking expected (MMI ' + localMMI.toFixed(1) + ')'}</span>`;
+        }
+
+        const timeStr = formatRelativeTime(ev.time);
+        const formattedDate = new Date(ev.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        html += `
+          <div class="pulse-card">
+            <div class="pulse-card-header">
+              <span class="mag-badge ${magClass}">M ${ev.mag.toFixed(1)}</span>
+              <span class="pulse-place" title="${ev.place}">${ev.place}</span>
+              <span class="pulse-time">${timeStr}</span>
+            </div>
+            <div class="pulse-meta">
+              <span>📏 ${isEs ? 'Profundidad' : 'Depth'}: ${ev.depth.toFixed(1)} km</span>
+              <span>🕒 ${formattedDate} (Hora local)</span>
+              <span>📍 ${STRINGS[currentLang].pulseDistPrefix || 'Distancia a ti'}: <strong>${Math.round(distKm).toLocaleString()} km</strong></span>
+            </div>
+            ${impactBadge}
+          </div>
+        `;
+      }
+
+      pulseListContainer.innerHTML = html;
+    }
+
+    async function fetchWorldPulse() {
+      try {
+        pulseCountText.textContent = STRINGS[currentLang].pulseLoading || "Cargando eventos globales...";
+        const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
+        const data = await res.json();
+        
+        worldPulseEvents = (data.features || []).map(feat => {
+          const p = feat.properties;
+          const coords = feat.geometry.coordinates;
+          return {
+            id: feat.id,
+            title: p.title || 'Earthquake',
+            place: p.place || 'Unknown location',
+            mag: parseFloat(p.mag || 0),
+            time: p.time,
+            lat: coords[1],
+            lon: coords[0],
+            depth: coords[2] || 10.0,
+            url: p.url
+          };
+        }).filter(e => !isNaN(e.mag));
+
+        try {
+          localStorage.setItem('qm_world_pulse_cache', JSON.stringify(worldPulseEvents.slice(0, 50)));
+        } catch(e) {}
+
+        renderWorldPulseCards();
+      } catch (err) {
+        console.warn("World pulse network fetch failed, using fallback cache:", err);
+        const cached = localStorage.getItem('qm_world_pulse_cache');
+        if (cached) {
+          try {
+            worldPulseEvents = JSON.parse(cached);
+            renderWorldPulseCards();
+          } catch(e) {}
+        }
+      }
+    }
+
+    // Filter pill interactions
+    const filterPills = document.querySelectorAll('#pulseFilters .pill-btn');
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentPulseRegion = pill.getAttribute('data-region');
+        renderWorldPulseCards();
+      });
+    });
+
+    if (pulseSearchInput) {
+      pulseSearchInput.addEventListener('input', (e) => {
+        pulseSearchQuery = e.target.value;
+        renderWorldPulseCards();
+      });
+    }
+
+    if (btnRefreshPulse) {
+      btnRefreshPulse.addEventListener('click', () => {
+        fetchWorldPulse();
+      });
+    }
+
+    // ==========================================
+    // ADAPTIVE MICRO-POLLING & BATTERY OPTIMIZATION
+    // ==========================================
+    let adaptiveTimer = null;
+    let basePollInterval = 15000; // 15 seconds active
+    let isHidden = false;
+    let consecutivePollErrors = 0;
+
+    function startAdaptiveMonitoring() {
+      if (adaptiveTimer) clearTimeout(adaptiveTimer);
+      pollCycle();
+    }
+
+    async function pollCycle() {
+      let interval = basePollInterval;
+      if (isHidden) {
+        interval = 75000; // 75 seconds in background to preserve battery
+      }
+      if (consecutivePollErrors > 0) {
+        interval = Math.min(120000, 30000 * Math.pow(2, consecutivePollErrors - 1));
+      }
+
+      try {
+        await checkLiveQuakesFeed();
+        consecutivePollErrors = 0;
+      } catch (err) {
+        consecutivePollErrors++;
+        console.warn("Poll cycle error backoff:", err);
+      }
+
+      adaptiveTimer = setTimeout(pollCycle, interval);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      isHidden = document.hidden;
+      if (!isHidden) {
+        // Tab foregrounded: poll immediately with fresh data
+        startAdaptiveMonitoring();
+      }
+    });
+
+    if ('getBattery' in navigator) {
+      navigator.getBattery().then((battery) => {
+        function updatePowerProfile() {
+          if (battery.level < 0.20 && !battery.charging) {
+            basePollInterval = 45000; // Save battery
+          } else {
+            basePollInterval = 15000;
+          }
+        }
+        updatePowerProfile();
+        battery.addEventListener('levelchange', updatePowerProfile);
+        battery.addEventListener('chargingchange', updatePowerProfile);
+      }).catch(() => {});
+    }
+
+    // ==========================================
     // THEME SWITCHER & I18N
     // ==========================================
     const langToggle = document.getElementById('langToggle');
@@ -1384,8 +1980,43 @@
       document.getElementById('backpackTitle').textContent = d.backpackTitle;
       document.getElementById('backpackSubtitle').textContent = d.backpackSubtitle;
       document.getElementById('triageQuickTitle').textContent = d.triageQuickTitle;
+
+      // Zero-Fatigue Labels
+      const fatigueTitleEl = document.getElementById('fatigueTitle');
+      if (fatigueTitleEl) fatigueTitleEl.textContent = d.fatigueTitle;
+      const fatigueBadgeEl = document.getElementById('fatigueBadge');
+      if (fatigueBadgeEl) fatigueBadgeEl.textContent = d.fatigueBadge;
+      const fatigueDescEl = document.getElementById('fatigueDesc');
+      if (fatigueDescEl) fatigueDescEl.textContent = d.fatigueDesc;
+      const lblThresholdEl = document.getElementById('lblThreshold');
+      if (lblThresholdEl) lblThresholdEl.textContent = d.lblThreshold;
+      const opt4 = document.getElementById('optThresh4'); if (opt4) opt4.textContent = d.optThresh4;
+      const opt5 = document.getElementById('optThresh5'); if (opt5) opt5.textContent = d.optThresh5;
+      const opt3 = document.getElementById('optThresh3'); if (opt3) opt3.textContent = d.optThresh3;
+      const opt6 = document.getElementById('optThresh6'); if (opt6) opt6.textContent = d.optThresh6;
+      const lblAlertModeEl = document.getElementById('lblAlertMode');
+      if (lblAlertModeEl) lblAlertModeEl.textContent = d.lblAlertMode;
+      const optSound = document.getElementById('optModeSound'); if (optSound) optSound.textContent = d.optModeSound;
+      const optSilent = document.getElementById('optModeSilent'); if (optSilent) optSilent.textContent = d.optModeSilent;
+      const optVisual = document.getElementById('optModeVisual'); if (optVisual) optVisual.textContent = d.optModeVisual;
+
+      // World Pulse Labels
+      const pulseTitleEl = document.getElementById('pulseTitle');
+      if (pulseTitleEl) pulseTitleEl.textContent = d.pulseTitle;
+      const pulseSubtitleEl = document.getElementById('pulseSubtitle');
+      if (pulseSubtitleEl) pulseSubtitleEl.textContent = d.pulseSubtitle;
+      const pulseBadgeEl = document.getElementById('pulseBadge');
+      if (pulseBadgeEl) pulseBadgeEl.textContent = d.pulseBadge;
+      const pillAll = document.getElementById('pillAll'); if (pillAll) pillAll.textContent = d.pulseRegAll;
+      const pillLatam = document.getElementById('pillLatam'); if (pillLatam) pillLatam.textContent = d.pulseRegLatam;
+      const pillAsia = document.getElementById('pillAsia'); if (pillAsia) pillAsia.textContent = d.pulseRegAsia;
+      const pillEurope = document.getElementById('pillEurope'); if (pillEurope) pillEurope.textContent = d.pulseRegEurope;
+      const pillNortham = document.getElementById('pillNortham'); if (pillNortham) pillNortham.textContent = d.pulseRegNortham;
+      if (pulseSearchInput) pulseSearchInput.placeholder = d.pulseSearchPlaceholder;
+
       updateThemeButtonLabel();
       renderChecklist();
+      renderWorldPulseCards();
     }
 
     function updateThemeButtonLabel() {
@@ -1421,9 +2052,9 @@
       locationInfo.textContent = `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`;
       radarBadge.textContent = "🟢 Monitoreo Activo";
       radarBadge.className = "badge-status badge-green";
-      checkLiveQuakesFeed();
-      radarInterval = setInterval(checkLiveQuakesFeed, 12000);
+      startAdaptiveMonitoring();
     }
+    fetchWorldPulse();
   </script>
 </body>
 </html>

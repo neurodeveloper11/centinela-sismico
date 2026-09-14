@@ -64,6 +64,19 @@ class TestGeophysicsAndAttenuation:
         assert "VIII" in desc_en["roman_title"]
         assert "Destructive" in desc_en["roman_title"]
 
+    def test_zero_alarm_fatigue_filtering(self):
+        # A distant small quake (M 4.2 at 350 km epicentral, 20 km depth)
+        hypo_distant = hypocentral_distance(350.0, 20.0)
+        mmi_distant = calculate_attenuation_mmi(4.2, hypo_distant)
+        # Should be below threshold (MMI IV / 4.0), imperceptible to human occupants
+        assert mmi_distant < 3.0, f"Expected imperceptible MMI < 3.0, got {mmi_distant}"
+
+        # A severe regional quake (M 7.2 at 60 km epicentral, 15 km depth)
+        hypo_severe = hypocentral_distance(60.0, 15.0)
+        mmi_severe = calculate_attenuation_mmi(7.2, hypo_severe)
+        # Should be high intensity (MMI >= 7.0 - Very Strong)
+        assert mmi_severe >= 7.0, f"Expected severe MMI >= 7.0, got {mmi_severe}"
+
 
 class TestPsychologicalFirstAid:
 
