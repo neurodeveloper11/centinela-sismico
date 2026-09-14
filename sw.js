@@ -1,9 +1,13 @@
-// Service Worker for QuakeMind Global Offline Survival PWA
-const CACHE_NAME = 'quakemind-cache-v3';
+// Service Worker for Centinela Sísmico Offline PWA
+const CACHE_NAME = 'centinela-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
+  './og-image.png'
 ];
 
 self.addEventListener('install', (event) => {
