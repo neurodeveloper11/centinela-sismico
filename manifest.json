@@ -1,0 +1,17 @@
+{
+  "name": "Centinela Sísmico — Alerta Temprana y Protección Familiar",
+  "short_name": "Centinela",
+  "description": "El vigía que calcula la onda destructiva antes de que llegue a tu hogar. Alerta temprana anticipada, serenidad guiada y botiquín de respaldo.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
