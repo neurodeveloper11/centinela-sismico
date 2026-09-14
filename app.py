@@ -415,9 +415,14 @@ with gr.Blocks(title="QuakeMind Global - Seismic Intelligence and Crisis Hub") a
             <p style="font-size: 1.1rem; color: #38bdf8; font-weight: bold; margin-bottom: 12px;">
                 Descarga y código fuente completo disponible en el repositorio de GitHub
             </p>
-            <a href="https://github.com/neurodeveloper11" target="_blank" style="background: #ef4444; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-                Ver Repositorio Open Source en GitHub
-            </a>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <a href="https://github.com/neurodeveloper11/quakemind-global" target="_blank" style="background: #ef4444; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                    Ver Repositorio en GitHub
+                </a>
+                <a href="https://huggingface.co/neurodeveloper" target="_blank" style="background: #eab308; color: #0f172a; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                    🤗 Perfil en Hugging Face (@neurodeveloper)
+                </a>
+            </div>
         </div>
         """)
 

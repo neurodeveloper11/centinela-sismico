@@ -13,6 +13,7 @@ license: mit
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![PWA Zero-Network](https://img.shields.io/badge/PWA-Instalable%20en%20Celular-teal)](https://neurodeveloper11.github.io/quakemind-global/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-%40neurodeveloper-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/neurodeveloper)
 [![USGS Live API](https://img.shields.io/badge/USGS-Real--Time%20GeoJSON-green)](https://earthquake.usgs.gov)
 [![Standards: WHO PAP & ATC-20](https://img.shields.io/badge/Standards-WHO%20PAP%20%7C%20ATC--20-purple)](https://www.who.int)
 
@@ -195,7 +196,7 @@ Variables included: `event_id`, `title`, `place`, `magnitude`, `magnitude_type`,
 **Fabio Ignacio Torres Benítez**  
 *Data Engineer | Cognitive Scientist & Clinical/Organizational Psychologist | Full-Stack AI Developer*  
 📍 Cali / Buenaventura, Colombia  
-🔗 [LinkedIn](https://www.linkedin.com/in/fabio-torres-39364b258) | [GitHub](https://github.com/neurodeveloper11) | [Google Play (NeuroGym Live)](https://play.google.com/store/apps/details?id=com.t11.neurochess&hl=es_419)
+🔗 [LinkedIn](https://www.linkedin.com/in/fabio-torres-39364b258) | [GitHub](https://github.com/neurodeveloper11) | [Hugging Face](https://huggingface.co/neurodeveloper) | [Google Play (NeuroGym Live)](https://play.google.com/store/apps/details?id=com.t11.neurochess&hl=es_419)
 
 ---
 
