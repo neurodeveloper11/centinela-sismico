@@ -4,9 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0284c7">
-  <meta name="description" content="QuakeMind Global — Inteligencia Sísmica Humana, Alerta Temprana, Serenidad y Cuidado Familiar">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Centinela">
+  <meta name="description" content="Centinela Sísmico — El vigía que calcula la onda destructiva antes de que llegue a tu hogar. Alerta temprana y serenidad.">
   <link rel="manifest" href="manifest.json">
-  <title>QuakeMind Global — Espacio de Confianza y Protección Sísmica</title>
+  <title>Centinela Sísmico — Protección Familiar y Alerta Temprana</title>
   <style>
     :root {
       --bg: #f8fafc;
@@ -93,8 +96,9 @@
     .brand-icon {
       font-size: 1.4rem;
       background: rgba(2, 132, 199, 0.1);
-      padding: 6px;
+      padding: 6px 8px;
       border-radius: 10px;
+      line-height: 1;
     }
 
     .brand h1 {
@@ -173,6 +177,47 @@
       line-height: 1.5;
     }
 
+    /* Install Prompt Banner */
+    .install-banner {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.1), rgba(13, 148, 136, 0.08));
+      border: 1px solid rgba(2, 132, 199, 0.3);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.06);
+    }
+
+    .install-banner-text h3 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .install-banner-text p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .btn-install {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s, transform 0.1s;
+    }
+
+    .btn-install:hover { background: var(--primary-hover); }
+    .btn-install:active { transform: scale(0.97); }
+
     /* Peace & Reassurance Shield */
     .reassurance-shield {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(2, 132, 199, 0.06));
@@ -217,7 +262,7 @@
       line-height: 1.4;
     }
 
-    /* Urgent Alert Banner (Only active on actual wave) */
+    /* Urgent Countdown Banner (Active seismic wave only) */
     .alert-countdown-banner {
       display: none;
       background: linear-gradient(135deg, #991b1b, #dc2626);
@@ -254,13 +299,8 @@
       transition: background-color 0.2s, transform 0.1s;
     }
 
-    .btn-action:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-action:active {
-      transform: scale(0.98);
-    }
+    .btn-action:hover { background: var(--primary-hover); }
+    .btn-action:active { transform: scale(0.98); }
 
     .btn-secondary {
       background: var(--inner-bg);
@@ -278,10 +318,7 @@
       transition: all 0.2s;
     }
 
-    .btn-secondary:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
+    .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
 
     /* Micro-Seismograph */
     #seismoCanvas {
@@ -348,11 +385,6 @@
       border-radius: 8px;
       color: var(--text);
       font-size: 0.9rem;
-      transition: border-color 0.2s;
-    }
-    .form-input:focus {
-      outline: none;
-      border-color: var(--primary);
     }
 
     /* Checklist */
@@ -380,10 +412,10 @@
       cursor: pointer;
     }
 
-    /* Accordion Details */
+    /* Details Accordion */
     details {
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 12px 16px;
       margin-top: 10px;
       background: var(--inner-bg);
@@ -401,10 +433,10 @@
 
   <header>
     <div class="brand">
-      <div class="brand-icon">🌱</div>
+      <div class="brand-icon">🛡️</div>
       <div>
-        <h1>QuakeMind</h1>
-        <span id="headerBadge">Protección en Calma</span>
+        <h1>Centinela Sísmico</h1>
+        <span id="headerBadge">Vigía Activo</span>
       </div>
     </div>
     <div class="controls">
@@ -418,14 +450,23 @@
 
   <main class="container">
 
+    <!-- 0. INSTALACIÓN EN EL CELULAR EN 1 CLIC (PWA BANNER) -->
+    <div class="install-banner" id="installBanner">
+      <div class="install-banner-text">
+        <h3 id="installBannerTitle">📲 Instalar Centinela en tu Celular</h3>
+        <p id="installBannerDesc">Acceso instantáneo en tu pantalla de inicio, 100% gratis y sin tiendas de descarga.</p>
+      </div>
+      <button class="btn-install" id="btnInstallApp">Instalar App</button>
+    </div>
+
     <!-- 1. ESCUDO DE TRANQUILIDAD Y CERTEZA (REASSURANCE SHIELD) -->
     <section class="reassurance-shield">
       <div class="pulse-indicator">🛡️</div>
       <div class="shield-text">
         <h2 id="shieldStatusTitle">Todo en Orden: Tu Entorno Está en Calma</h2>
         <p id="shieldStatusDesc">
-          Monitoreando la actividad sísmica en silencio con datos de la Red Global. No se registran alertas cercanas a tu ubicación. 
-          Estás en un espacio seguro diseñado para acompañarte con serenidad y ciencia.
+          El Centinela vigila en silencio las fallas tectónicas con la Red Global. No se registran alertas cercanas a tu ubicación. 
+          Descansa con tranquilidad; estás en un espacio seguro que cuida a tu familia.
         </p>
       </div>
     </section>
@@ -447,7 +488,7 @@
     <section class="card" style="border-top: 4px solid var(--accent);">
       <h2 class="card-title" id="papTitle">🫁 Pausa de Serenidad (60 Segundos)</h2>
       <p class="card-subtitle" id="papSubtitle">
-        Si las noticias o los sismos recientes te generan angustia o taquicardia, tómate un minuto para activar el freno natural de tu sistema nervioso (Suspiro Cíclico 4-4-7).
+        Si las noticias o los temblores recientes te generan inquietud, tómate un minuto para activar el freno natural de tu sistema nervioso (Suspiro Cíclico 4-4-7).
       </p>
 
       <div class="pacer-box">
@@ -473,7 +514,7 @@
         <span class="badge-status badge-blue" id="radarBadge">Listo para activar</span>
       </div>
       <p class="card-subtitle" id="radarSubtitle">
-        Calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote <strong>segundos antes</strong> del temblor fuerte.
+        El Centinela calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote <strong>segundos antes</strong> del temblor fuerte.
       </p>
 
       <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
@@ -509,7 +550,7 @@
       </div>
       <p class="card-subtitle" id="sentinelSubtitle">
         Para que duermas con tranquilidad: coloca tu celular plano sobre la mesa o mesita de noche. 
-        Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.
+        Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso de servidor), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.
       </p>
 
       <canvas id="seismoCanvas" width="700" height="80"></canvas>
@@ -537,7 +578,32 @@
       </div>
     </section>
 
-    <!-- 5. BOTIQUÍN DIGITAL & HERRAMIENTAS FAMILIARES -->
+    <!-- 5. GUÍA DE INSTALACIÓN PASO A PASO EN EL CELULAR -->
+    <details>
+      <summary style="font-weight: 700; color: var(--primary);">📲 ¿Cómo instalar Centinela en tu teléfono sin tiendas de aplicaciones?</summary>
+      <div style="padding-top: 12px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+        <p style="margin-bottom: 10px;"><strong>Centinela Sísmico</strong> es una Aplicación Web Progresiva (PWA). Ocupa menos de 1 MB, no requiere descargas lentas y funciona sin internet:</p>
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;">
+          <strong style="color: var(--text);">🤖 En Android (Chrome / Samsung Internet / Edge):</strong>
+          <ol style="padding-left: 20px; margin-top: 4px;">
+            <li>Presiona el botón azul <strong>"Instalar App"</strong> en el banner superior.</li>
+            <li>O toca los 3 puntos <strong>(⋮)</strong> arriba a la derecha en tu navegador y elige <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla principal"</strong>.</li>
+            <li>¡Listo! El icono del escudo 🛡️ aparecerá en tu teléfono junto a tus demás aplicaciones.</li>
+          </ol>
+        </div>
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px;">
+          <strong style="color: var(--text);">🍎 En iPhone / iPad (Safari):</strong>
+          <ol style="padding-left: 20px; margin-top: 4px;">
+            <li>Abre este enlace en el navegador <strong>Safari</strong>.</li>
+            <li>Toca el botón <strong>Compartir</strong> (el cuadrado con la flecha hacia arriba <strong>⎋</strong> en la barra inferior).</li>
+            <li>Desliza hacia abajo y toca <strong>"Agregar al inicio" (Add to Home Screen ➕)</strong>.</li>
+            <li>Presiona <strong>"Agregar"</strong> y el Centinela quedará instalado para siempre.</li>
+          </ol>
+        </div>
+      </div>
+    </details>
+
+    <!-- 6. BOTIQUÍN DIGITAL & HERRAMIENTAS FAMILIARES -->
     <section class="card">
       <h2 class="card-title" id="toolsTitle">🎒 Botiquín Digital de Respaldo</h2>
       <p class="card-subtitle" id="toolsSubtitle">
@@ -621,7 +687,7 @@
 
   <script>
     // ==========================================
-    // I18N STRINGS (WARM, CALM & TRUST-CENTERED)
+    // I18N STRINGS (CENTINELA SÍSMICO)
     // ==========================================
     let currentLang = 'es';
 
@@ -629,11 +695,14 @@
       es: {
         themeBtnGray: "🏛️ Blanco Grisáceo",
         themeBtnDark: "🌙 Modo Oscuro",
-        headerBadge: "Protección en Calma",
+        headerBadge: "Vigía Activo",
+        installTitle: "📲 Instalar Centinela en tu Celular",
+        installDesc: "Acceso instantáneo en tu pantalla de inicio, 100% gratis y sin tiendas de descarga.",
+        btnInstall: "Instalar App",
         shieldTitle: "Todo en Orden: Tu Entorno Está en Calma",
-        shieldDesc: "Monitoreando la actividad sísmica en silencio con datos de la Red Global. No se registran alertas cercanas a tu ubicación. Estás en un espacio seguro diseñado para acompañarte con serenidad y ciencia.",
+        shieldDesc: "El Centinela vigila en silencio las fallas tectónicas con la Red Global. No se registran alertas cercanas a tu ubicación. Descansa con tranquilidad; estás en un espacio seguro que cuida a tu familia.",
         papTitle: "🫁 Pausa de Serenidad (60 Segundos)",
-        papSubtitle: "Si las noticias o los sismos recientes te generan angustia o taquicardia, tómate un minuto para activar el freno natural de tu sistema nervioso (Suspiro Cíclico 4-4-7).",
+        papSubtitle: "Si las noticias o los temblores recientes te generan inquietud, tómate un minuto para activar el freno natural de tu sistema nervioso (Suspiro Cíclico 4-4-7).",
         pacerReady: "Listo para comenzar",
         pacerInhale: "INHALA POR LA NARIZ (4s)",
         pacerHold: "RETÉN EL AIRE (4s)",
@@ -642,13 +711,13 @@
         groundingSummary: "🧘 Técnica de Enraizamiento Sensorial (5-4-3-2-1)",
         groundingBody: "Mira a tu alrededor con serenidad: Nombra 5 cosas que ves, toca 4 cosas firmes con tus manos, identifica 3 sonidos reales, percibe 2 olores y evoca 1 recuerdo que te transmita gratitud y afecto.",
         radarTitle: "📍 Radar Sísmico Protector (GPS)",
-        radarSubtitle: "Calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote segundos antes del temblor fuerte.",
+        radarSubtitle: "El Centinela calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote segundos antes del temblor fuerte.",
         btnGetLoc: "📍 Conectar mi Ubicación Protectora",
         btnDemo: "🧪 Probar Demostración",
         physicsSummary: "🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)",
         physicsBody: "La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. Por cada 100 km de distancia al epicentro, dispones de 12 segundos de ventaja matemática (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.",
         sentinelTitle: "🌙 Centinela Nocturno (Detector de Mesa)",
-        sentinelSubtitle: "Para que duermas con tranquilidad: coloca tu celular plano sobre la mesa o mesita de noche. Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.",
+        sentinelSubtitle: "Para que duermas con tranquilidad: coloca tu celular plano sobre la mesa o mesita de noche. Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso de servidor), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.",
         sentinelBtnStart: "🛡️ Activar Centinela Nocturno",
         sentinelBtnStop: "⏹️ Desactivar Centinela Nocturno",
         toolsTitle: "🎒 Botiquín Digital de Respaldo",
@@ -689,9 +758,12 @@
       en: {
         themeBtnGray: "🏛️ Grayish White",
         themeBtnDark: "🌙 Dark Mode",
-        headerBadge: "Calm Protection",
+        headerBadge: "Active Sentinel",
+        installTitle: "📲 Install Sentinel on Your Phone",
+        installDesc: "Instant home screen access, 100% free with no app store downloads.",
+        btnInstall: "Install App",
         shieldTitle: "All is Well: Your Environment is in Calm",
-        shieldDesc: "Silently monitoring global seismic feeds. No active alerts recorded near your location. You are in a safe, science-backed sanctuary designed to support your family with composure.",
+        shieldDesc: "The Sentinel silently monitors tectonic faultlines with the Global Network. No active alerts near your location. Rest in peace; your family is safely guarded.",
         papTitle: "🫁 60-Second Serenity Pause",
         papSubtitle: "If news of recent quakes triggers anxiety or heart racing, take 60 seconds to reset your nervous system through cyclic sighing (4-4-7 breath).",
         pacerReady: "Ready to begin",
@@ -702,7 +774,7 @@
         groundingSummary: "🧘 Sensory Grounding Technique (5-4-3-2-1)",
         groundingBody: "Look around with composure: Name 5 things you see, touch 4 solid objects, identify 3 real sounds, sense 2 subtle smells, recall 1 memory that fills you with gratitude.",
         radarTitle: "📍 Protective Seismic Radar (GPS)",
-        radarSubtitle: "Calculates in advance the arrival time of the secondary shear wave (S) directly on your device, providing seconds of warning before strong shaking.",
+        radarSubtitle: "The Sentinel calculates in advance the arrival time of the secondary shear wave (S) directly on your device, providing seconds of warning before strong shaking.",
         btnGetLoc: "📍 Connect Protective Location",
         btnDemo: "🧪 Test Simulation Demo",
         physicsSummary: "🔬 How does early warning work? (Scientific Explanation)",
@@ -747,6 +819,40 @@
         ]
       }
     };
+
+    // ==========================================
+    // PWA 1-CLICK INSTALLATION LOGIC
+    // ==========================================
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('installBanner');
+    const btnInstallApp = document.getElementById('btnInstallApp');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBanner) installBanner.style.display = 'flex';
+    });
+
+    if (btnInstallApp) {
+      btnInstallApp.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            installBanner.style.display = 'none';
+          }
+          deferredPrompt = null;
+        } else {
+          // If iOS or already installed, open instructions
+          alert("Para instalar en iPhone: Toca el icono Compartir (⎋) en Safari y selecciona 'Agregar al inicio ➕'. En Android: Toca los 3 puntos (⋮) y 'Instalar aplicación'.");
+        }
+      });
+    }
+
+    // Hide install banner if already running in standalone PWA mode
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      if (installBanner) installBanner.style.display = 'none';
+    }
 
     // ==========================================
     // AUDIO ENGINE (SOS & PROTECTIVE TONE)
@@ -1201,7 +1307,7 @@
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 24px Arial, sans-serif';
-      ctx.fillText('FICHA FAMILIAR DE PROTECCIÓN SÍSMICA — QUAKEMIND', 30, 45);
+      ctx.fillText('FICHA FAMILIAR DE PROTECCIÓN SÍSMICA — CENTINELA', 30, 45);
 
       ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#0369a1';
       ctx.fillText('NOMBRE COMPLETO Y DOCUMENTO:', 40, 115);
@@ -1224,7 +1330,7 @@
       ctx.fillText(med, 40, 385);
 
       ctx.fillStyle = '#64748b'; ctx.font = '13px Arial, sans-serif';
-      ctx.fillText('Generado sin internet por QuakeMind Global • Protocolo de Calma y Protección Familiar', 40, 430);
+      ctx.fillText('Generado sin internet por Centinela Sísmico • Protocolo de Calma y Protección Familiar', 40, 430);
 
       cardCanvas.style.display = 'block';
       const link = document.createElement('a');
@@ -1243,6 +1349,9 @@
       currentLang = lang;
       const d = STRINGS[lang];
       document.getElementById('headerBadge').textContent = d.headerBadge;
+      document.getElementById('installBannerTitle').textContent = d.installTitle;
+      document.getElementById('installBannerDesc').textContent = d.installDesc;
+      btnInstallApp.textContent = d.btnInstall;
       document.getElementById('shieldStatusTitle').textContent = d.shieldTitle;
       document.getElementById('shieldStatusDesc').textContent = d.shieldDesc;
       document.getElementById('papTitle').textContent = d.papTitle;

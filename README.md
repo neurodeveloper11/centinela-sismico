@@ -1,26 +1,25 @@
 ---
-title: QuakeMind Global
-emoji: 🌐
-colorFrom: red
-colorTo: slate
-sdk: gradio
-app_file: app.py
+title: Centinela Sísmico
+emoji: 🛡️
+colorFrom: blue
+colorTo: gray
+sdk: static
 pinned: false
 license: mit
 ---
 
-# 🌐 QuakeMind Global *(SismoMente Global)*
+# 🛡️ Centinela Sísmico *(Global Seismic Sentinel)*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-orange)](https://huggingface.co/spaces)
+[![PWA Zero-Network](https://img.shields.io/badge/PWA-Instalable%20en%20Celular-teal)](https://neurodeveloper11.github.io/quakemind-global/)
 [![USGS Live API](https://img.shields.io/badge/USGS-Real--Time%20GeoJSON-green)](https://earthquake.usgs.gov)
-[![Offline-First PWA](https://img.shields.io/badge/PWA-Zero--Network%20Ready-red)](https://github.com/neurodeveloper11)
 [![Standards: WHO PAP & ATC-20](https://img.shields.io/badge/Standards-WHO%20PAP%20%7C%20ATC--20-purple)](https://www.who.int)
 
-> **Real-Time Global Seismic Intelligence, Human-Centric Psychological First Aid (PAP), and Zero-Network Emergency Survival Hub.**  
-> *Conceived and engineered by **Fabio Ignacio Torres Benítez** (Psychologist, Cognitive Scientist & Data / AI Engineer).*  
-> **100% Free, Open Source, and Accessible to Every Citizen Worldwide.**
+> **El vigía que calcula la onda destructiva antes de que llegue a tu hogar.**  
+> *Alerta temprana anticipada por GPS, detector de mesa con 0ms de latencia, serenidad guiada y botiquín familiar.*  
+> *Concebido e implementado por **Fabio Ignacio Torres Benítez** (Psicólogo, Científico Cognitivo e Ingeniero de Datos / IA).*  
+> **100% Gratuito, Libre y Accesible para Cualquier Persona en el Mundo.**
 
 ---
 
