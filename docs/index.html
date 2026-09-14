@@ -431,6 +431,69 @@
     .btn-action:hover { background: var(--primary-hover); }
     .btn-action:active { transform: scale(0.98); }
 
+    /* GPS Button State Machine */
+    .btn-action.is-connecting {
+      background: #f59e0b;
+      animation: pulse-connecting 1.2s infinite;
+      pointer-events: none;
+      opacity: 0.92;
+    }
+    .btn-action.is-connected {
+      background: #059669;
+    }
+    .btn-action.is-connected:hover {
+      background: #047857;
+    }
+    .btn-action.is-error {
+      background: #dc2626;
+    }
+    .btn-action.is-error:hover {
+      background: #b91c1c;
+    }
+    @keyframes pulse-connecting {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    /* Situational Action Chips (Universal Alert Protocol) */
+    .situational-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    .chip-situational {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chip-situational:hover,
+    .chip-situational.active {
+      background: rgba(255,255,255,0.3);
+      border-color: white;
+      transform: scale(1.03);
+    }
+    .situational-advice {
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.25);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
     .btn-secondary {
       background: var(--inner-bg);
       color: var(--text);
@@ -752,8 +815,15 @@
       <p id="alertDetails" style="font-size: 1.02rem; opacity: 0.95;">Sismo M6.2 detectado a 110 km.</p>
       <div class="countdown-seconds" id="countdownSec">16s</div>
       <p id="alertActionAdvice" style="font-size: 1.05rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
-        CONSERVA LA CALMA • AGÁCHATE • CÚBRETE BAJO UNA MESA FIRME
+        CONSERVA LA CALMA • PROTEGE TU CABEZA Y CUELLO • BUSCA UN LUGAR SEGURO SEGÚN TU ENTORNO
       </p>
+      <div id="situationalChips" class="situational-chips" style="display:none;">
+        <button class="chip-situational" data-situation="wheelchair">🦽 <span id="chipWheelchair">Movilidad reducida</span></button>
+        <button class="chip-situational" data-situation="bed">🛏️ <span id="chipBed">En cama</span></button>
+        <button class="chip-situational" data-situation="outdoor">🚶 <span id="chipOutdoor">Aire libre</span></button>
+        <button class="chip-situational" data-situation="vehicle">🚗 <span id="chipVehicle">En vehículo</span></button>
+      </div>
+      <p id="situationalAdvice" class="situational-advice" style="display:none;"></p>
       <p id="alertSubNote" style="font-size: 0.82rem; opacity: 0.92; margin-bottom: 12px; display: none;">
         Esta es una práctica educativa para entrenar tu tiempo de reacción sereno.
       </p>
@@ -796,6 +866,34 @@
           </button>
           <button class="btn-action" id="btnStartDemoPractice" style="flex: 2; background: linear-gradient(135deg, #0284c7, #0d9488);">
             ▶️ Iniciar Práctica Segura
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL GUÍA GPS (ERRORES DE UBICACIÓN) -->
+    <div class="modal-backdrop" id="modalGpsGuide" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.5rem;">📍</span>
+            <h3 id="gpsGuideTitle" style="font-size: 1.15rem; font-weight: 800; color: var(--text); margin: 0;">
+              ¿Cómo activar tu GPS?
+            </h3>
+          </div>
+          <button id="btnCloseGpsModal" class="btn-alert-close" style="background: var(--inner-bg); border-color: var(--border); color: var(--text);">✕</button>
+        </div>
+        <div style="background: var(--inner-bg); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+          <p id="gpsGuideAndroid" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 10px;">
+            <strong>📱 Android:</strong> Ajustes → Ubicación → Activar. Luego regresa a esta app y presiona el botón de ubicación.
+          </p>
+          <p id="gpsGuideIOS" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin: 0;">
+            <strong>🍎 iPhone:</strong> Ajustes → Privacidad → Localización → Activar y permitir al navegador.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn-action" id="btnRetryGps" style="flex: 1; background: linear-gradient(135deg, #059669, #0284c7);">
+            🔄 Reintentar GPS
           </button>
         </div>
       </div>
@@ -1194,7 +1292,32 @@
           { id: "d1", group: "docs", text: "Fotocopias plastificadas de cédulas, escrituras y pólizas" },
           { id: "d2", group: "docs", text: "Dinero en efectivo en billetes de baja denominación" },
           { id: "d3", group: "docs", text: "Copia de llaves de la vivienda y del vehículo" }
-        ]
+        ],
+        // GPS Button States
+        btnGetLocConnecting: "🛰️ Obteniendo GPS satelital...",
+        btnGetLocConnected: "✅ Ubicación Activa y Protegida",
+        btnGetLocPersist: "✅ Ubicación Protegida",
+        btnGetLocUpdateGPS: "Actualizar GPS",
+        btnGetLocError: "⚠️ Activa tu GPS en el celular",
+        // GPS Guide Modal
+        gpsGuideTitle: "¿Cómo activar tu GPS?",
+        gpsGuideAndroid: "📱 Android: Ajustes → Ubicación → Activar. Luego regresa a esta app y presiona el botón de ubicación.",
+        gpsGuideIOS: "🍎 iPhone: Ajustes → Privacidad → Localización → Activar y permitir al navegador.",
+        gpsGuideRetry: "🔄 Reintentar GPS",
+        // Universal Alert Protocol
+        alertActionUniversal: "CONSERVA LA CALMA • PROTEGE TU CABEZA Y CUELLO • BUSCA UN LUGAR SEGURO SEGÚN TU ENTORNO",
+        // Situational Chips
+        chipWheelchair: "Movilidad reducida",
+        chipBed: "En cama",
+        chipOutdoor: "Aire libre",
+        chipVehicle: "En vehículo",
+        adviceWheelchair: "Frena las ruedas, cúbrete cabeza y cuello con los brazos o una almohada.",
+        adviceBed: "Quédate en ella, boca abajo y cubre tu cabeza con la almohada.",
+        adviceOutdoor: "Aléjate de cables, fachadas, postes y árboles altos.",
+        adviceVehicle: "Detente a un costado en zona despejada sin bloquear la vía y permanece dentro.",
+        // Multi-source badge
+        pulseBadgeMulti: "Red USGS + EMSC en Vivo",
+        feedSourcesActive: "fuentes activas (USGS + EMSC)"
       },
       en: {
         themeBtnGray: "🏛️ Grayish White",
@@ -1298,7 +1421,32 @@
           { id: "d1", group: "docs", text: "Laminated copies of passports, deeds, insurance and IDs" },
           { id: "d2", group: "docs", text: "Emergency cash in small bills" },
           { id: "d3", group: "docs", text: "Spare house and vehicle keys" }
-        ]
+        ],
+        // GPS Button States
+        btnGetLocConnecting: "🛰️ Acquiring satellite GPS...",
+        btnGetLocConnected: "✅ Location Active & Protected",
+        btnGetLocPersist: "✅ Location Protected",
+        btnGetLocUpdateGPS: "Update GPS",
+        btnGetLocError: "⚠️ Enable GPS on your phone",
+        // GPS Guide Modal
+        gpsGuideTitle: "How to enable GPS?",
+        gpsGuideAndroid: "📱 Android: Settings → Location → Enable. Then return to this app and tap the location button.",
+        gpsGuideIOS: "🍎 iPhone: Settings → Privacy → Location Services → Enable and allow browser.",
+        gpsGuideRetry: "🔄 Retry GPS",
+        // Universal Alert Protocol
+        alertActionUniversal: "STAY CALM • PROTECT YOUR HEAD AND NECK • SEEK SAFETY BASED ON YOUR SURROUNDINGS",
+        // Situational Chips
+        chipWheelchair: "Reduced mobility",
+        chipBed: "In bed",
+        chipOutdoor: "Outdoors",
+        chipVehicle: "In vehicle",
+        adviceWheelchair: "Lock wheels, cover head and neck with arms or a pillow.",
+        adviceBed: "Stay in bed, face down, cover your head with the pillow.",
+        adviceOutdoor: "Move away from cables, facades, posts and tall trees.",
+        adviceVehicle: "Pull over to a clear area without blocking the road and stay inside.",
+        // Multi-source badge
+        pulseBadgeMulti: "Live USGS + EMSC Network",
+        feedSourcesActive: "active sources (USGS + EMSC)"
       }
     };
 
@@ -1554,26 +1702,99 @@
       });
     }
 
-    btnGetLocation.addEventListener('click', () => {
+    // GPS Button State Machine: Connecting → Connected → Persistent → Error
+    function requestGPSLocation() {
       if (!navigator.geolocation) {
-        alert("Tu navegador no soporta geolocalización.");
+        alert(currentLang === 'es' ? "Tu navegador no soporta geolocalización." : "Your browser does not support geolocation.");
         return;
       }
-      locationInfo.textContent = "Conectando coordenadas con serenidad...";
-      navigator.geolocation.getCurrentPosition((pos) => {
+
+      // State: CONNECTING
+      btnGetLocation.disabled = true;
+      btnGetLocation.className = 'btn-action is-connecting';
+      btnGetLocation.innerHTML = STRINGS[currentLang].btnGetLocConnecting;
+      locationInfo.textContent = currentLang === 'es' ? "Conectando coordenadas con serenidad..." : "Connecting coordinates with serenity...";
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
         userLat = pos.coords.latitude;
         userLon = pos.coords.longitude;
         localStorage.setItem('qm_user_lat', userLat);
         localStorage.setItem('qm_user_lon', userLon);
-        locationInfo.textContent = `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`;
+
+        // State: CONNECTED (immediate feedback)
+        btnGetLocation.disabled = false;
+        btnGetLocation.className = 'btn-action is-connected';
+        btnGetLocation.innerHTML = STRINGS[currentLang].btnGetLocConnected;
         radarBadge.textContent = "🟢 Monitoreo Activo";
         radarBadge.className = "badge-status badge-green";
+
+        // Reverse geocoding (BigDataCloud free client-side API, no key required)
+        let cityName = '';
+        try {
+          const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${userLat}&longitude=${userLon}&localityLanguage=${currentLang}`);
+          const geoData = await geoRes.json();
+          cityName = geoData.city || geoData.locality || '';
+          const region = geoData.principalSubdivision || '';
+          if (cityName && region) {
+            cityName = `${cityName} / ${region}`;
+          } else if (region) {
+            cityName = region;
+          }
+          if (cityName) {
+            localStorage.setItem('qm_user_city', cityName);
+          }
+        } catch (geoErr) {
+          // Fallback: use stored city or coordinates only
+          cityName = localStorage.getItem('qm_user_city') || '';
+        }
+
+        locationInfo.textContent = cityName
+          ? `📍 ${cityName} (${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° • Precisión: ~${Math.round(pos.coords.accuracy)}m)`
+          : `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`;
+
         startAdaptiveMonitoring();
         fetchWorldPulse();
       }, (err) => {
-        locationInfo.textContent = `📍 Ubicación de referencia: Cali / Valle del Cauca.`;
+        // State: ERROR
+        btnGetLocation.disabled = false;
+        btnGetLocation.className = 'btn-action is-error';
+        btnGetLocation.innerHTML = STRINGS[currentLang].btnGetLocError;
+        locationInfo.textContent = currentLang === 'es'
+          ? '📍 Ubicación de referencia: Cali / Valle del Cauca (GPS no disponible).'
+          : '📍 Reference location: Cali / Valle del Cauca (GPS unavailable).';
+
+        // Show GPS guide modal
+        const modalGps = document.getElementById('modalGpsGuide');
+        if (modalGps) modalGps.classList.add('is-active');
+      }, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
       });
-    });
+    }
+
+    btnGetLocation.addEventListener('click', requestGPSLocation);
+
+    // GPS Guide Modal controls
+    const modalGpsGuide = document.getElementById('modalGpsGuide');
+    const btnCloseGpsModal = document.getElementById('btnCloseGpsModal');
+    const btnRetryGps = document.getElementById('btnRetryGps');
+    if (btnCloseGpsModal) {
+      btnCloseGpsModal.addEventListener('click', () => {
+        if (modalGpsGuide) modalGpsGuide.classList.remove('is-active');
+      });
+    }
+    if (btnRetryGps) {
+      btnRetryGps.addEventListener('click', () => {
+        if (modalGpsGuide) modalGpsGuide.classList.remove('is-active');
+        requestGPSLocation();
+      });
+    }
+    if (modalGpsGuide) {
+      modalGpsGuide.addEventListener('click', (e) => {
+        if (e.target === modalGpsGuide) modalGpsGuide.classList.remove('is-active');
+      });
+    }
 
     let lastNearbyCalmEventId = null;
 
@@ -1621,62 +1842,122 @@
     });
     window.addEventListener('offline', () => updateNetworkStatus(false));
 
+    // ==========================================
+    // MULTI-SOURCE SEISMIC INGESTION (USGS + EMSC/CSEM)
+    // ==========================================
+
+    async function fetchUSGSHourly() {
+      const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson");
+      const data = await res.json();
+      return (data.features || []).map(feat => ({
+        id: feat.id,
+        title: feat.properties.title,
+        mag: feat.properties.mag,
+        time: feat.properties.time,
+        lat: feat.geometry.coordinates[1],
+        lon: feat.geometry.coordinates[0],
+        depth: feat.geometry.coordinates[2] || 10.0,
+        source: 'USGS'
+      })).filter(e => e.mag !== null && !isNaN(e.mag));
+    }
+
+    async function fetchEMSCRecent() {
+      const res = await fetch("https://www.seismicportal.eu/fdsnws/event/1/query?format=json&limit=30&minmag=2.5&orderby=time");
+      const data = await res.json();
+      return (data.features || []).map(feat => {
+        const p = feat.properties;
+        let timeMs = 0;
+        try {
+          const tStr = p.time || '';
+          timeMs = new Date(tStr.endsWith('Z') ? tStr : tStr + 'Z').getTime();
+        } catch(e) { timeMs = 0; }
+        return {
+          id: feat.id || `emsc-${timeMs}`,
+          title: `M ${parseFloat(p.mag || 0).toFixed(1)} - ${p.flynn_region || p.place || 'Unknown'}`,
+          mag: parseFloat(p.mag || 0),
+          time: timeMs,
+          lat: feat.geometry?.coordinates?.[1] || 0,
+          lon: feat.geometry?.coordinates?.[0] || 0,
+          depth: feat.geometry?.coordinates?.[2] || 10.0,
+          source: 'EMSC'
+        };
+      }).filter(e => !isNaN(e.mag) && e.mag > 0);
+    }
+
+    function deduplicateQuakes(eventsA, eventsB) {
+      const merged = [...eventsA];
+      for (const qb of eventsB) {
+        let isDup = false;
+        for (const qa of merged) {
+          const dist = haversine(qa.lat, qa.lon, qb.lat, qb.lon);
+          const timeDiff = Math.abs((qa.time || 0) - (qb.time || 0)) / 1000;
+          if (dist < 50 && timeDiff < 120) { isDup = true; break; }
+        }
+        if (!isDup) merged.push(qb);
+      }
+      return merged.sort((a, b) => (b.time || 0) - (a.time || 0));
+    }
+
+    // Aftershock watch mode: accelerates polling for 5 min after a nearby event
+    let aftershockWatchUntil = 0;
+
     async function checkLiveQuakesFeed() {
       if (!navigator.onLine) {
         updateNetworkStatus(false);
         return;
       }
       try {
-        const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson");
-        const data = await res.json();
+        // Parallel multi-source fetch
+        const results = await Promise.allSettled([fetchUSGSHourly(), fetchEMSCRecent()]);
+        const usgsEvents = results[0].status === 'fulfilled' ? results[0].value : [];
+        const emscEvents = results[1].status === 'fulfilled' ? results[1].value : [];
+        const allEvents = deduplicateQuakes(usgsEvents, emscEvents);
+
+        const activeSources = [];
+        if (usgsEvents.length > 0) activeSources.push('USGS');
+        if (emscEvents.length > 0) activeSources.push('EMSC');
+        const srcLabel = activeSources.join(' + ') || 'USGS';
+
         lastFeedCheck.textContent = currentLang === 'es'
-          ? `Última revisión: ${new Date().toLocaleTimeString()} • ${data.features.length} eventos monitoreados en la Tierra`
-          : `Last review: ${new Date().toLocaleTimeString()} • ${data.features.length} events monitored on Earth`;
+          ? `Última revisión: ${new Date().toLocaleTimeString()} • ${srcLabel} • ${allEvents.length} eventos monitoreados`
+          : `Last review: ${new Date().toLocaleTimeString()} • ${srcLabel} • ${allEvents.length} events monitored`;
 
         const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
         let nearbyImperceptibleFound = null;
 
-        for (const feat of data.features) {
-          const props = feat.properties;
-          const coords = feat.geometry.coordinates;
-          const qLon = coords[0];
-          const qLat = coords[1];
-          const qDepth = coords[2] || 10.0;
-          const mag = props.mag;
-          const originTime = props.time;
+        for (const evt of allEvents) {
+          const mag = evt.mag;
+          const originTime = evt.time;
 
           if (mag === null || isNaN(mag)) continue;
 
-          const distKm = haversine(userLat, userLon, qLat, qLon);
-          const hypoDist = hypocentralDistance(distKm, qDepth);
+          const distKm = haversine(userLat, userLon, evt.lat, evt.lon);
+          const hypoDist = hypocentralDistance(distKm, evt.depth);
           const localMMI = calculateEstimatedMMI(mag, hypoDist);
 
           // CERO FATIGA DE ALARMA: Solo disparar sirena/alerta si la intensidad local percibida >= umbral
-          if (localMMI >= userThreshold && feat.id !== lastAlertedId) {
+          if (localMMI >= userThreshold && evt.id !== lastAlertedId) {
             const elapsedSec = (Date.now() - originTime) / 1000;
             const sWaveTravelTime = hypoDist / 3.5;
             const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
 
             if (remainingSec > 0) {
-              lastAlertedId = feat.id;
-              fireEarlyWarning(props.title, distKm, mag, remainingSec, localMMI);
+              lastAlertedId = evt.id;
+              fireEarlyWarning(evt.title, distKm, mag, remainingSec, localMMI);
+              // Activate aftershock watch mode for 5 minutes
+              aftershockWatchUntil = Date.now() + 300000;
               break;
             }
           } else if (distKm <= 500 && localMMI < userThreshold) {
-            // Sismo regional cercano pero matemáticamente imperceptible: mantener serenidad activa
             if (!nearbyImperceptibleFound) {
               nearbyImperceptibleFound = {
-                id: feat.id,
-                title: props.title,
-                distKm: distKm,
-                mag: mag,
-                localMMI: localMMI
+                id: evt.id, title: evt.title, distKm, mag, localMMI
               };
             }
           }
         }
 
-        // Si hay un sismo cercano pero imperceptible, actualizar el Escudo de Tranquilidad para evitar pánico
+        // Si hay un sismo cercano pero imperceptible, actualizar el Escudo de Tranquilidad
         if (nearbyImperceptibleFound && nearbyImperceptibleFound.id !== lastNearbyCalmEventId) {
           lastNearbyCalmEventId = nearbyImperceptibleFound.id;
           const sTitle = document.getElementById('shieldStatusTitle');
@@ -1706,6 +1987,13 @@
       clearInterval(alertCountdownTimer);
       stopEmergencySiren();
       if (alertBanner) alertBanner.style.display = 'none';
+      // Hide situational chips
+      const situationalChips = document.getElementById('situationalChips');
+      const situationalAdvice = document.getElementById('situationalAdvice');
+      if (situationalChips) situationalChips.style.display = 'none';
+      if (situationalAdvice) { situationalAdvice.style.display = 'none'; situationalAdvice.textContent = ''; }
+      // Remove active state from all chips
+      document.querySelectorAll('.chip-situational').forEach(c => c.classList.remove('active'));
       const reassuranceShield = document.getElementById('reassuranceShield');
       if (reassuranceShield) reassuranceShield.style.display = 'flex';
     }
@@ -1718,6 +2006,12 @@
       if (reassuranceShield) reassuranceShield.style.display = 'none';
 
       if (alertBanner) alertBanner.style.display = 'block';
+
+      // Show situational action chips
+      const situationalChips = document.getElementById('situationalChips');
+      const situationalAdvice = document.getElementById('situationalAdvice');
+      if (situationalChips) situationalChips.style.display = 'flex';
+      if (situationalAdvice) { situationalAdvice.style.display = 'none'; situationalAdvice.textContent = ''; }
 
       const alertTypeBadge = document.getElementById('alertTypeBadge');
       const alertMainTitle = document.getElementById('alertMainTitle');
@@ -1758,9 +2052,7 @@
           alertMainTitle.textContent = currentLang === 'es' ? '🚨 ¡ONDA SÍSMICA EN CAMINO!' : '🚨 SEISMIC WAVE INCOMING!';
         }
         if (alertActionAdvice) {
-          alertActionAdvice.textContent = currentLang === 'es'
-            ? 'CONSERVA LA CALMA • AGÁCHATE • CÚBRETE BAJO UNA MESA FIRME'
-            : 'STAY CALM • DROP • COVER UNDER A STURDY TABLE';
+          alertActionAdvice.textContent = STRINGS[currentLang].alertActionUniversal;
         }
         if (alertSubNote) {
           alertSubNote.style.display = 'none';
@@ -1879,6 +2171,71 @@
           true
         );
       });
+    }
+
+    // ==========================================
+    // SITUATIONAL ACTION CHIPS (UNIVERSAL ALERT PROTOCOL)
+    // ==========================================
+    const situationalChipsContainer = document.getElementById('situationalChips');
+    const situationalAdviceEl = document.getElementById('situationalAdvice');
+
+    if (situationalChipsContainer) {
+      situationalChipsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip-situational');
+        if (!btn) return;
+        const situation = btn.getAttribute('data-situation');
+        const allChips = situationalChipsContainer.querySelectorAll('.chip-situational');
+        const isCurrentlyActive = btn.classList.contains('active');
+
+        allChips.forEach(c => c.classList.remove('active'));
+
+        if (!isCurrentlyActive && situation) {
+          btn.classList.add('active');
+          const d = STRINGS[currentLang];
+          let adviceText = '';
+          if (situation === 'wheelchair') adviceText = `🦽 ${d.adviceWheelchair}`;
+          else if (situation === 'bed') adviceText = `🛏️ ${d.adviceBed}`;
+          else if (situation === 'outdoor') adviceText = `🚶 ${d.adviceOutdoor}`;
+          else if (situation === 'vehicle') adviceText = `🚗 ${d.adviceVehicle}`;
+
+          if (situationalAdviceEl) {
+            situationalAdviceEl.textContent = adviceText;
+            situationalAdviceEl.style.display = 'block';
+          }
+        } else {
+          if (situationalAdviceEl) {
+            situationalAdviceEl.style.display = 'none';
+            situationalAdviceEl.textContent = '';
+          }
+        }
+      });
+    }
+
+    // ==========================================
+    // WEB PUSH NOTIFICATIONS (CLIENT-SIDE TRIGGER PREP)
+    // ==========================================
+    // PUSH_BACKEND_REQUIRED:
+    // Web Push API enables Centinela to awaken the mobile device when the screen
+    // is locked/backgrounded. This requires an external serverless cron/webhook
+    // (e.g. Cloudflare Worker or Vercel Cron) that monitors USGS/EMSC feeds and
+    // dispatches VAPID Web Push payloads to subscribed user endpoints.
+    async function requestPushNotificationPermission() {
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        return null;
+      }
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const reg = await navigator.serviceWorker.ready;
+          if ('pushManager' in reg) {
+            let sub = await reg.pushManager.getSubscription();
+            return sub;
+          }
+        }
+      } catch (err) {
+        console.warn("Push subscription check notice:", err);
+      }
+      return null;
     }
 
     // ==========================================
@@ -2383,7 +2740,7 @@
     // ADAPTIVE MICRO-POLLING & BATTERY OPTIMIZATION
     // ==========================================
     let adaptiveTimer = null;
-    let basePollInterval = 15000; // 15 seconds active
+    let basePollInterval = 12000; // 12 seconds active (refined from 15s)
     let isHidden = false;
     let consecutivePollErrors = 0;
 
@@ -2394,7 +2751,10 @@
 
     async function pollCycle() {
       let interval = basePollInterval;
-      if (isHidden) {
+      // Aftershock watch mode: 8s for 5 minutes after a nearby significant event
+      if (Date.now() < aftershockWatchUntil && !isHidden) {
+        interval = 8000;
+      } else if (isHidden) {
         interval = 75000; // 75 seconds in background to preserve battery
       }
       if (consecutivePollErrors > 0) {
@@ -2426,7 +2786,7 @@
           if (battery.level < 0.20 && !battery.charging) {
             basePollInterval = 45000; // Save battery
           } else {
-            basePollInterval = 15000;
+            basePollInterval = 12000;
           }
         }
         updatePowerProfile();
@@ -2457,7 +2817,44 @@
       document.getElementById('groundingBody').innerHTML = d.groundingBody;
       document.getElementById('radarTitle').textContent = d.radarTitle;
       document.getElementById('radarSubtitle').innerHTML = d.radarSubtitle;
-      btnGetLocation.textContent = d.btnGetLoc;
+      if (localStorage.getItem('qm_user_lat')) {
+        btnGetLocation.className = 'btn-action is-connected';
+        btnGetLocation.innerHTML = `${d.btnGetLocPersist} • <small style="text-decoration:underline;">[${d.btnGetLocUpdateGPS}]</small>`;
+      } else {
+        btnGetLocation.className = 'btn-action';
+        btnGetLocation.textContent = d.btnGetLoc;
+      }
+
+      // Situational Chips Labels (Universal Alert Protocol)
+      const chipWheelchairEl = document.getElementById('chipWheelchair');
+      if (chipWheelchairEl) chipWheelchairEl.textContent = d.chipWheelchair;
+      const chipBedEl = document.getElementById('chipBed');
+      if (chipBedEl) chipBedEl.textContent = d.chipBed;
+      const chipOutdoorEl = document.getElementById('chipOutdoor');
+      if (chipOutdoorEl) chipOutdoorEl.textContent = d.chipOutdoor;
+      const chipVehicleEl = document.getElementById('chipVehicle');
+      if (chipVehicleEl) chipVehicleEl.textContent = d.chipVehicle;
+
+      // Update active situational advice if any
+      const activeChip = document.querySelector('.chip-situational.active');
+      const situationalAdviceEl = document.getElementById('situationalAdvice');
+      if (activeChip && situationalAdviceEl) {
+        const sit = activeChip.getAttribute('data-situation');
+        if (sit === 'wheelchair') situationalAdviceEl.textContent = `🦽 ${d.adviceWheelchair}`;
+        else if (sit === 'bed') situationalAdviceEl.textContent = `🛏️ ${d.adviceBed}`;
+        else if (sit === 'outdoor') situationalAdviceEl.textContent = `🚶 ${d.adviceOutdoor}`;
+        else if (sit === 'vehicle') situationalAdviceEl.textContent = `🚗 ${d.adviceVehicle}`;
+      }
+
+      // GPS Guide Modal Labels
+      const gpsGuideTitleEl = document.getElementById('gpsGuideTitle');
+      if (gpsGuideTitleEl) gpsGuideTitleEl.textContent = d.gpsGuideTitle;
+      const gpsGuideAndroidEl = document.getElementById('gpsGuideAndroid');
+      if (gpsGuideAndroidEl) gpsGuideAndroidEl.innerHTML = d.gpsGuideAndroid;
+      const gpsGuideIOSEl = document.getElementById('gpsGuideIOS');
+      if (gpsGuideIOSEl) gpsGuideIOSEl.innerHTML = d.gpsGuideIOS;
+      const btnRetryGpsEl = document.getElementById('btnRetryGps');
+      if (btnRetryGpsEl) btnRetryGpsEl.textContent = d.gpsGuideRetry;
       btnSimulateAlert.textContent = d.btnDemo;
       const modalDemoTitleEl = document.getElementById('modalDemoTitle');
       if (modalDemoTitleEl) modalDemoTitleEl.textContent = d.modalDemoTitle;
@@ -2518,7 +2915,7 @@
       const pulseSubtitleEl = document.getElementById('pulseSubtitle');
       if (pulseSubtitleEl) pulseSubtitleEl.textContent = d.pulseSubtitle;
       const pulseBadgeEl = document.getElementById('pulseBadge');
-      if (pulseBadgeEl) pulseBadgeEl.textContent = d.pulseBadge;
+      if (pulseBadgeEl) pulseBadgeEl.textContent = d.pulseBadgeMulti || d.pulseBadge;
       const pillAll = document.getElementById('pillAll'); if (pillAll) pillAll.textContent = d.pulseRegAll;
       const pillLatam = document.getElementById('pillLatam'); if (pillLatam) pillLatam.textContent = d.pulseRegLatam;
       const pillAsia = document.getElementById('pillAsia'); if (pillAsia) pillAsia.textContent = d.pulseRegAsia;
@@ -2583,9 +2980,14 @@
     applyLanguage('es');
 
     if (localStorage.getItem('qm_user_lat')) {
-      locationInfo.textContent = `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`;
+      const savedCity = localStorage.getItem('qm_user_city');
+      locationInfo.textContent = savedCity
+        ? `📍 ${savedCity} (${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°)`
+        : `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`;
       radarBadge.textContent = "🟢 Monitoreo Activo";
       radarBadge.className = "badge-status badge-green";
+      btnGetLocation.className = 'btn-action is-connected';
+      btnGetLocation.innerHTML = `${STRINGS[currentLang].btnGetLocPersist} • <small style="text-decoration:underline;">[${STRINGS[currentLang].btnGetLocUpdateGPS}]</small>`;
       startAdaptiveMonitoring();
     }
     updateNetworkStatus();

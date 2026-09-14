@@ -1,5 +1,5 @@
 // Service Worker for Centinela Sísmico Offline PWA
-const CACHE_NAME = 'centinela-cache-v6';
+const CACHE_NAME = 'centinela-cache-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -35,8 +35,11 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Bypass cache for live USGS seismic feeds
-  if (event.request.url.includes('earthquake.usgs.gov')) {
+  // Bypass cache for live seismic feeds (USGS + EMSC/CSEM + SGC)
+  if (event.request.url.includes('earthquake.usgs.gov') ||
+      event.request.url.includes('seismicportal.eu') ||
+      event.request.url.includes('sgc.gov.co') ||
+      event.request.url.includes('bigdatacloud.net')) {
     return;
   }
 
@@ -67,6 +70,44 @@ self.addEventListener('fetch', (event) => {
       return fetch(event.request).catch(() => {
         return caches.match('./index.html');
       });
+    })
+  );
+});
+
+// ===========================================
+// WEB PUSH NOTIFICATIONS (Client-side ready)
+// PUSH_BACKEND_REQUIRED: This listener is activated by an external
+// VAPID push server (e.g. Cloudflare Worker or Vercel Cron) that
+// sends payloads when a significant earthquake is detected near
+// subscribed users. The client subscription is managed in index.html.
+// ===========================================
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || '🚨 Centinela Sísmico — Alerta Sísmica';
+  const options = {
+    body: data.body || 'Se ha detectado actividad sísmica cerca de tu ubicación.',
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    vibrate: [400, 150, 400, 150, 800],
+    tag: 'centinela-seismic-alert',
+    renotify: true,
+    requireInteraction: true,
+    data: { url: data.url || './index.html' }
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || './index.html';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url.includes('index.html') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(targetUrl);
     })
   );
 });
