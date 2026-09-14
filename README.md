@@ -1,3 +1,14 @@
+---
+title: QuakeMind Global
+emoji: 🌐
+colorFrom: red
+colorTo: slate
+sdk: gradio
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # 🌐 QuakeMind Global *(SismoMente Global)*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
