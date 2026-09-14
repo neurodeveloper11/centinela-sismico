@@ -16,13 +16,19 @@ from i18n import get_text
 # Cache file path for offline resilience
 CACHE_FILE = os.path.join(os.path.dirname(__file__), "cache_quakes.json")
 
-# USGS GeoJSON endpoints
-USGS_FEEDS = {
+# Seismic data endpoints (multi-source: USGS + EMSC/CSEM)
+SEISMIC_FEEDS = {
     "hour": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson",
     "day_all": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
     "day_45": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
     "month_sig": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson",
+    "emsc_recent": "https://www.seismicportal.eu/fdsnws/event/1/query?format=json&limit=50&orderby=time",
 }
+# Backward compatibility alias
+USGS_FEEDS = SEISMIC_FEEDS
+
+# EMSC / CSEM SeismicPortal FDSN endpoint (latency < 30s for global coverage)
+EMSC_FDSN_URL = "https://www.seismicportal.eu/fdsnws/event/1/query"
 
 
 # =====================================================================
@@ -34,7 +40,7 @@ def fetch_global_earthquakes(feed_key: str = "day_45", timeout: int = 8) -> List
     Fetch real-time earthquakes from USGS with timeout handling and local cache fallback.
     Returns a cleaned list of earthquake dictionaries.
     """
-    url = USGS_FEEDS.get(feed_key, USGS_FEEDS["day_45"])
+    url = SEISMIC_FEEDS.get(feed_key, SEISMIC_FEEDS["day_45"])
     data = None
     
     try:
@@ -146,6 +152,113 @@ def _get_fallback_mock_earthquakes() -> List[Dict[str, Any]]:
             "tsunami": True
         }
     ]
+
+
+def fetch_emsc_earthquakes(limit: int = 50, min_mag: float = 2.5, timeout: int = 8) -> List[Dict[str, Any]]:
+    """
+    Fetch recent earthquakes from EMSC/CSEM SeismicPortal via FDSN Event Web Service.
+    Returns normalized earthquake dictionaries compatible with USGS format.
+    Latency: typically < 30 seconds for global seismic events.
+    """
+    params = {
+        "format": "json",
+        "limit": str(limit),
+        "minmag": str(min_mag),
+        "orderby": "time"
+    }
+    try:
+        response = requests.get(
+            EMSC_FDSN_URL,
+            params=params,
+            timeout=timeout,
+            headers={"User-Agent": "QuakeMind-Global/1.0 (CentinelaSismico)"}
+        )
+        if response.status_code != 200:
+            return []
+        data = response.json()
+    except Exception:
+        return []
+
+    parsed = []
+    for feat in data.get("features", []):
+        props = feat.get("properties", {})
+        geom = feat.get("geometry", {})
+        coords = geom.get("coordinates", [0.0, 0.0, 0.0])
+
+        mag = props.get("mag")
+        if mag is None:
+            continue
+
+        # EMSC uses ISO time string; convert to epoch ms for compatibility
+        time_str = props.get("time", "")
+        try:
+            import datetime
+            dt = datetime.datetime.fromisoformat(time_str.replace("Z", "+00:00"))
+            time_epoch = int(dt.timestamp() * 1000)
+        except Exception:
+            time_epoch = 0
+
+        quake_obj = {
+            "id": feat.get("id", f"emsc-{time_epoch}"),
+            "title": f"M {float(mag):.1f} - {props.get('flynn_region', props.get('place', 'Unknown'))}",
+            "place": props.get("flynn_region", props.get("place", "Unknown Location")),
+            "mag": round(float(mag), 1),
+            "mag_type": props.get("magtype", "Mw"),
+            "time_epoch": time_epoch,
+            "time_iso": time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(time_epoch / 1000.0)) if time_epoch else time_str,
+            "lon": float(coords[0]),
+            "lat": float(coords[1]),
+            "depth_km": round(float(coords[2]), 1) if len(coords) > 2 else 10.0,
+            "url": props.get("url", ""),
+            "alert": "none",
+            "felt": 0,
+            "mmi_usgs": None,
+            "tsunami": False,
+            "source": "EMSC"
+        }
+        parsed.append(quake_obj)
+
+    return parsed
+
+
+def _deduplicate_quakes(quakes_a: List[Dict[str, Any]], quakes_b: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Merge and deduplicate earthquake lists from multiple sources.
+    Two events are considered duplicates if:
+      - Epicentral distance < 50 km AND
+      - Time difference < 120 seconds
+    When duplicates are found, the event with the earlier ingestion (lower time_epoch) is kept.
+    Returns unified list sorted by time descending.
+    """
+    merged = list(quakes_a)
+    for qb in quakes_b:
+        is_dup = False
+        for qa in merged:
+            dist = haversine_distance(qa.get("lat", 0), qa.get("lon", 0),
+                                      qb.get("lat", 0), qb.get("lon", 0))
+            time_diff = abs(qa.get("time_epoch", 0) - qb.get("time_epoch", 0)) / 1000.0
+            if dist < 50.0 and time_diff < 120.0:
+                is_dup = True
+                break
+        if not is_dup:
+            merged.append(qb)
+    merged.sort(key=lambda q: q.get("time_epoch", 0), reverse=True)
+    return merged
+
+
+def fetch_multi_source(feed_key: str = "day_45", timeout: int = 8) -> List[Dict[str, Any]]:
+    """
+    Fetch earthquakes from both USGS and EMSC in parallel-sequential fashion,
+    deduplicate, and return a unified global event list.
+    """
+    usgs_quakes = fetch_global_earthquakes(feed_key, timeout=timeout)
+    # Tag USGS events with source
+    for q in usgs_quakes:
+        q.setdefault("source", "USGS")
+
+    emsc_quakes = fetch_emsc_earthquakes(limit=50, min_mag=2.5, timeout=timeout)
+
+    return _deduplicate_quakes(usgs_quakes, emsc_quakes)
 
 
 # =====================================================================

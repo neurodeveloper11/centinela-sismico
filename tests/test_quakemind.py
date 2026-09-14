@@ -19,7 +19,12 @@ from quakemind_engine import (
     get_pap_guidance,
     evaluate_structural_safety,
     debunk_seismic_myth,
-    fetch_global_earthquakes
+    fetch_global_earthquakes,
+    fetch_emsc_earthquakes,
+    fetch_multi_source,
+    _deduplicate_quakes,
+    SEISMIC_FEEDS,
+    USGS_FEEDS
 )
 from i18n import get_text
 
@@ -141,3 +146,56 @@ class TestDataIngestionFallback:
         assert "lat" in q
         assert "lon" in q
         assert "depth_km" in q
+
+
+class TestMultiSourceIngestion:
+
+    def test_seismic_feeds_contains_emsc(self):
+        assert "emsc_recent" in SEISMIC_FEEDS
+        assert "seismicportal.eu" in SEISMIC_FEEDS["emsc_recent"]
+
+    def test_backward_compat_usgs_feeds_alias(self):
+        # USGS_FEEDS must remain accessible as alias for backward compatibility
+        assert USGS_FEEDS is SEISMIC_FEEDS
+        assert "hour" in USGS_FEEDS
+        assert "day_45" in USGS_FEEDS
+
+    def test_fetch_emsc_returns_list(self):
+        quakes = fetch_emsc_earthquakes(limit=10, min_mag=4.0, timeout=10)
+        assert isinstance(quakes, list)
+        # EMSC may return 0 if no recent M4+ events, but should not error
+        if len(quakes) > 0:
+            q = quakes[0]
+            assert "mag" in q
+            assert "lat" in q
+            assert "lon" in q
+            assert "depth_km" in q
+            assert q.get("source") == "EMSC"
+
+    def test_deduplication_removes_close_events(self):
+        # Two events at nearly the same location and time should be deduplicated
+        event_a = [
+            {"id": "usgs-1", "lat": 3.45, "lon": -76.53, "time_epoch": 1700000000000, "mag": 5.0, "source": "USGS"}
+        ]
+        event_b = [
+            {"id": "emsc-1", "lat": 3.46, "lon": -76.54, "time_epoch": 1700000060000, "mag": 5.1, "source": "EMSC"}
+        ]
+        merged = _deduplicate_quakes(event_a, event_b)
+        # Should keep only 1 event (they are ~1.5 km apart and 60s difference)
+        assert len(merged) == 1
+
+    def test_deduplication_keeps_distant_events(self):
+        # Two events far apart should both be kept
+        event_a = [
+            {"id": "usgs-1", "lat": 3.45, "lon": -76.53, "time_epoch": 1700000000000, "mag": 5.0, "source": "USGS"}
+        ]
+        event_b = [
+            {"id": "emsc-1", "lat": 35.0, "lon": 139.0, "time_epoch": 1700000060000, "mag": 6.0, "source": "EMSC"}
+        ]
+        merged = _deduplicate_quakes(event_a, event_b)
+        assert len(merged) == 2
+
+    def test_multi_source_returns_list(self):
+        quakes = fetch_multi_source("day_45", timeout=10)
+        assert isinstance(quakes, list)
+        assert len(quakes) > 0
