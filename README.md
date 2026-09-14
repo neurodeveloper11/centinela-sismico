@@ -12,7 +12,7 @@ license: mit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![PWA Zero-Network](https://img.shields.io/badge/PWA-Instalable%20en%20Celular-teal)](https://neurodeveloper11.github.io/quakemind-global/)
+[![PWA Zero-Network](https://img.shields.io/badge/PWA-Instalable%20en%20Celular-teal)](https://neurodeveloper11.github.io/centinela-sismico/)
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-%40neurodeveloper-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/neurodeveloper)
 [![USGS Live API](https://img.shields.io/badge/USGS-Real--Time%20GeoJSON-green)](https://earthquake.usgs.gov)
 [![Standards: WHO PAP & ATC-20](https://img.shields.io/badge/Standards-WHO%20PAP%20%7C%20ATC--20-purple)](https://www.who.int)
@@ -135,8 +135,8 @@ Operates with **0 bytes of internet connection** once saved to the device:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/neurodeveloper11/quakemind-global.git
-cd quakemind-global
+git clone https://github.com/neurodeveloper11/centinela-sismico.git
+cd centinela-sismico
 ```
 
 ### 2. Install Dependencies
@@ -148,7 +148,7 @@ pip install -r requirements.txt
 ```bash
 pytest -v tests/test_quakemind.py
 ```
-*(All 16 unit tests covering Haversine geophysics, attenuation formulas, PAP logic, and ATC-20 triage will execute and pass).*
+*(All 17 unit tests covering Haversine geophysics, attenuation formulas, PAP logic, and ATC-20 triage will execute and pass).*
 
 ### 4. Launch the Hugging Face Space App Locally
 ```bash
