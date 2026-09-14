@@ -22,7 +22,11 @@ DOCS_DIR = os.path.join(REPO_ROOT, "docs")
 FILES_TO_SYNC = [
     "index.html",
     "sw.js",
-    "manifest.json"
+    "manifest.json",
+    "og-image.png",
+    "icon-192.png",
+    "icon-512.png",
+    "apple-touch-icon.png"
 ]
 
 def sha256_file(filepath: str) -> str:

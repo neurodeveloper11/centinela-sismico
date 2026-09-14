@@ -285,24 +285,130 @@
       line-height: 1.4;
     }
 
-    /* Urgent Countdown Banner (Active seismic wave only) */
+    /* Urgent Countdown Banner (Active seismic wave & educational demo) */
     .alert-countdown-banner {
       display: none;
-      background: linear-gradient(135deg, #991b1b, #dc2626);
+      background: linear-gradient(135deg, #7c2d12, #9a3412);
       color: white;
       border-radius: 16px;
-      padding: 24px;
+      padding: 20px;
       text-align: center;
-      box-shadow: 0 12px 30px rgba(220, 38, 38, 0.35);
-      border: 2px solid #fecaca;
+      box-shadow: 0 12px 30px rgba(154, 52, 18, 0.35);
+      border: 2px solid #fdba74;
+      margin-bottom: 20px;
+      animation: alertPulse 2s infinite ease-in-out;
+    }
+
+    .alert-countdown-banner.is-demo {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      border: 2px solid #f59e0b;
+      box-shadow: 0 12px 30px rgba(245, 158, 11, 0.22);
+      animation: none;
+    }
+
+    @keyframes alertPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.015); }
+      100% { transform: scale(1); }
+    }
+
+    .alert-banner-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .alert-banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(245, 158, 11, 0.2);
+      color: #fef08a;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .alert-banner-badge.is-real {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fee2e2;
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-alert-close {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: bold;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-alert-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-alert-close:active {
+      transform: scale(0.92);
     }
 
     .countdown-seconds {
-      font-size: 3.5rem;
+      font-size: 3.4rem;
       font-weight: 900;
       line-height: 1;
-      margin: 12px 0;
-      color: #fef08a;
+      margin: 10px 0;
+      color: #fbbf24;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Modal Didáctico Previo a Simulación (Trauma-Informed) */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.is-active {
+      display: flex;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      max-width: 460px;
+      width: 100%;
+      padding: 22px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      position: relative;
     }
 
     /* Buttons */
@@ -625,7 +731,7 @@
     </div>
 
     <!-- 1. ESCUDO DE TRANQUILIDAD Y CERTEZA (REASSURANCE SHIELD) -->
-    <section class="reassurance-shield">
+    <section class="reassurance-shield" id="reassuranceShield">
       <div class="pulse-indicator">🛡️</div>
       <div class="shield-text">
         <h2 id="shieldStatusTitle">Todo en Orden: Tu Entorno Está en Calma</h2>
@@ -636,17 +742,63 @@
       </div>
     </section>
 
-    <!-- URGENT COUNTDOWN BANNER (Appears strictly when an active S-wave is incoming) -->
-    <div class="alert-countdown-banner" id="alertBanner">
-      <h2 style="font-size: 1.35rem; margin-bottom: 6px;">🚨 ¡ONDA SÍSMICA EN CAMINO!</h2>
-      <p id="alertDetails" style="font-size: 1.05rem; opacity: 0.95;">Sismo M6.5 detectado a 85 km.</p>
-      <div class="countdown-seconds" id="countdownSec">12s</div>
-      <p style="font-size: 1.1rem; font-weight: 800; text-transform: uppercase;">
+    <!-- URGENT COUNTDOWN BANNER (Appears strictly when an active S-wave is incoming or during safe demo) -->
+    <div class="alert-countdown-banner" id="alertBanner" role="alert" aria-live="assertive">
+      <div class="alert-banner-header">
+        <span class="alert-banner-badge" id="alertTypeBadge">🧪 MODO PRÁCTICA SIMULADA</span>
+        <button class="btn-alert-close" id="btnQuickCloseAlert" title="Cerrar alerta">✕</button>
+      </div>
+      <h2 id="alertMainTitle" style="font-size: 1.35rem; margin-bottom: 6px;">🚨 ¡ONDA SÍSMICA EN CAMINO!</h2>
+      <p id="alertDetails" style="font-size: 1.02rem; opacity: 0.95;">Sismo M6.2 detectado a 110 km.</p>
+      <div class="countdown-seconds" id="countdownSec">16s</div>
+      <p id="alertActionAdvice" style="font-size: 1.05rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">
         CONSERVA LA CALMA • AGÁCHATE • CÚBRETE BAJO UNA MESA FIRME
       </p>
-      <button class="btn-sm" id="btnDismissAlert" style="margin: 14px auto 0 auto; background: rgba(0,0,0,0.45); color: white; border: 1px solid white;">
+      <p id="alertSubNote" style="font-size: 0.82rem; opacity: 0.92; margin-bottom: 12px; display: none;">
+        Esta es una práctica educativa para entrenar tu tiempo de reacción sereno.
+      </p>
+      <button class="btn-sm" id="btnDismissAlert" style="margin: 0 auto; background: rgba(0,0,0,0.35); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 8px 18px; font-weight: 600; cursor: pointer;">
         Silenciar Alerta
       </button>
+    </div>
+
+    <!-- MODAL DIDÁCTICO PREVIO A LA DEMOSTRACIÓN (EVITA SUSTOS Y PÁNICO) -->
+    <div class="modal-backdrop" id="modalDemoConfirm" role="dialog" aria-modal="true" aria-labelledby="modalDemoTitle">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.5rem;">🧪</span>
+            <h3 id="modalDemoTitle" style="font-size: 1.15rem; font-weight: 800; color: var(--text); margin: 0;">
+              Simulacro Didáctico de Alerta
+            </h3>
+          </div>
+          <button id="btnCloseDemoModal" class="btn-alert-close" style="background: var(--inner-bg); border-color: var(--border); color: var(--text);">✕</button>
+        </div>
+
+        <div style="background: rgba(245, 158, 11, 0.12); border-left: 4px solid var(--warning); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+          <p id="modalDemoReassurance" style="font-size: 0.88rem; color: var(--text); font-weight: 600; line-height: 1.4;">
+            🌿 <strong>Tranquilidad absoluta:</strong> No hay ningún sismo ocurriendo en este momento.
+          </p>
+        </div>
+
+        <p id="modalDemoBody" style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+          Esta demostración te muestra cómo funcionaría el <strong>radar de alerta temprana</strong> si un sismo lejano ocurriera. 
+          Podrás ver el conteo regresivo de segundos de ventaja y escuchar un tono suave de práctica para familiarizarte sin sobresaltos.
+        </p>
+
+        <div id="modalDemoDuration" style="background: var(--inner-bg); border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; font-size: 0.82rem; color: var(--text-muted);">
+          ⏱️ <strong>Duración:</strong> Conteo didáctico de 16 segundos con cierre automático al finalizar.
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn-secondary" id="btnCancelDemoModal" style="flex: 1;">
+            Cancelar
+          </button>
+          <button class="btn-action" id="btnStartDemoPractice" style="flex: 2; background: linear-gradient(135deg, #0284c7, #0d9488);">
+            ▶️ Iniciar Práctica Segura
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- 2. PAUSA DE SERENIDAD & REGULACIÓN NEUROCOGNITIVA (PAP) -->
@@ -962,6 +1114,12 @@
         radarSubtitle: "El Centinela calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote segundos antes del temblor fuerte.",
         btnGetLoc: "📍 Conectar mi Ubicación Protectora",
         btnDemo: "🧪 Probar Demostración",
+        modalDemoTitle: "Simulacro Didáctico de Alerta",
+        modalDemoReassurance: "🌿 Tranquilidad absoluta: No hay ningún sismo ocurriendo en este momento.",
+        modalDemoBody: "Esta demostración te muestra cómo funcionaría el radar de alerta temprana si un sismo lejano ocurriera. Podrás ver el conteo regresivo de segundos de ventaja y escuchar un tono suave de práctica para familiarizarte sin sobresaltos.",
+        modalDemoDuration: "⏱️ Duración: Conteo didáctico de 16 segundos con cierre automático al finalizar.",
+        btnCancelDemo: "Cancelar",
+        btnStartDemo: "▶️ Iniciar Práctica Segura",
         physicsSummary: "🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)",
         physicsBody: "La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. Por cada 100 km de distancia al epicentro, dispones de 12 segundos de ventaja matemática (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.",
         sentinelTitle: "🌙 Centinela Nocturno (Detector de Sacudida en Reposo)",
@@ -1060,6 +1218,12 @@
         radarSubtitle: "The Sentinel calculates in advance the arrival time of the secondary shear wave (S) directly on your device, providing seconds of warning before strong shaking.",
         btnGetLoc: "📍 Connect Protective Location",
         btnDemo: "🧪 Test Simulation Demo",
+        modalDemoTitle: "Educational Alert Drill",
+        modalDemoReassurance: "🌿 Total peace of mind: No earthquake is occurring right now.",
+        modalDemoBody: "This demonstration shows how the early warning radar would work if a distant earthquake occurred. You will see the countdown of advantage seconds and hear a gentle practice chime so you can familiarize yourself without panic.",
+        modalDemoDuration: "⏱️ Duration: 16-second educational countdown with automatic close upon completion.",
+        btnCancelDemo: "Cancel",
+        btnStartDemo: "▶️ Begin Safe Drill",
         physicsSummary: "🔬 How does early warning work? (Scientific Explanation)",
         physicsBody: "Primary (P) waves are fast (~6 km/s) but gentle. Secondary (S) waves are slower (~3.5 km/s) and cause rolling displacement. For every 100 km of distance to the epicenter, you gain 12 seconds of mathematical advantage (Δt = Distance × 0.12s) to reach a secure spot before motion begins.",
         sentinelTitle: "🌙 Nighttime Sentinel (Resting Motion Detector)",
@@ -1212,6 +1376,47 @@
 
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+    let demoChimeInterval = null;
+    function playGentleChime(freq = 528, durationMs = 280) {
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        
+        const now = audioCtx.currentTime;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.25, now + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + (durationMs / 1000));
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + (durationMs / 1000));
+      } catch (e) {}
+    }
+
+    function startDemoAudioSequence() {
+      initAudio();
+      stopEmergencySiren();
+      if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
+      // Gentle opening chord: 440 Hz (A4) then 528 Hz ("frequency of serenity")
+      playGentleChime(440, 240);
+      setTimeout(() => playGentleChime(528, 350), 140);
+
+      clearInterval(demoChimeInterval);
+      demoChimeInterval = setInterval(() => {
+        playGentleChime(528, 220);
+      }, 2000);
+    }
+
+    function stopDemoAudioSequence() {
+      clearInterval(demoChimeInterval);
+      demoChimeInterval = null;
+    }
+
     function triggerEmergencySiren() {
       initAudio();
       if (isSirenPlaying) return;
@@ -1239,6 +1444,7 @@
     function stopEmergencySiren() {
       isSirenPlaying = false;
       clearInterval(sirenInterval);
+      stopDemoAudioSequence();
     }
 
     async function runMorseSosLoop() {
@@ -1480,43 +1686,182 @@
     }
 
     let alertCountdownTimer = null;
-    function fireEarlyWarning(title, distKm, mag, remainingSec, localMMI) {
-      alertBanner.style.display = 'block';
+    let alertAutoDismissTimer = null;
+
+    function dismissEarlyWarning() {
+      clearTimeout(alertAutoDismissTimer);
+      clearInterval(alertCountdownTimer);
+      stopEmergencySiren();
+      if (alertBanner) alertBanner.style.display = 'none';
+      const reassuranceShield = document.getElementById('reassuranceShield');
+      if (reassuranceShield) reassuranceShield.style.display = 'flex';
+    }
+
+    function fireEarlyWarning(title, distKm, mag, remainingSec, localMMI, isDemo = false) {
+      clearTimeout(alertAutoDismissTimer);
+      clearInterval(alertCountdownTimer);
+
+      const reassuranceShield = document.getElementById('reassuranceShield');
+      if (reassuranceShield) reassuranceShield.style.display = 'none';
+
+      if (alertBanner) alertBanner.style.display = 'block';
+
+      const alertTypeBadge = document.getElementById('alertTypeBadge');
+      const alertMainTitle = document.getElementById('alertMainTitle');
+      const alertActionAdvice = document.getElementById('alertActionAdvice');
+      const alertSubNote = document.getElementById('alertSubNote');
+      const btnDismissAlert = document.getElementById('btnDismissAlert');
+
+      if (isDemo) {
+        if (alertBanner) alertBanner.classList.add('is-demo');
+        if (alertTypeBadge) {
+          alertTypeBadge.textContent = currentLang === 'es' ? '🧪 MODO PRÁCTICA SIMULADA' : '🧪 SIMULATED PRACTICE MODE';
+          alertTypeBadge.className = 'alert-banner-badge';
+        }
+        if (alertMainTitle) {
+          alertMainTitle.textContent = currentLang === 'es' ? '🧪 Simulacro de Alerta Temprana' : '🧪 Early Warning Drill';
+        }
+        if (alertActionAdvice) {
+          alertActionAdvice.textContent = currentLang === 'es'
+            ? 'PRACTICA CON SERENIDAD: IDENTIFICA TU ZONA SEGURA'
+            : 'PRACTICE WITH SERENITY: IDENTIFY YOUR SAFE ZONE';
+        }
+        if (alertSubNote) {
+          alertSubNote.style.display = 'block';
+          alertSubNote.textContent = currentLang === 'es'
+            ? 'Ejercicio controlado. Ningún sismo está ocurriendo en este momento. Mantén la calma.'
+            : 'Controlled drill. No earthquake is occurring right now. Stay calm.';
+        }
+        if (btnDismissAlert) {
+          btnDismissAlert.textContent = currentLang === 'es' ? 'Finalizar Práctica' : 'Finish Practice';
+        }
+      } else {
+        if (alertBanner) alertBanner.classList.remove('is-demo');
+        if (alertTypeBadge) {
+          alertTypeBadge.textContent = currentLang === 'es' ? '🚨 ALERTA SÍSMICA REAL' : '🚨 REAL SEISMIC ALERT';
+          alertTypeBadge.className = 'alert-banner-badge is-real';
+        }
+        if (alertMainTitle) {
+          alertMainTitle.textContent = currentLang === 'es' ? '🚨 ¡ONDA SÍSMICA EN CAMINO!' : '🚨 SEISMIC WAVE INCOMING!';
+        }
+        if (alertActionAdvice) {
+          alertActionAdvice.textContent = currentLang === 'es'
+            ? 'CONSERVA LA CALMA • AGÁCHATE • CÚBRETE BAJO UNA MESA FIRME'
+            : 'STAY CALM • DROP • COVER UNDER A STURDY TABLE';
+        }
+        if (alertSubNote) {
+          alertSubNote.style.display = 'none';
+        }
+        if (btnDismissAlert) {
+          btnDismissAlert.textContent = currentLang === 'es' ? 'Silenciar Alerta' : 'Silence Alert';
+        }
+      }
+
       const mmiStr = localMMI ? ` • Intensidad local: MMI ${localMMI.toFixed(1)} (${getMmiLabel(localMMI).text})` : '';
-      alertDetails.textContent = `${title} • Distancia: ${Math.round(distKm)} km • Magnitud: M${mag.toFixed(1)}${mmiStr}`;
-      countdownSec.textContent = `${remainingSec}s`;
+      if (alertDetails) alertDetails.textContent = `${title} • Distancia: ${Math.round(distKm)} km • Magnitud: M${mag.toFixed(1)}${mmiStr}`;
+      if (countdownSec) countdownSec.textContent = `${remainingSec}s`;
 
       const alertMode = localStorage.getItem('qm_alert_mode') || 'sound_vibrate';
-      if (alertMode === 'sound_vibrate') {
-        triggerEmergencySiren();
-      } else if (alertMode === 'silent_vibrate') {
-        if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 800]);
+      if (isDemo) {
+        if (alertMode === 'sound_vibrate') {
+          startDemoAudioSequence();
+        } else if (alertMode === 'silent_vibrate') {
+          if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
+        }
+      } else {
+        if (alertMode === 'sound_vibrate') {
+          triggerEmergencySiren();
+        } else if (alertMode === 'silent_vibrate') {
+          if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 800]);
+        }
       }
-      // If 'visual_only', no sound or vibration is emitted
 
       let rem = remainingSec;
-      clearInterval(alertCountdownTimer);
       alertCountdownTimer = setInterval(() => {
         rem--;
         if (rem > 0) {
-          countdownSec.textContent = `${rem}s`;
+          if (countdownSec) countdownSec.textContent = `${rem}s`;
         } else {
-          countdownSec.textContent = `¡ONDA EN ZONA!`;
           clearInterval(alertCountdownTimer);
+          stopEmergencySiren();
+
+          if (isDemo) {
+            if (countdownSec) countdownSec.textContent = `✅ 0s`;
+            if (alertMainTitle) {
+              alertMainTitle.textContent = currentLang === 'es' 
+                ? '✅ ¡Tiempo de Ventaja Cumplido!' 
+                : '✅ Advantage Time Completed!';
+            }
+            if (alertActionAdvice) {
+              alertActionAdvice.textContent = currentLang === 'es'
+                ? '¡Excelente! En un sismo real habrías tenido este valioso tiempo para protegerte.'
+                : 'Great! In a real earthquake you would have had this time to safely take cover.';
+            }
+            if (btnDismissAlert) {
+              btnDismissAlert.textContent = currentLang === 'es' ? 'Entendido • Volver a la Calma' : 'Understood • Return to Calm';
+            }
+            // Auto-dismiss demo after 7 seconds smoothly
+            alertAutoDismissTimer = setTimeout(() => {
+              dismissEarlyWarning();
+            }, 7000);
+          } else {
+            if (countdownSec) countdownSec.textContent = currentLang === 'es' ? `¡ONDA EN ZONA!` : `WAVE IN ZONE!`;
+          }
         }
       }, 1000);
     }
 
-    btnDismissAlert.addEventListener('click', () => {
-      stopEmergencySiren();
-      alertBanner.style.display = 'none';
-      clearInterval(alertCountdownTimer);
-    });
+    if (btnDismissAlert) {
+      btnDismissAlert.addEventListener('click', dismissEarlyWarning);
+    }
+    const btnQuickCloseAlert = document.getElementById('btnQuickCloseAlert');
+    if (btnQuickCloseAlert) {
+      btnQuickCloseAlert.addEventListener('click', dismissEarlyWarning);
+    }
 
-    btnSimulateAlert.addEventListener('click', () => {
-      const demoMMI = 5.8;
-      fireEarlyWarning("DEMO Sismo Regional Magnitud 6.2", 110, 6.2, 16, demoMMI);
-    });
+    // Educational Pre-Demo Modal Controls
+    const modalDemoConfirm = document.getElementById('modalDemoConfirm');
+    const btnCloseDemoModal = document.getElementById('btnCloseDemoModal');
+    const btnCancelDemoModal = document.getElementById('btnCancelDemoModal');
+    const btnStartDemoPractice = document.getElementById('btnStartDemoPractice');
+
+    function openDemoModal() {
+      if (modalDemoConfirm) modalDemoConfirm.classList.add('is-active');
+    }
+
+    function closeDemoModal() {
+      if (modalDemoConfirm) modalDemoConfirm.classList.remove('is-active');
+    }
+
+    if (btnSimulateAlert) {
+      btnSimulateAlert.addEventListener('click', openDemoModal);
+    }
+    if (btnCloseDemoModal) {
+      btnCloseDemoModal.addEventListener('click', closeDemoModal);
+    }
+    if (btnCancelDemoModal) {
+      btnCancelDemoModal.addEventListener('click', closeDemoModal);
+    }
+    if (modalDemoConfirm) {
+      modalDemoConfirm.addEventListener('click', (e) => {
+        if (e.target === modalDemoConfirm) closeDemoModal();
+      });
+    }
+
+    if (btnStartDemoPractice) {
+      btnStartDemoPractice.addEventListener('click', () => {
+        closeDemoModal();
+        const demoMMI = 5.8;
+        fireEarlyWarning(
+          currentLang === 'es' ? "Simulación de Práctica: Sismo Lejano M6.2" : "Practice Simulation: Distant Quake M6.2",
+          110,
+          6.2,
+          16,
+          demoMMI,
+          true
+        );
+      });
+    }
 
     // ==========================================
     // MODO CENTINELA (ACCELEROMETER P-WAVE SEISMOMETER)
@@ -2096,6 +2441,18 @@
       document.getElementById('radarSubtitle').innerHTML = d.radarSubtitle;
       btnGetLocation.textContent = d.btnGetLoc;
       btnSimulateAlert.textContent = d.btnDemo;
+      const modalDemoTitleEl = document.getElementById('modalDemoTitle');
+      if (modalDemoTitleEl) modalDemoTitleEl.textContent = d.modalDemoTitle;
+      const modalDemoReassureEl = document.getElementById('modalDemoReassurance');
+      if (modalDemoReassureEl) modalDemoReassureEl.innerHTML = d.modalDemoReassurance;
+      const modalDemoBodyEl = document.getElementById('modalDemoBody');
+      if (modalDemoBodyEl) modalDemoBodyEl.innerHTML = d.modalDemoBody;
+      const modalDemoDurationEl = document.getElementById('modalDemoDuration');
+      if (modalDemoDurationEl) modalDemoDurationEl.textContent = d.modalDemoDuration;
+      const btnCancelDemoModalEl = document.getElementById('btnCancelDemoModal');
+      if (btnCancelDemoModalEl) btnCancelDemoModalEl.textContent = d.btnCancelDemo;
+      const btnStartDemoPracticeEl = document.getElementById('btnStartDemoPractice');
+      if (btnStartDemoPracticeEl) btnStartDemoPracticeEl.textContent = d.btnStartDemo;
       document.getElementById('physicsSummary').textContent = d.physicsSummary;
       document.getElementById('physicsBody').innerHTML = d.physicsBody;
       document.getElementById('sentinelTitle').textContent = d.sentinelTitle;
