@@ -3,37 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#dc2626">
-  <meta name="description" content="QuakeMind Global - Offline Emergency Survival Hub, P-Wave Seismometer & Early Earthquake Warnings">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="description" content="QuakeMind Global — Inteligencia Sísmica Humana, Alerta Temprana, Serenidad y Cuidado Familiar">
   <link rel="manifest" href="manifest.json">
-  <title>QuakeMind Global — Alertas Tempranas & Survival Hub</title>
+  <title>QuakeMind Global — Espacio de Confianza y Protección Sísmica</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #ef4444;
-      --primary-hover: #dc2626;
-      --accent: #38bdf8;
-      --success: #22c55e;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #0d9488;
+      --success: #10b981;
       --warning: #f59e0b;
-      --border: #334155;
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      --danger: #dc2626;
+      --border: #e2e8f0;
+      --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+      --inner-bg: #f1f5f9;
     }
 
     [data-theme="grayish-white"] {
       --bg: #f1f5f9;
       --card-bg: #ffffff;
       --text: #0f172a;
-      --text-muted: #64748b;
+      --text-muted: #475569;
       --border: #cbd5e1;
-      --accent: #0284c7;
-      --primary: #dc2626;
-      --primary-hover: #b91c1c;
-      --success: #16a34a;
-      --warning: #d97706;
-      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #0d9488;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+      --inner-bg: #f8fafc;
     }
 
     [data-theme="dark"] {
@@ -42,12 +46,14 @@
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
-      --accent: #38bdf8;
-      --primary: #ef4444;
-      --primary-hover: #dc2626;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #2dd4bf;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      --inner-bg: #0b1120;
     }
 
     * {
@@ -60,168 +66,229 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      line-height: 1.5;
-      padding-bottom: 70px;
-      transition: background-color 0.2s, color 0.2s;
+      line-height: 1.55;
+      padding-bottom: 80px;
+      transition: background-color 0.25s, color 0.25s;
     }
 
     header {
       background-color: var(--card-bg);
-      border-bottom: 2px solid var(--primary);
-      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      font-size: 1.4rem;
+      background: rgba(2, 132, 199, 0.1);
+      padding: 6px;
+      border-radius: 10px;
     }
 
     .brand h1 {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 800;
       color: var(--text);
-      letter-spacing: -0.5px;
+      letter-spacing: -0.4px;
     }
 
     .brand span {
-      background: var(--primary);
-      color: white;
-      font-size: 0.65rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      font-weight: bold;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 700;
     }
 
     .controls {
       display: flex;
-      gap: 6px;
+      gap: 8px;
     }
 
     .btn-sm {
       background: var(--card-bg);
       color: var(--text);
       border: 1px solid var(--border);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.8rem;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
       cursor: pointer;
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+
+    .btn-sm:hover {
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
     .container {
       max-width: 740px;
       margin: 0 auto;
-      padding: 16px;
+      padding: 20px 16px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 20px;
     }
 
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 16px;
+      padding: 24px;
       box-shadow: var(--card-shadow);
+      transition: transform 0.15s, box-shadow 0.15s;
     }
 
     .card-title {
       font-size: 1.15rem;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      color: var(--text);
     }
 
     .card-subtitle {
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
       margin-bottom: 16px;
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
-    /* Urgent Alert Banner */
+    /* Peace & Reassurance Shield */
+    .reassurance-shield {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(2, 132, 199, 0.06));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .pulse-indicator {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      animation: pulse-calm 2.5s infinite;
+    }
+
+    @keyframes pulse-calm {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .shield-text h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .shield-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Urgent Alert Banner (Only active on actual wave) */
     .alert-countdown-banner {
       display: none;
-      background: linear-gradient(135deg, #b91c1c, #dc2626);
+      background: linear-gradient(135deg, #991b1b, #dc2626);
       color: white;
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 16px;
+      padding: 24px;
       text-align: center;
-      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
-      animation: alert-pulse 1s infinite alternate;
+      box-shadow: 0 12px 30px rgba(220, 38, 38, 0.35);
       border: 2px solid #fecaca;
-    }
-
-    @keyframes alert-pulse {
-      0% { transform: scale(1.0); }
-      100% { transform: scale(1.02); }
     }
 
     .countdown-seconds {
       font-size: 3.5rem;
       font-weight: 900;
       line-height: 1;
-      margin: 10px 0;
+      margin: 12px 0;
       color: #fef08a;
     }
 
     /* Buttons */
-    .btn-emergency {
-      width: 100%;
-      padding: 16px;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 800;
-      cursor: pointer;
+    .btn-action {
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
       border: none;
+      padding: 13px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.92rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: transform 0.1s, background-color 0.2s;
+      transition: background-color 0.2s, transform 0.1s;
     }
 
-    .btn-emergency:active {
+    .btn-action:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-action:active {
       transform: scale(0.98);
     }
 
-    .btn-sound { background: #dc2626; color: white; }
-    .btn-sound.active { background: #7f1d1d; animation: pulse-red 1s infinite; }
-
-    .btn-strobe { background: #d97706; color: white; margin-top: 10px; }
-    .btn-sentinel { background: #0284c7; color: white; margin-top: 10px; }
-    .btn-sentinel.active { background: #15803d; animation: pulse-green 1.5s infinite; }
-
-    @keyframes pulse-red {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
-      50% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+    .btn-secondary {
+      background: var(--inner-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      padding: 11px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
     }
 
-    @keyframes pulse-green {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
-      50% { box-shadow: 0 0 0 14px rgba(22, 163, 74, 0); }
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
-    /* Micro-Seismograph Canvas */
+    /* Micro-Seismograph */
     #seismoCanvas {
       width: 100%;
-      height: 90px;
-      background: #0f172a;
-      border-radius: 8px;
+      height: 80px;
+      background: var(--inner-bg);
+      border-radius: 10px;
       border: 1px solid var(--border);
       margin: 12px 0;
       display: block;
@@ -231,100 +298,114 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 20px;
-      font-size: 0.75rem;
+      font-size: 0.76rem;
       font-weight: 700;
     }
 
     .badge-green { background: #dcfce7; color: #166534; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; }
     .badge-yellow { background: #fef3c7; color: #92400e; }
-    .badge-red { background: #fee2e2; color: #991b1b; }
 
-    /* Strobe Overlay */
-    #strobeOverlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 99999;
-      cursor: pointer;
-    }
-
-    /* Checklist */
-    .checklist-group { margin-bottom: 16px; }
-    .group-title { font-size: 0.95rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
-    .checklist-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-    }
-    .checklist-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
-    .checklist-item span { font-size: 0.9rem; }
-    .checklist-item.checked span { text-decoration: line-through; color: var(--text-muted); }
-
-    /* Form Inputs */
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
-    .form-input {
-      width: 100%;
-      padding: 10px 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 0.9rem;
-    }
-
-    .btn-action {
-      background: var(--accent);
-      color: white;
-      font-weight: 700;
-      border: none;
-      padding: 12px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 8px;
-    }
-
+    /* Vagal Pacer */
     .pacer-box {
-      border: 2px dashed var(--accent);
-      border-radius: 10px;
-      padding: 20px;
+      background: var(--inner-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
       text-align: center;
     }
 
     .pacer-bubble {
-      width: 90px;
-      height: 90px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      background: var(--accent);
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
       margin: 14px auto;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 800;
-      font-size: 1.1rem;
-      transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 1.15rem;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.25);
+      transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s;
     }
-    .pacer-bubble.inhale { transform: scale(1.35); }
-    .pacer-bubble.hold { transform: scale(1.35); background: var(--warning); }
-    .pacer-bubble.exhale { transform: scale(1.0); background: var(--success); }
+
+    .pacer-bubble.inhale { transform: scale(1.35); background: linear-gradient(135deg, #38bdf8, #0284c7); }
+    .pacer-bubble.hold { transform: scale(1.35); background: linear-gradient(135deg, #fbbf24, #d97706); }
+    .pacer-bubble.exhale { transform: scale(1.0); background: linear-gradient(135deg, #34d399, #059669); }
+
+    /* Form Inputs */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--inner-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Checklist */
+    .checklist-group { margin-bottom: 18px; }
+    .group-title { font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .checklist-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+    .checklist-item span { font-size: 0.9rem; }
+    .checklist-item.checked span { text-decoration: line-through; color: var(--text-muted); }
+
+    /* Strobe Overlay */
+    #strobeOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 99999;
+      cursor: pointer;
+    }
+
+    /* Accordion Details */
+    details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 10px;
+      background: var(--inner-bg);
+    }
+    details summary {
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      color: var(--text);
+      user-select: none;
+    }
   </style>
 </head>
 <body>
 
   <header>
     <div class="brand">
-      <h1>QuakeMind</h1>
-      <span id="offlineBadge">Offline</span>
+      <div class="brand-icon">🌱</div>
+      <div>
+        <h1>QuakeMind</h1>
+        <span id="headerBadge">Protección en Calma</span>
+      </div>
     </div>
     <div class="controls">
       <button class="btn-sm" id="themeBtn">🏛️ Blanco Grisáceo</button>
@@ -337,188 +418,210 @@
 
   <main class="container">
 
-    <!-- 0. URGENT EARLY WARNING COUNTDOWN BANNER -->
-    <div class="alert-countdown-banner" id="alertBanner">
-      <h2 style="font-size: 1.3rem; margin-bottom: 4px;">🚨 ¡ALERTA SÍSMICA TEMPRANA EN CAMINO!</h2>
-      <p id="alertDetails" style="font-size: 1rem; opacity: 0.95;">Sismo M6.5 detectado a 85 km de tu ubicación.</p>
-      <div class="countdown-seconds" id="countdownSec">12s</div>
-      <p style="font-size: 1.1rem; font-weight: 800; text-transform: uppercase;">
-        ¡LA ONDA DESTRUCTIVA S LLEGA EN BREVE! ¡AGÁCHATE, CÚBRETE Y SUJÉTATE!
-      </p>
-      <button class="btn-sm" id="btnDismissAlert" style="margin: 12px auto 0 auto; background: rgba(0,0,0,0.5); color: white; border: 1px solid white;">
-        Silenciar Alarma
-      </button>
-    </div>
-
-    <!-- 1. GPS EARLY WARNING RADAR -->
-    <section class="card" style="border-left: 6px solid var(--accent);">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-        <h2 class="card-title" id="radarTitle">📍 Radar Sísmico por Geolocalización (GPS)</h2>
-        <span class="badge-status badge-yellow" id="radarBadge">Esperando GPS</span>
-      </div>
-      <p class="card-subtitle" id="radarSubtitle">
-        Las alertas tradicionales de Google suelen llegar <em>después</em> del temblor debido al retraso de servidores en la nube. 
-        Este radar calcula en tu navegador el tiempo de viaje de la onda destructiva S (a 3.5 km/s) para avisarte <strong>segundos antes</strong> del impacto.
-      </p>
-
-      <div style="background: rgba(2, 132, 199, 0.08); border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 0.85rem;">
-        <div style="font-weight: bold; color: var(--accent); margin-bottom: 4px;" id="physicsTitle">🔬 Física de la Alerta Temprana:</div>
-        <div id="physicsDesc">
-          La onda primaria (P) viaja a ~6.0 km/s (poco dañina), mientras que la onda destructiva secundaria (S) viaja a ~3.5 km/s. 
-          Por cada 100 km de distancia al epicentro, <strong>tienes 12 segundos de ventaja</strong> (Δt = Distancia × 0.12s) para ponerte a salvo.
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-        <button class="btn-action" id="btnGetLocation" style="flex: 2;">
-          📍 Obtener mi Ubicación y Activar Radar
-        </button>
-        <button class="btn-action" id="btnSimulateAlert" style="flex: 1; background: var(--primary);">
-          🧪 Probar Alerta (Demo)
-        </button>
-      </div>
-
-      <div id="locationInfo" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">
-        Ubicación: No asignada (Presiona el botón para geolocalizarte)
-      </div>
-      <div id="lastFeedCheck" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
-        Última comprobación de sismos: En espera...
-      </div>
-    </section>
-
-    <!-- 2. IN-DEVICE P-WAVE SEISMOMETER (MODO CENTINELA) -->
-    <section class="card" style="border-left: 6px solid var(--success);">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-        <h2 class="card-title" id="sentinelTitle">🔬 Modo Centinela (Detector de Onda P - 0ms Latencia)</h2>
-        <span class="badge-status badge-yellow" id="sentinelBadge">Inactivo</span>
-      </div>
-      <p class="card-subtitle" id="sentinelSubtitle">
-        Convierte tu teléfono en un sismógrafo digital. Colócalo sobre una mesa firme o mesita de noche. 
-        Al detectar la micro-vibración vertical de la <strong>Onda P</strong> con el acelerómetro interno, disparará una sirena ruidosa de forma instantánea y local, ganándote entre <strong>5 y 25 segundos críticos</strong> antes de que sientas el temblor fuerte.
-      </p>
-
-      <!-- Live Micro-Seismograph Canvas -->
-      <canvas id="seismoCanvas" width="700" height="90"></canvas>
-      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
-        <span>Aceleración 3D (m/s²)</span>
-        <span id="seismoValue">Calibrando: 0.00 m/s²</span>
-      </div>
-
-      <div style="margin-top: 10px;">
-        <button class="btn-emergency btn-sentinel" id="btnSentinel">
-          <span>🛡️</span>
-          <span id="sentinelBtnText">ACTIVAR MODO CENTINELA (EN MESA / NOCHE)</span>
-        </button>
-      </div>
-
-      <div style="display: flex; gap: 8px; margin-top: 10px;">
-        <button class="btn-sm" id="btnTestSiren" style="flex: 1; justify-content: center;">
-          🔊 Probar Sirena de Alarma
-        </button>
-        <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
-          <label style="font-size: 0.75rem; font-weight: bold;">Sensibilidad:</label>
-          <select id="sentinelSens" class="form-input" style="padding: 4px; font-size: 0.8rem;">
-            <option value="0.15">Alta (0.15 m/s²)</option>
-            <option value="0.25" selected>Normal (0.25 m/s²)</option>
-            <option value="0.40">Baja (0.40 m/s²)</option>
-          </select>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. SOS ACOUSTIC & VISUAL BEACON -->
-    <section class="card" style="border: 2px solid var(--primary);">
-      <h2 class="card-title" id="beaconTitle">🔊 Baliza de Rescate Acústica y Visual (SOS)</h2>
-      <p class="card-subtitle" id="beaconSubtitle">
-        Emite una señal acústica penetrante de 3.500 Hz en código Morse (S-O-S) y destellos de pantalla para guiar a rescatistas sin agotar tu voz.
-      </p>
-
-      <button class="btn-emergency btn-sound" id="btnSound">
-        <span id="soundIcon">📢</span>
-        <span id="soundText">ACTIVAR SILBATO SOS ACÚSTICO (3.5 kHz)</span>
-      </button>
-
-      <button class="btn-emergency btn-strobe" id="btnStrobe">
-        <span>⚡</span>
-        <span id="strobeText">ACTIVAR BALIZA ESTROBOSCÓPICA (PANTALLA)</span>
-      </button>
-    </section>
-
-    <!-- 4. AUTONOMIC BREATHING & GROUNDING (PAP) -->
-    <section class="card">
-      <h2 class="card-title" id="papTitle">🫁 Regulación Inmediata del Pánico (Primeros Auxilios)</h2>
-      <p class="card-subtitle" id="papSubtitle">
-        Suspiro Cíclico para frenar la taquicardia y desescalar el sistema simpático en 60 segundos.
-      </p>
-
-      <div class="pacer-box">
-        <h3 id="pacerState">Listo para iniciar</h3>
-        <div class="pacer-bubble" id="pacerBubble">PAZ</div>
-        <button class="btn-action" id="btnStartBreathing" style="background: var(--success); color: white;">
-          Iniciar Ciclo Vagal (4-4-7)
-        </button>
-      </div>
-
-      <div style="margin-top: 14px; background: rgba(56, 189, 248, 0.08); padding: 12px; border-radius: 8px;">
-        <h4 style="color: var(--accent); margin-bottom: 4px;" id="groundingTitle">Enraizamiento Sensorial Rápido (5-4-3-2-1):</h4>
-        <p style="font-size: 0.85rem;" id="groundingText">
-          Mira a tu alrededor: Nombra <strong>5</strong> cosas que ves, toca <strong>4</strong> cosas firmes, escucha <strong>3</strong> sonidos, identifica <strong>2</strong> olores y recuerda <strong>1</strong> motivo de esperanza.
+    <!-- 1. ESCUDO DE TRANQUILIDAD Y CERTEZA (REASSURANCE SHIELD) -->
+    <section class="reassurance-shield">
+      <div class="pulse-indicator">🛡️</div>
+      <div class="shield-text">
+        <h2 id="shieldStatusTitle">Todo en Orden: Tu Entorno Está en Calma</h2>
+        <p id="shieldStatusDesc">
+          Monitoreando la actividad sísmica en silencio con datos de la Red Global. No se registran alertas cercanas a tu ubicación. 
+          Estás en un espacio seguro diseñado para acompañarte con serenidad y ciencia.
         </p>
       </div>
     </section>
 
-    <!-- 5. EMERGENCY CONTACT ID CARD GENERATOR -->
-    <section class="card">
-      <h2 class="card-title" id="cardGenTitle">💳 Tarjeta Familiar de Emergencia (Sin Conexión)</h2>
-      <p class="card-subtitle" id="cardGenSubtitle">
-        Ingresa tus datos clave y genera una tarjeta en imagen PNG para guardar en la galería de tu celular sin internet.
+    <!-- URGENT COUNTDOWN BANNER (Appears strictly when an active S-wave is incoming) -->
+    <div class="alert-countdown-banner" id="alertBanner">
+      <h2 style="font-size: 1.35rem; margin-bottom: 6px;">🚨 ¡ONDA SÍSMICA EN CAMINO!</h2>
+      <p id="alertDetails" style="font-size: 1.05rem; opacity: 0.95;">Sismo M6.5 detectado a 85 km.</p>
+      <div class="countdown-seconds" id="countdownSec">12s</div>
+      <p style="font-size: 1.1rem; font-weight: 800; text-transform: uppercase;">
+        CONSERVA LA CALMA • AGÁCHATE • CÚBRETE BAJO UNA MESA FIRME
+      </p>
+      <button class="btn-sm" id="btnDismissAlert" style="margin: 14px auto 0 auto; background: rgba(0,0,0,0.45); color: white; border: 1px solid white;">
+        Silenciar Alerta
+      </button>
+    </div>
+
+    <!-- 2. PAUSA DE SERENIDAD & REGULACIÓN NEUROCOGNITIVA (PAP) -->
+    <section class="card" style="border-top: 4px solid var(--accent);">
+      <h2 class="card-title" id="papTitle">🫁 Pausa de Serenidad (60 Segundos)</h2>
+      <p class="card-subtitle" id="papSubtitle">
+        Si las noticias o los sismos recientes te generan angustia o taquicardia, tómate un minuto para activar el freno natural de tu sistema nervioso (Suspiro Cíclico 4-4-7).
       </p>
 
-      <div class="form-group">
-        <label id="lblCardName">Nombre Completo y Documento:</label>
-        <input type="text" class="form-input" id="cardName" placeholder="Ej: Fabio Torres - ID: 12345678">
-      </div>
-      <div class="form-group">
-        <label id="lblCardAssembly">Punto de Encuentro Familiar:</label>
-        <input type="text" class="form-input" id="cardAssembly" placeholder="Ej: Parque Principal / Cancha del Barrio">
-      </div>
-      <div class="form-group">
-        <label id="lblCardPhone">Contacto Telefónico Fuera de la Ciudad:</label>
-        <input type="text" class="form-input" id="cardPhone" placeholder="Ej: +57 300 000 0000 (Tía Marta - Bogotá)">
-      </div>
-      <div class="form-group">
-        <label id="lblCardMed">Tipo de Sangre y Alergias / Medicinas Crónicas:</label>
-        <input type="text" class="form-input" id="cardMed" placeholder="Ej: O+, Alérgico a Penicilina, Insulina">
+      <div class="pacer-box">
+        <h3 id="pacerState" style="font-size: 1rem; color: var(--text-muted); margin-bottom: 6px;">Listo para comenzar</h3>
+        <div class="pacer-bubble" id="pacerBubble">PAZ</div>
+        <button class="btn-action" id="btnStartBreathing" style="margin: 10px auto 0 auto; max-width: 280px; background: var(--accent);">
+          Iniciar Respiración de Calma
+        </button>
       </div>
 
-      <button class="btn-action" id="btnGenerateCard">Generar y Descargar Tarjeta PNG</button>
-      <canvas id="cardCanvas" width="800" height="450" style="display: none;"></canvas>
+      <details>
+        <summary id="groundingSummary">🧘 Técnica de Enraizamiento Sensorial (5-4-3-2-1)</summary>
+        <p style="font-size: 0.88rem; margin-top: 10px; color: var(--text-muted);" id="groundingBody">
+          Mira a tu alrededor con serenidad: Nombra <strong>5</strong> cosas que ves, toca <strong>4</strong> cosas firmes con tus manos, identifica <strong>3</strong> sonidos reales, percibe <strong>2</strong> olores y evoca <strong>1</strong> recuerdo que te transmita gratitud y afecto.
+        </p>
+      </details>
     </section>
 
-    <!-- 6. 72-HOUR SURVIVAL BACKPACK CHECKLIST -->
-    <section class="card">
-      <h2 class="card-title" id="backpackTitle">🎒 Mochila de las 72 Horas (Guardado Offline)</h2>
-      <p class="card-subtitle" id="backpackSubtitle">
-        Marca los elementos que ya tienes empacados. Tu progreso se guarda automáticamente en el dispositivo.
+    <!-- 3. RADAR SÍSMICO PROTECTOR (GPS EARLY WARNING) -->
+    <section class="card" style="border-top: 4px solid var(--primary);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+        <h2 class="card-title" id="radarTitle">📍 Radar Sísmico Protector (GPS)</h2>
+        <span class="badge-status badge-blue" id="radarBadge">Listo para activar</span>
+      </div>
+      <p class="card-subtitle" id="radarSubtitle">
+        Calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote <strong>segundos antes</strong> del temblor fuerte.
       </p>
-      <div id="checklistContainer"></div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+        <button class="btn-action" id="btnGetLocation" style="flex: 2; min-width: 220px;">
+          📍 Conectar mi Ubicación Protectora
+        </button>
+        <button class="btn-secondary" id="btnSimulateAlert" style="flex: 1; min-width: 140px;">
+          🧪 Probar Demostración
+        </button>
+      </div>
+
+      <div id="locationInfo" style="font-size: 0.85rem; color: var(--text-muted);">
+        Ubicación: No asignada (Presiona el botón para verificar tu entorno)
+      </div>
+      <div id="lastFeedCheck" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+        Última comprobación de sismos: En espera...
+      </div>
+
+      <details>
+        <summary id="physicsSummary">🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)</summary>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;" id="physicsBody">
+          La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. 
+          Por cada 100 km de distancia al epicentro, <strong>dispones de 12 segundos de ventaja matemática</strong> (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.
+        </div>
+      </details>
     </section>
 
-    <!-- 7. CRITICAL ACTION TRIAGE -->
-    <section class="card" style="background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.3);">
-      <h2 class="card-title" style="color: var(--primary);" id="triageQuickTitle">⚠️ Triaje Rápido de Grietas (ATC-20)</h2>
-      <ul style="padding-left: 20px; font-size: 0.88rem; display: flex; flex-direction: column; gap: 8px;" id="triageList">
-        <li><strong>🟢 Fisuras Superficiales (&lt; 2 mm):</strong> Solo pintura o revoque. No hay peligro estructural. Puedes permanecer.</li>
-        <li><strong>🟡 Grietas Horizontales / Tabiques:</strong> Daño moderado en paredes divisorias. Uso restringido, no duermas allí.</li>
-        <li><strong>🔴 Grietas Diagonales en 'X' o Columnas Quebradas:</strong> PELIGRO CRÍTICO DE COLAPSO. Corta el gas y la luz, y EVACÚA INMEDIATAMENTE.</li>
-      </ul>
+    <!-- 4. CENTINELA NOCTURNO (IN-DEVICE P-WAVE SEISMOMETER) -->
+    <section class="card" style="border-top: 4px solid var(--success);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+        <h2 class="card-title" id="sentinelTitle">🌙 Centinela Nocturno (Detector de Mesa)</h2>
+        <span class="badge-status badge-yellow" id="sentinelBadge">Descanso</span>
+      </div>
+      <p class="card-subtitle" id="sentinelSubtitle">
+        Para que duermas con tranquilidad: coloca tu celular plano sobre la mesa o mesita de noche. 
+        Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.
+      </p>
+
+      <canvas id="seismoCanvas" width="700" height="80"></canvas>
+      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+        <span>Sismógrafo de Mesa en Vivo</span>
+        <span id="seismoValue">Calibrando: 0.00 m/s²</span>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+        <button class="btn-action" id="btnSentinel" style="flex: 2; min-width: 220px; background: var(--success);">
+          🛡️ Activar Centinela Nocturno
+        </button>
+        <button class="btn-secondary" id="btnTestSiren" style="flex: 1; min-width: 140px;">
+          🔊 Probar Tono de Alarma
+        </button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Sensibilidad:</label>
+        <select id="sentinelSens" class="form-input" style="max-width: 180px; padding: 6px 10px; font-size: 0.82rem;">
+          <option value="0.15">Alta (0.15 m/s²)</option>
+          <option value="0.25" selected>Normal (0.25 m/s²)</option>
+          <option value="0.40">Baja (0.40 m/s²)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- 5. BOTIQUÍN DIGITAL & HERRAMIENTAS FAMILIARES -->
+    <section class="card">
+      <h2 class="card-title" id="toolsTitle">🎒 Botiquín Digital de Respaldo</h2>
+      <p class="card-subtitle" id="toolsSubtitle">
+        Herramientas organizadas y discretas para cuidar a tu familia en caso de que alguna vez las necesites.
+      </p>
+
+      <!-- Sub-Tool: Silbato de Rescate SOS -->
+      <details open>
+        <summary id="sosWhistleSummary">🔊 Silbato Acústico de Rescate (3.500 Hz Morse)</summary>
+        <div style="padding-top: 10px;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;" id="whistleDesc">
+            Emite un tono puro continuo en código Morse (S-O-S) calibrado a la frecuencia de resonancia del oído humano, para pedir auxilio en la oscuridad o bajo escombros sin agotar tu voz.
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn-secondary" id="btnSound" style="flex: 1; min-width: 180px;">
+              <span id="soundIcon">📢</span>
+              <span id="soundText">Activar Silbato Acústico</span>
+            </button>
+            <button class="btn-secondary" id="btnStrobe" style="flex: 1; min-width: 180px;">
+              <span>⚡</span>
+              <span id="strobeText">Baliza Visual de Pantalla</span>
+            </button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Sub-Tool: Tarjeta Familiar -->
+      <details>
+        <summary id="cardGenTitle">💳 Tarjeta de Emergencia Familiar (PNG)</summary>
+        <div style="padding-top: 12px;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;" id="cardGenSubtitle">
+            Genera una tarjeta de contacto de emergencia para guardar en la galería de fotos de tu teléfono sin internet.
+          </p>
+          <div class="form-group">
+            <label id="lblCardName">Nombre Completo y Documento:</label>
+            <input type="text" class="form-input" id="cardName" placeholder="Ej: Fabio Torres - ID: 12345678">
+          </div>
+          <div class="form-group">
+            <label id="lblCardAssembly">Punto de Encuentro Familiar:</label>
+            <input type="text" class="form-input" id="cardAssembly" placeholder="Ej: Parque Principal o Cancha del Barrio">
+          </div>
+          <div class="form-group">
+            <label id="lblCardPhone">Contacto Telefónico Fuera de la Ciudad:</label>
+            <input type="text" class="form-input" id="cardPhone" placeholder="Ej: +57 300 000 0000 (Familiar fuera de zona)">
+          </div>
+          <div class="form-group">
+            <label id="lblCardMed">Datos Médicos / Tipo de Sangre / Alergias:</label>
+            <input type="text" class="form-input" id="cardMed" placeholder="Ej: O+, Alérgico a Penicilina, Insulina">
+          </div>
+          <button class="btn-action" id="btnGenerateCard">Descargar Tarjeta en Imagen PNG</button>
+          <canvas id="cardCanvas" width="800" height="450" style="display: none;"></canvas>
+        </div>
+      </details>
+
+      <!-- Sub-Tool: Mochila 72 Horas -->
+      <details>
+        <summary id="backpackTitle">🎒 Mochila de las 72 Horas (Checklist)</summary>
+        <div style="padding-top: 12px;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;" id="backpackSubtitle">
+            Prepara con calma los elementos esenciales de tu hogar. Tu progreso se guarda automáticamente en el teléfono.
+          </p>
+          <div id="checklistContainer"></div>
+        </div>
+      </details>
+
+      <!-- Sub-Tool: Guía del Hogar -->
+      <details>
+        <summary id="triageQuickTitle">🏡 Cuidado del Hogar: Guía Serena de Grietas (ATC-20)</summary>
+        <div style="padding-top: 10px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+          <p style="margin-bottom: 8px;">Aprende a diferenciar las fisuras con tranquilidad:</p>
+          <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+            <li><strong>🟢 Fisuras Superficiales (&lt; 2 mm):</strong> Solo pintura, yeso o estuco. No afectan la seguridad de tu hogar. Puedes estar tranquilo.</li>
+            <li><strong>🟡 Grietas en Mampostería (2-5 mm):</strong> Daño no estructural en tabiques divisorios. Evita dormir cerca de paredes afectadas hasta una revisión.</li>
+            <li><strong>🔴 Grietas Diagonales en 'X' cruzando columnas de concreto:</strong> Por precaución y serenidad, es mejor salir con tu familia a un espacio abierto.</li>
+          </ul>
+        </div>
+      </details>
     </section>
 
   </main>
 
   <script>
     // ==========================================
-    // I18N STRINGS
+    // I18N STRINGS (WARM, CALM & TRUST-CENTERED)
     // ==========================================
     let currentLang = 'es';
 
@@ -526,40 +629,46 @@
       es: {
         themeBtnGray: "🏛️ Blanco Grisáceo",
         themeBtnDark: "🌙 Modo Oscuro",
-        radarTitle: "📍 Radar Sísmico por Geolocalización (GPS)",
-        radarSubtitle: "Las alertas de Google suelen llegar después del sismo por retrasos de servidores. Este radar calcula en tu navegador el tiempo de viaje de la onda destructiva S (3.5 km/s) para avisarte segundos antes.",
-        physicsTitle: "🔬 Física de la Alerta Temprana:",
-        physicsDesc: "La onda primaria (P) viaja a ~6 km/s y la onda destructiva secundaria (S) a ~3.5 km/s. Por cada 100 km de distancia al epicentro, tienes 12 segundos de ventaja (Δt = Distancia × 0.12s) para ponerte a salvo.",
-        btnGetLoc: "📍 Obtener mi Ubicación y Activar Radar",
-        btnDemo: "🧪 Probar Alerta (Demo)",
-        sentinelTitle: "🔬 Modo Centinela (Detector de Onda P - 0ms Latencia)",
-        sentinelSubtitle: "Convierte tu teléfono en un sismógrafo digital. Colócalo sobre una mesa firme o mesita de noche. Al detectar la micro-vibración vertical de la Onda P con el acelerómetro, disparará una sirena de forma instantánea y local, ganándote entre 5 y 25 segundos críticos.",
-        sentinelBtnStart: "ACTIVAR MODO CENTINELA (EN MESA / NOCHE)",
-        sentinelBtnStop: "DESACTIVAR MODO CENTINELA",
-        beaconTitle: "🔊 Baliza de Rescate Acústica y Visual (SOS)",
-        beaconSubtitle: "Emite una señal acústica penetrante de 3.500 Hz en código Morse (S-O-S) y destellos de pantalla para guiar a rescatistas sin agotar tu voz.",
-        soundStart: "ACTIVAR SILBATO SOS ACÚSTICO (3.5 kHz)",
-        soundStop: "DETENER SILBATO SOS (SILENCIO)",
-        strobeStart: "ACTIVAR BALIZA ESTROBOSCÓPICA (PANTALLA)",
-        strobeStop: "DETENER BALIZA ESTROBOSCÓPICA",
-        papTitle: "🫁 Regulación Inmediata del Pánico (Primeros Auxilios)",
-        papSubtitle: "Suspiro Cíclico para frenar la taquicardia y desescalar el sistema simpático en 60 segundos.",
-        pacerReady: "Listo para iniciar",
+        headerBadge: "Protección en Calma",
+        shieldTitle: "Todo en Orden: Tu Entorno Está en Calma",
+        shieldDesc: "Monitoreando la actividad sísmica en silencio con datos de la Red Global. No se registran alertas cercanas a tu ubicación. Estás en un espacio seguro diseñado para acompañarte con serenidad y ciencia.",
+        papTitle: "🫁 Pausa de Serenidad (60 Segundos)",
+        papSubtitle: "Si las noticias o los sismos recientes te generan angustia o taquicardia, tómate un minuto para activar el freno natural de tu sistema nervioso (Suspiro Cíclico 4-4-7).",
+        pacerReady: "Listo para comenzar",
         pacerInhale: "INHALA POR LA NARIZ (4s)",
         pacerHold: "RETÉN EL AIRE (4s)",
-        pacerExhale: "EXHALA LENTAMENTE (7s)",
-        btnBreathing: "Iniciar Ciclo Vagal (4-4-7)",
-        groundingTitle: "Enraizamiento Sensorial Rápido (5-4-3-2-1):",
-        groundingText: "Mira a tu alrededor: Nombra 5 cosas que ves, toca 4 cosas firmes, escucha 3 sonidos, identifica 2 olores y recuerda 1 motivo de esperanza.",
-        cardGenTitle: "💳 Tarjeta Familiar de Emergencia (Sin Conexión)",
-        cardGenSubtitle: "Ingresa tus datos clave y genera una tarjeta en imagen PNG para guardar en la galería de tu celular sin internet.",
+        pacerExhale: "EXHALA CON SERENIDAD (7s)",
+        btnBreathing: "Iniciar Respiración de Calma",
+        groundingSummary: "🧘 Técnica de Enraizamiento Sensorial (5-4-3-2-1)",
+        groundingBody: "Mira a tu alrededor con serenidad: Nombra 5 cosas que ves, toca 4 cosas firmes con tus manos, identifica 3 sonidos reales, percibe 2 olores y evoca 1 recuerdo que te transmita gratitud y afecto.",
+        radarTitle: "📍 Radar Sísmico Protector (GPS)",
+        radarSubtitle: "Calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote segundos antes del temblor fuerte.",
+        btnGetLoc: "📍 Conectar mi Ubicación Protectora",
+        btnDemo: "🧪 Probar Demostración",
+        physicsSummary: "🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)",
+        physicsBody: "La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. Por cada 100 km de distancia al epicentro, dispones de 12 segundos de ventaja matemática (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.",
+        sentinelTitle: "🌙 Centinela Nocturno (Detector de Mesa)",
+        sentinelSubtitle: "Para que duermas con tranquilidad: coloca tu celular plano sobre la mesa o mesita de noche. Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.",
+        sentinelBtnStart: "🛡️ Activar Centinela Nocturno",
+        sentinelBtnStop: "⏹️ Desactivar Centinela Nocturno",
+        toolsTitle: "🎒 Botiquín Digital de Respaldo",
+        toolsSubtitle: "Herramientas organizadas y discretas para cuidar a tu familia en caso de que alguna vez las necesites.",
+        sosWhistleSummary: "🔊 Silbato Acústico de Rescate (3.500 Hz Morse)",
+        whistleDesc: "Emite un tono puro continuo en código Morse (S-O-S) calibrado a la frecuencia de resonancia del oído humano, para pedir auxilio en la oscuridad o bajo escombros sin agotar tu voz.",
+        soundStart: "Activar Silbato Acústico",
+        soundStop: "Silenciar Silbato",
+        strobeStart: "Baliza Visual de Pantalla",
+        strobeStop: "Detener Baliza Visual",
+        cardGenTitle: "💳 Tarjeta de Emergencia Familiar (PNG)",
+        cardGenSubtitle: "Genera una tarjeta de contacto de emergencia para guardar en la galería de fotos de tu teléfono sin internet.",
         lblCardName: "Nombre Completo y Documento:",
         lblCardAssembly: "Punto de Encuentro Familiar:",
         lblCardPhone: "Contacto Telefónico Fuera de la Ciudad:",
-        lblCardMed: "Tipo de Sangre y Alergias / Medicinas Crónicas:",
-        btnGenCard: "Generar y Descargar Tarjeta PNG",
-        backpackTitle: "🎒 Mochila de las 72 Horas (Guardado Offline)",
-        backpackSubtitle: "Marca los elementos que ya tienes empacados. Tu progreso se guarda automáticamente en el dispositivo.",
+        lblCardMed: "Datos Médicos / Tipo de Sangre / Alergias:",
+        btnGenCard: "Descargar Tarjeta en Imagen PNG",
+        backpackTitle: "🎒 Mochila de las 72 Horas (Checklist)",
+        backpackSubtitle: "Prepara con calma los elementos esenciales de tu hogar. Tu progreso se guarda automáticamente en el teléfono.",
+        triageQuickTitle: "🏡 Cuidado del Hogar: Guía Serena de Grietas (ATC-20)",
         groups: { water: "Agua y Alimentos", tools: "Herramientas y Comunicación", meds: "Salud y Primeros Auxilios", docs: "Documentos y Valores" },
         items: [
           { id: "w1", group: "water", text: "4 litros de agua embotellada por persona (ración para 72h)" },
@@ -580,40 +689,46 @@
       en: {
         themeBtnGray: "🏛️ Grayish White",
         themeBtnDark: "🌙 Dark Mode",
-        radarTitle: "📍 Geolocation Seismic Radar (GPS Early Warning)",
-        radarSubtitle: "Google alerts often arrive after the shaking due to cloud latency. This radar calculates in your browser the travel time of the destructive S-wave (3.5 km/s) to warn you seconds ahead.",
-        physicsTitle: "🔬 Physics of Early Earthquake Warning:",
-        physicsDesc: "Primary (P) waves travel at ~6 km/s and destructive Secondary (S) waves at ~3.5 km/s. For every 100 km of distance from the epicenter, you gain a 12-second lead window (Δt = Distance × 0.12s) to drop, cover and hold on.",
-        btnGetLoc: "📍 Get My Location & Activate Radar",
-        btnDemo: "🧪 Test Alert (Demo)",
-        sentinelTitle: "🔬 Sentinel Mode (In-Device P-Wave Detector - 0ms Latency)",
-        sentinelSubtitle: "Turns your phone into a digital micro-seismograph. Place on a solid desk or nightstand. Upon detecting vertical P-wave micro-vibrations with the accelerometer, it sounds an instant siren, giving you 5 to 25 critical seconds.",
-        sentinelBtnStart: "ACTIVATE SENTINEL MODE (ON DESK / NIGHT)",
-        sentinelBtnStop: "DEACTIVATE SENTINEL MODE",
-        beaconTitle: "🔊 Acoustic & Visual Rescue Beacon (SOS)",
-        beaconSubtitle: "Emits a penetrating 3,500 Hz acoustic Morse code signal (S-O-S) and high-visibility screen strobe to guide rescuers without vocal exhaustion.",
-        soundStart: "ACTIVATE ACOUSTIC SOS WHISTLE (3.5 kHz)",
-        soundStop: "STOP ACOUSTIC SOS WHISTLE",
-        strobeStart: "ACTIVATE SCREEN DISTRESS STROBE",
-        strobeStop: "STOP SCREEN DISTRESS STROBE",
-        papTitle: "🫁 Rapid Panic De-escalation (Psychological First Aid)",
-        papSubtitle: "Cyclic Sighing to suppress tachycardia and reset the sympathetic nervous system within 60 seconds.",
-        pacerReady: "Ready to start",
+        headerBadge: "Calm Protection",
+        shieldTitle: "All is Well: Your Environment is in Calm",
+        shieldDesc: "Silently monitoring global seismic feeds. No active alerts recorded near your location. You are in a safe, science-backed sanctuary designed to support your family with composure.",
+        papTitle: "🫁 60-Second Serenity Pause",
+        papSubtitle: "If news of recent quakes triggers anxiety or heart racing, take 60 seconds to reset your nervous system through cyclic sighing (4-4-7 breath).",
+        pacerReady: "Ready to begin",
         pacerInhale: "INHALE THROUGH NOSE (4s)",
-        pacerHold: "HOLD BREATH (4s)",
-        pacerExhale: "EXHALE SLOWLY (7s)",
-        btnBreathing: "Start Vagal Cycle (4-4-7)",
-        groundingTitle: "Rapid Sensory Grounding (5-4-3-2-1):",
-        groundingText: "Look around: Name 5 things you see, touch 4 solid objects, identify 3 sounds, detect 2 smells, recall 1 positive memory.",
-        cardGenTitle: "💳 Offline Emergency Family ID Card",
-        cardGenSubtitle: "Fill in vital emergency information and render a downloadable high-res PNG image directly on your phone.",
+        pacerHold: "HOLD GENTLY (4s)",
+        pacerExhale: "EXHALE WITH EASE (7s)",
+        btnBreathing: "Begin Calm Breathing",
+        groundingSummary: "🧘 Sensory Grounding Technique (5-4-3-2-1)",
+        groundingBody: "Look around with composure: Name 5 things you see, touch 4 solid objects, identify 3 real sounds, sense 2 subtle smells, recall 1 memory that fills you with gratitude.",
+        radarTitle: "📍 Protective Seismic Radar (GPS)",
+        radarSubtitle: "Calculates in advance the arrival time of the secondary shear wave (S) directly on your device, providing seconds of warning before strong shaking.",
+        btnGetLoc: "📍 Connect Protective Location",
+        btnDemo: "🧪 Test Simulation Demo",
+        physicsSummary: "🔬 How does early warning work? (Scientific Explanation)",
+        physicsBody: "Primary (P) waves are fast (~6 km/s) but gentle. Secondary (S) waves are slower (~3.5 km/s) and cause rolling displacement. For every 100 km of distance to the epicenter, you gain 12 seconds of mathematical advantage (Δt = Distance × 0.12s) to reach a secure spot before motion begins.",
+        sentinelTitle: "🌙 Nighttime Sentinel (Desk Detector)",
+        sentinelSubtitle: "For peaceful sleep: place your phone flat on a nightstand. If its sensor detects the initial vertical P-wave (0ms network delay), it alerts you immediately to gain vital lead time before the strong wave.",
+        sentinelBtnStart: "🛡️ Activate Night Sentinel",
+        sentinelBtnStop: "⏹️ Deactivate Night Sentinel",
+        toolsTitle: "🎒 Digital Family Safety Kit",
+        toolsSubtitle: "Discreet and organized tools to care for your family whenever you need them.",
+        sosWhistleSummary: "🔊 Acoustic Rescue Whistle (3,500 Hz Morse)",
+        whistleDesc: "Emits a pure continuous Morse code tone (S-O-S) tuned to human ear canal resonance, allowing you to signal rescuers without vocal strain.",
+        soundStart: "Activate Acoustic Whistle",
+        soundStop: "Silence Whistle",
+        strobeStart: "Visual Screen Distress Beacon",
+        strobeStop: "Stop Visual Beacon",
+        cardGenTitle: "💳 Emergency Family ID Card (PNG)",
+        cardGenSubtitle: "Renders an emergency contact badge to save in your phone photo gallery without internet.",
         lblCardName: "Full Name & Official ID:",
-        lblCardAssembly: "Family Designated Assembly Meeting Point:",
-        lblCardPhone: "Out-of-Town Emergency Phone Contact:",
-        lblCardMed: "Blood Type, Allergies & Chronic Medications:",
-        btnGenCard: "Generate & Download Card PNG",
-        backpackTitle: "🎒 72-Hour Survival Backpack (Saved Offline)",
-        backpackSubtitle: "Check off packed items. Your checklist status is saved permanently in your browser storage.",
+        lblCardAssembly: "Family Designated Meeting Point:",
+        lblCardPhone: "Out-of-Town Emergency Contact:",
+        lblCardMed: "Medical Notes / Blood Type / Allergies:",
+        btnGenCard: "Download Card PNG Image",
+        backpackTitle: "🎒 72-Hour Survival Backpack (Checklist)",
+        backpackSubtitle: "Calmly prepare household essentials. Your checklist progress saves automatically in your phone.",
+        triageQuickTitle: "🏡 Home Care: Serene Crack Triage Guide (ATC-20)",
         groups: { water: "Water & Sustenance", tools: "Tools & Communication", meds: "Medical & First Aid", docs: "Vital Documents & Cash" },
         items: [
           { id: "w1", group: "water", text: "4 Liters (1 Gallon) of bottled water per person (72h supply)" },
@@ -634,7 +749,7 @@
     };
 
     // ==========================================
-    // AUDIO ENGINE: SOS WHISTLE & URGENT SIREN
+    // AUDIO ENGINE (SOS & PROTECTIVE TONE)
     // ==========================================
     let audioCtx = null;
     let isBeeping = false;
@@ -659,8 +774,8 @@
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
           gain.gain.setValueAtTime(0, audioCtx.currentTime);
-          gain.gain.linearRampToValueAtTime(0.85, audioCtx.currentTime + 0.01);
-          gain.gain.setValueAtTime(0.85, audioCtx.currentTime + (durationMs / 1000) - 0.01);
+          gain.gain.linearRampToValueAtTime(0.8, audioCtx.currentTime + 0.01);
+          gain.gain.setValueAtTime(0.8, audioCtx.currentTime + (durationMs / 1000) - 0.01);
           gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + (durationMs / 1000));
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -673,7 +788,6 @@
 
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-    // High-urgency alternating 2-tone alarm siren
     function triggerEmergencySiren() {
       initAudio();
       if (isSirenPlaying) return;
@@ -688,7 +802,7 @@
           const gain = audioCtx.createGain();
           osc.type = 'sawtooth';
           osc.frequency.value = freqToggle ? 1200 : 750;
-          gain.gain.value = 0.9;
+          gain.gain.value = 0.85;
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start();
@@ -703,7 +817,6 @@
       clearInterval(sirenInterval);
     }
 
-    // 3,500 Hz Morse SOS
     async function runMorseSosLoop() {
       const FREQ = 3500;
       const DIT = 120, DAH = 360, INTRA = 100, INTER_CHAR = 300, INTER_WORD = 1000;
@@ -723,11 +836,9 @@
       initAudio();
       isBeeping = !isBeeping;
       if (isBeeping) {
-        btnSound.classList.add('active');
         soundText.textContent = STRINGS[currentLang].soundStop;
         runMorseSosLoop();
       } else {
-        btnSound.classList.remove('active');
         soundText.textContent = STRINGS[currentLang].soundStart;
       }
     });
@@ -737,7 +848,6 @@
     // ==========================================
     let userLat = parseFloat(localStorage.getItem('qm_user_lat') || '3.4516');
     let userLon = parseFloat(localStorage.getItem('qm_user_lon') || '-76.5320');
-    let hasUserLoc = localStorage.getItem('qm_user_lat') !== null;
     let radarInterval = null;
     let lastAlertedId = null;
 
@@ -764,20 +874,19 @@
         alert("Tu navegador no soporta geolocalización.");
         return;
       }
-      locationInfo.textContent = "Obteniendo coordenadas GPS...";
+      locationInfo.textContent = "Conectando coordenadas con serenidad...";
       navigator.geolocation.getCurrentPosition((pos) => {
         userLat = pos.coords.latitude;
         userLon = pos.coords.longitude;
-        hasUserLoc = true;
         localStorage.setItem('qm_user_lat', userLat);
         localStorage.setItem('qm_user_lon', userLon);
-        locationInfo.textContent = `📍 Coordenadas: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`;
-        radarBadge.textContent = "🟢 Radar Activo";
+        locationInfo.textContent = `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`;
+        radarBadge.textContent = "🟢 Monitoreo Activo";
         radarBadge.className = "badge-status badge-green";
         checkLiveQuakesFeed();
         if (!radarInterval) radarInterval = setInterval(checkLiveQuakesFeed, 12000);
       }, (err) => {
-        locationInfo.textContent = `⚠️ Error GPS (${err.message}). Usando referencia Cali/Valle.`;
+        locationInfo.textContent = `📍 Ubicación de referencia: Cali / Valle del Cauca.`;
       });
     });
 
@@ -785,7 +894,7 @@
       try {
         const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson");
         const data = await res.json();
-        lastFeedCheck.textContent = `Última comprobación: ${new Date().toLocaleTimeString()} (Sismos en la última hora: ${data.features.length})`;
+        lastFeedCheck.textContent = `Última revisión: ${new Date().toLocaleTimeString()} • ${data.features.length} eventos monitoreados en la Tierra`;
 
         for (const feat of data.features) {
           const props = feat.properties;
@@ -793,13 +902,11 @@
           const qLat = coords[1];
           const qLon = coords[0];
           const mag = props.mag;
-          const originTime = props.time; // ms epoch
+          const originTime = props.time;
           const distKm = haversine(userLat, userLon, qLat, qLon);
 
-          // If earthquake is M >= 4.0 and within 400 km
           if (mag >= 4.0 && distKm <= 400 && feat.id !== lastAlertedId) {
             const elapsedSec = (Date.now() - originTime) / 1000;
-            // S-wave travel time: dist / 3.5 km/s
             const sWaveTravelTime = distKm / 3.5;
             const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
 
@@ -811,7 +918,7 @@
           }
         }
       } catch (e) {
-        console.log("Feed check offline or rate limited:", e);
+        console.log("Feed check status:", e);
       }
     }
 
@@ -829,7 +936,7 @@
         if (rem > 0) {
           countdownSec.textContent = `${rem}s`;
         } else {
-          countdownSec.textContent = `¡IMPACTO SÍSMICO!`;
+          countdownSec.textContent = `¡ONDA EN ZONA!`;
           clearInterval(alertCountdownTimer);
         }
       }, 1000);
@@ -842,7 +949,7 @@
     });
 
     btnSimulateAlert.addEventListener('click', () => {
-      fireEarlyWarning("DEMO Sismo Magnitud 6.8 - Falla Regional", 95, 6.8, 14);
+      fireEarlyWarning("DEMO Sismo Regional Magnitud 6.2", 110, 6.2, 16);
     });
 
     // ==========================================
@@ -852,7 +959,6 @@
     let seismoHistory = new Array(80).fill(0);
     let baselineMag = 9.81;
     const btnSentinel = document.getElementById('btnSentinel');
-    const sentinelBtnText = document.getElementById('sentinelBtnText');
     const sentinelBadge = document.getElementById('sentinelBadge');
     const seismoCanvas = document.getElementById('seismoCanvas');
     const seismoValue = document.getElementById('seismoValue');
@@ -861,27 +967,26 @@
     const sCtx = seismoCanvas.getContext('2d');
 
     function drawSeismograph() {
-      sCtx.fillStyle = '#0f172a';
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      sCtx.fillStyle = isDark ? '#0b1120' : '#f8fafc';
       sCtx.fillRect(0, 0, seismoCanvas.width, seismoCanvas.height);
 
-      // Grid line
-      sCtx.strokeStyle = '#1e293b';
+      sCtx.strokeStyle = isDark ? '#1e293b' : '#e2e8f0';
       sCtx.beginPath();
       sCtx.moveTo(0, seismoCanvas.height / 2);
       sCtx.lineTo(seismoCanvas.width, seismoCanvas.height / 2);
       sCtx.stroke();
 
-      // Waveform
       sCtx.lineWidth = 2;
       sCtx.beginPath();
       const step = seismoCanvas.width / seismoHistory.length;
       for (let i = 0; i < seismoHistory.length; i++) {
         const val = seismoHistory[i];
-        const y = (seismoCanvas.height / 2) - (val * 25);
+        const y = (seismoCanvas.height / 2) - (val * 24);
         if (i === 0) sCtx.moveTo(0, y);
         else sCtx.lineTo(i * step, y);
       }
-      sCtx.strokeStyle = isSentinelActive ? '#22c55e' : '#64748b';
+      sCtx.strokeStyle = isSentinelActive ? '#10b981' : '#94a3b8';
       sCtx.stroke();
     }
     drawSeismograph();
@@ -896,7 +1001,6 @@
       const z = acc.z || 9.81;
       const total = Math.sqrt(x*x + y*y + z*z);
 
-      // Smooth baseline gravity calibration
       baselineMag = (baselineMag * 0.95) + (total * 0.05);
       const delta = Math.abs(total - baselineMag);
 
@@ -908,10 +1012,9 @@
 
       const threshold = parseFloat(sentinelSens.value);
       if (delta > threshold) {
-        // P-wave anomalous vibration detected locally!
         triggerEmergencySiren();
         alertBanner.style.display = 'block';
-        alertDetails.textContent = `🔬 ¡ONDAS PRIMARIAS (P) DETECTADAS EN ACELERÓMETRO LOCAL!`;
+        alertDetails.textContent = `🌙 ¡MICRO-VIBRACIÓN INICIAL (ONDA P) DETECTADA EN MESA!`;
         countdownSec.textContent = `¡ALERTA!`;
       }
     }
@@ -919,28 +1022,25 @@
     btnSentinel.addEventListener('click', async () => {
       initAudio();
       if (!isSentinelActive) {
-        // Request iOS permissions if needed
         if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
           try {
             const perm = await DeviceMotionEvent.requestPermission();
             if (perm !== 'granted') {
-              alert("Se requiere permiso de acelerómetro para el Centinela Sísmico.");
+              alert("Permiso de acelerómetro necesario para el Centinela.");
               return;
             }
           } catch(e) {}
         }
         window.addEventListener('devicemotion', handleDeviceMotion);
         isSentinelActive = true;
-        btnSentinel.classList.add('active');
-        sentinelBtnText.textContent = STRINGS[currentLang].sentinelBtnStop;
+        btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStop;
         sentinelBadge.textContent = "🟢 Centinela Vigilando";
         sentinelBadge.className = "badge-status badge-green";
       } else {
         window.removeEventListener('devicemotion', handleDeviceMotion);
         isSentinelActive = false;
-        btnSentinel.classList.remove('active');
-        sentinelBtnText.textContent = STRINGS[currentLang].sentinelBtnStart;
-        sentinelBadge.textContent = "Inactivo";
+        btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStart;
+        sentinelBadge.textContent = "Descanso";
         sentinelBadge.className = "badge-status badge-yellow";
         drawSeismograph();
       }
@@ -949,14 +1049,14 @@
     btnTestSiren.addEventListener('click', () => {
       if (isSirenPlaying) {
         stopEmergencySiren();
-        btnTestSiren.textContent = "🔊 Probar Sirena de Alarma";
+        btnTestSiren.textContent = "🔊 Probar Tono de Alarma";
       } else {
         triggerEmergencySiren();
-        btnTestSiren.textContent = "⏹️ Detener Sirena";
+        btnTestSiren.textContent = "⏹️ Detener Tono";
         setTimeout(() => {
           stopEmergencySiren();
-          btnTestSiren.textContent = "🔊 Probar Sirena de Alarma";
-        }, 3000);
+          btnTestSiren.textContent = "🔊 Probar Tono de Alarma";
+        }, 2800);
       }
     });
 
@@ -972,17 +1072,15 @@
       isStrobing = !isStrobing;
       if (isStrobing) {
         strobeOverlay.style.display = 'block';
-        btnStrobe.classList.add('active');
         strobeText.textContent = STRINGS[currentLang].strobeStop;
         let flip = false;
         strobeInterval = setInterval(() => {
-          strobeOverlay.style.backgroundColor = flip ? '#ffffff' : '#dc2626';
+          strobeOverlay.style.backgroundColor = flip ? '#ffffff' : '#0284c7';
           flip = !flip;
-        }, 120);
+        }, 130);
       } else {
         clearInterval(strobeInterval);
         strobeOverlay.style.display = 'none';
-        btnStrobe.classList.remove('active');
         strobeText.textContent = STRINGS[currentLang].strobeStart;
       }
     }
@@ -990,7 +1088,7 @@
     strobeOverlay.addEventListener('click', toggleStrobe);
 
     // ==========================================
-    // AUTONOMIC VAGAL PACER (4-4-7)
+    // AUTONOMIC VAGAL PACER (4-4-7 CYCLIC SIGHING)
     // ==========================================
     let isPacing = false;
     const pacerBubble = document.getElementById('pacerBubble');
@@ -1087,56 +1185,56 @@
     const btnGenerateCard = document.getElementById('btnGenerateCard');
     const cardCanvas = document.getElementById('cardCanvas');
     btnGenerateCard.addEventListener('click', () => {
-      const name = document.getElementById('cardName').value || 'TITULAR NO ESPECIFICADO';
-      const assembly = document.getElementById('cardAssembly').value || 'PUNTO PENDIENTE';
+      const name = document.getElementById('cardName').value || 'TITULAR FAMILIAR';
+      const assembly = document.getElementById('cardAssembly').value || 'PUNTO DE ENCUENTRO SEGURO';
       const phone = document.getElementById('cardPhone').value || 'NO REGISTRADO';
       const med = document.getElementById('cardMed').value || 'SIN DATOS MÉDICOS';
       const ctx = cardCanvas.getContext('2d');
 
       const grad = ctx.createLinearGradient(0, 0, 800, 450);
-      grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#1e293b');
+      grad.addColorStop(0, '#f8fafc'); grad.addColorStop(1, '#e2e8f0');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 800, 450);
 
-      ctx.fillStyle = '#dc2626';
+      ctx.fillStyle = '#0284c7';
       ctx.fillRect(0, 0, 800, 70);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 24px Arial, sans-serif';
-      ctx.fillText('TARJETA DE EMERGENCIA SÍSMICA — QUAKEMIND GLOBAL', 30, 45);
+      ctx.fillText('FICHA FAMILIAR DE PROTECCIÓN SÍSMICA — QUAKEMIND', 30, 45);
 
-      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#0369a1';
       ctx.fillText('NOMBRE COMPLETO Y DOCUMENTO:', 40, 115);
-      ctx.font = '22px Arial, sans-serif'; ctx.fillStyle = '#ffffff';
+      ctx.font = '22px Arial, sans-serif'; ctx.fillStyle = '#0f172a';
       ctx.fillText(name, 40, 145);
 
-      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#0369a1';
       ctx.fillText('PUNTO DE ENCUENTRO FAMILIAR:', 40, 195);
-      ctx.font = '20px Arial, sans-serif'; ctx.fillStyle = '#f8fafc';
+      ctx.font = '20px Arial, sans-serif'; ctx.fillStyle = '#1e293b';
       ctx.fillText(assembly, 40, 225);
 
-      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#38bdf8';
-      ctx.fillText('CONTACTO TELEFÓNICO FUERA DE LA CIUDAD:', 40, 275);
-      ctx.font = '20px Arial, sans-serif'; ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#0369a1';
+      ctx.fillText('CONTACTO FUERA DE LA ZONA:', 40, 275);
+      ctx.font = '20px Arial, sans-serif'; ctx.fillStyle = '#1e293b';
       ctx.fillText(phone, 40, 305);
 
-      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#38bdf8';
-      ctx.fillText('DATOS MÉDICOS / TIPO DE SANGRE / ALERGIAS:', 40, 355);
-      ctx.font = '18px Arial, sans-serif'; ctx.fillStyle = '#fcd34d';
+      ctx.font = 'bold 15px Arial, sans-serif'; ctx.fillStyle = '#0369a1';
+      ctx.fillText('DATOS MÉDICOS / GRUPO SANGUÍNEO / ALERGIAS:', 40, 355);
+      ctx.font = '18px Arial, sans-serif'; ctx.fillStyle = '#b45309';
       ctx.fillText(med, 40, 385);
 
       ctx.fillStyle = '#64748b'; ctx.font = '13px Arial, sans-serif';
-      ctx.fillText('Generado sin internet por QuakeMind Global • Protocolo Human-Centric Disaster Response', 40, 430);
+      ctx.fillText('Generado sin internet por QuakeMind Global • Protocolo de Calma y Protección Familiar', 40, 430);
 
       cardCanvas.style.display = 'block';
       const link = document.createElement('a');
-      link.download = `Emergencia_${name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+      link.download = `Ficha_Familiar_${name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
       link.href = cardCanvas.toDataURL('image/png');
       link.click();
     });
 
     // ==========================================
-    // THEME (BLANCO GRISÁCEO & OSCURO) & I18N
+    // THEME SWITCHER & I18N
     // ==========================================
     const langToggle = document.getElementById('langToggle');
     const themeBtn = document.getElementById('themeBtn');
@@ -1144,24 +1242,29 @@
     function applyLanguage(lang) {
       currentLang = lang;
       const d = STRINGS[lang];
-      document.getElementById('radarTitle').textContent = d.radarTitle;
-      document.getElementById('radarSubtitle').innerHTML = d.radarSubtitle;
-      document.getElementById('physicsTitle').textContent = d.physicsTitle;
-      document.getElementById('physicsDesc').innerHTML = d.physicsDesc;
-      btnGetLocation.textContent = d.btnGetLoc;
-      btnSimulateAlert.textContent = d.btnDemo;
-      document.getElementById('sentinelTitle').textContent = d.sentinelTitle;
-      document.getElementById('sentinelSubtitle').innerHTML = d.sentinelSubtitle;
-      sentinelBtnText.textContent = isSentinelActive ? d.sentinelBtnStop : d.sentinelBtnStart;
-      document.getElementById('beaconTitle').textContent = d.beaconTitle;
-      document.getElementById('beaconSubtitle').textContent = d.beaconSubtitle;
-      soundText.textContent = isBeeping ? d.soundStop : d.soundStart;
-      strobeText.textContent = isStrobing ? d.strobeStop : d.strobeStart;
+      document.getElementById('headerBadge').textContent = d.headerBadge;
+      document.getElementById('shieldStatusTitle').textContent = d.shieldTitle;
+      document.getElementById('shieldStatusDesc').textContent = d.shieldDesc;
       document.getElementById('papTitle').textContent = d.papTitle;
       document.getElementById('papSubtitle').textContent = d.papSubtitle;
       btnStartBreathing.textContent = d.btnBreathing;
-      document.getElementById('groundingTitle').textContent = d.groundingTitle;
-      document.getElementById('groundingText').innerHTML = d.groundingText;
+      document.getElementById('groundingSummary').textContent = d.groundingSummary;
+      document.getElementById('groundingBody').innerHTML = d.groundingBody;
+      document.getElementById('radarTitle').textContent = d.radarTitle;
+      document.getElementById('radarSubtitle').innerHTML = d.radarSubtitle;
+      btnGetLocation.textContent = d.btnGetLoc;
+      btnSimulateAlert.textContent = d.btnDemo;
+      document.getElementById('physicsSummary').textContent = d.physicsSummary;
+      document.getElementById('physicsBody').innerHTML = d.physicsBody;
+      document.getElementById('sentinelTitle').textContent = d.sentinelTitle;
+      document.getElementById('sentinelSubtitle').innerHTML = d.sentinelSubtitle;
+      btnSentinel.textContent = isSentinelActive ? d.sentinelBtnStop : d.sentinelBtnStart;
+      document.getElementById('toolsTitle').textContent = d.toolsTitle;
+      document.getElementById('toolsSubtitle').textContent = d.toolsSubtitle;
+      document.getElementById('sosWhistleSummary').textContent = d.sosWhistleSummary;
+      document.getElementById('whistleDesc').textContent = d.whistleDesc;
+      soundText.textContent = isBeeping ? d.soundStop : d.soundStart;
+      strobeText.textContent = isStrobing ? d.strobeStop : d.strobeStart;
       document.getElementById('cardGenTitle').textContent = d.cardGenTitle;
       document.getElementById('cardGenSubtitle').textContent = d.cardGenSubtitle;
       document.getElementById('lblCardName').textContent = d.lblCardName;
@@ -1171,6 +1274,7 @@
       btnGenerateCard.textContent = d.btnGenCard;
       document.getElementById('backpackTitle').textContent = d.backpackTitle;
       document.getElementById('backpackSubtitle').textContent = d.backpackSubtitle;
+      document.getElementById('triageQuickTitle').textContent = d.triageQuickTitle;
       updateThemeButtonLabel();
       renderChecklist();
     }
@@ -1186,30 +1290,27 @@
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('qm_theme', newTheme);
       updateThemeButtonLabel();
+      drawSeismograph();
     });
 
     langToggle.addEventListener('click', () => {
       applyLanguage(currentLang === 'es' ? 'en' : 'es');
     });
 
-    // Saved theme preference
     const savedTheme = localStorage.getItem('qm_theme') || 'grayish-white';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // Register Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
       });
     }
 
-    // Initialize UI
     applyLanguage('es');
 
-    // Auto-check GPS if previously granted
     if (localStorage.getItem('qm_user_lat')) {
-      locationInfo.textContent = `📍 Coordenadas guardadas: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`;
-      radarBadge.textContent = "🟢 Radar Activo";
+      locationInfo.textContent = `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`;
+      radarBadge.textContent = "🟢 Monitoreo Activo";
       radarBadge.className = "badge-status badge-green";
       checkLiveQuakesFeed();
       radarInterval = setInterval(checkLiveQuakesFeed, 12000);
