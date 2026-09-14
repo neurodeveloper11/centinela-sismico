@@ -1,5 +1,5 @@
 // Service Worker for QuakeMind Global Offline Survival PWA
-const CACHE_NAME = 'quakemind-cache-v2';
+const CACHE_NAME = 'quakemind-cache-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

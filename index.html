@@ -590,6 +590,17 @@
       <button class="btn-install" id="btnInstallApp">Instalar App</button>
     </div>
 
+    <!-- OFFLINE PSYCHOLOGICAL SAFETY BANNER -->
+    <div id="offlineStatusBanner" style="display: none; background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.88rem; line-height: 1.4; align-items: center; gap: 10px;">
+      <span style="font-size: 1.3rem;">⚠️</span>
+      <div>
+        <strong id="offlineBannerTitle">Modo Sin Conexión Activo</strong>
+        <p id="offlineBannerDesc" style="margin-top: 2px; font-size: 0.82rem; opacity: 0.95;">
+          No hay conexión a internet. El radar no puede consultar nuevos sismos en tiempo real del USGS. Conservando los últimos datos guardados en tu dispositivo.
+        </p>
+      </div>
+    </div>
+
     <!-- 1. ESCUDO DE TRANQUILIDAD Y CERTEZA (REASSURANCE SHIELD) -->
     <section class="reassurance-shield">
       <div class="pulse-indicator">🛡️</div>
@@ -710,22 +721,30 @@
           Por cada 100 km de distancia al epicentro, <strong>dispones de 12 segundos de ventaja matemática</strong> (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.
         </div>
       </details>
+
+      <div style="background: rgba(2, 132, 199, 0.06); border-left: 3px solid var(--primary); padding: 10px 12px; border-radius: 6px; margin-top: 12px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.45;">
+        <strong id="geoTransparencyTitle" style="color: var(--text);">⚖️ Transparencia Científica:</strong>
+        <span id="geoTransparencyText">
+          La intensidad se estima matemáticamente con la relación de atenuación de Wald et al. (1999) usando distancia hipocentral 3D. Ningún celular inteligente tiene acelerómetros con calibración sísmica para medir directamente la aceleración del suelo. Margen de variación empírico: ±1 a 2 grados MMI según las condiciones geológicas locales.
+        </span>
+      </div>
     </section>
 
-    <!-- 4. CENTINELA NOCTURNO (IN-DEVICE P-WAVE SEISMOMETER) -->
+    <!-- 4. CENTINELA NOCTURNO (DETECTOR DE SACUDIDA EN REPOSO) -->
     <section class="card" style="border-top: 4px solid var(--success);">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-        <h2 class="card-title" id="sentinelTitle">🌙 Centinela Nocturno (Detector de Mesa)</h2>
+        <h2 class="card-title" id="sentinelTitle">🌙 Centinela Nocturno (Detector de Sacudida en Reposo)</h2>
         <span class="badge-status badge-yellow" id="sentinelBadge">Descanso</span>
       </div>
       <p class="card-subtitle" id="sentinelSubtitle">
-        Para que duermas con tranquilidad: coloca tu celular plano sobre la mesa o mesita de noche. 
-        Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso de servidor), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.
+        Vigía de reposo: coloca tu celular plano sobre la mesa o mesita de noche. 
+        Si la superficie sufre un movimiento físico brusco mientras descansas, emitirá una alarma acústica para despertarte oportunamente. 
+        (Nota científica: los sensores de teléfonos comerciales no son sismógrafos profesionales ni aíslan ondas P débiles lejanas; actúan como interruptor de seguridad ante sacudidas físicas directas).
       </p>
 
       <canvas id="seismoCanvas" width="700" height="80"></canvas>
       <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
-        <span>Sismógrafo de Mesa en Vivo</span>
+        <span id="seismoSensorLabel">Sensor de Aceleración en Reposo</span>
         <span id="seismoValue">Calibrando: 0.00 m/s²</span>
       </div>
 
@@ -922,10 +941,19 @@
         btnDemo: "🧪 Probar Demostración",
         physicsSummary: "🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)",
         physicsBody: "La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. Por cada 100 km de distancia al epicentro, dispones de 12 segundos de ventaja matemática (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.",
-        sentinelTitle: "🌙 Centinela Nocturno (Detector de Mesa)",
-        sentinelSubtitle: "Para que duermas con tranquilidad: coloca tu celular plano sobre la mesa o mesita de noche. Si el acelerómetro detecta la micro-vibración de la Onda P inicial (con 0ms de retraso de servidor), te alertará para darte valiosos segundos de ventaja antes del temblor fuerte.",
+        sentinelTitle: "🌙 Centinela Nocturno (Detector de Sacudida en Reposo)",
+        sentinelSubtitle: "Vigía de reposo: coloca tu celular plano sobre la mesa o mesita de noche. Si la superficie sufre un movimiento físico brusco mientras descansas, emitirá una alarma acústica para despertarte oportunamente. (Nota científica: los sensores de teléfonos comerciales no son sismógrafos profesionales ni aíslan ondas P débiles lejanas; actúan como interruptor de seguridad ante sacudidas físicas directas).",
         sentinelBtnStart: "🛡️ Activar Centinela Nocturno",
         sentinelBtnStop: "⏹️ Desactivar Centinela Nocturno",
+        sentinelAlertText: "🌙 ¡SACUDIDA MECÁNICA DETECTADA EN LA SUPERFICIE DE REPOSO!",
+        seismoSensorLabel: "Sensor de Aceleración en Reposo",
+        offlineBannerTitle: "Modo Sin Conexión Activo",
+        offlineBannerDesc: "No hay conexión a internet. El radar no puede consultar nuevos sismos en tiempo real del USGS. Conservando los últimos datos guardados en tu dispositivo.",
+        offlineShieldTitle: "Modo Sin Conexión — Monitoreo en Pausa",
+        offlineShieldDesc: "Tu dispositivo no tiene acceso a internet. No es posible verificar nuevos sismos en tiempo real con el USGS. Conservando el último registro conocido.",
+        geoTransparencyTitle: "⚖️ Transparencia Científica:",
+        geoTransparencyText: "La intensidad se estima matemáticamente con la relación de atenuación de Wald et al. (1999) usando distancia hipocentral 3D. Ningún celular inteligente tiene acelerómetros con calibración sísmica para medir directamente la aceleración del suelo. Margen de variación empírico: ±1 a 2 grados MMI según las condiciones geológicas locales.",
+        pulseBtnLoadMore: "Mostrar más sismos (+10)",
         toolsTitle: "🎒 Botiquín Digital de Respaldo",
         toolsSubtitle: "Herramientas organizadas y discretas para cuidar a tu familia en caso de que alguna vez las necesites.",
         sosWhistleSummary: "🔊 Silbato Acústico de Rescate (3.500 Hz Morse)",
@@ -1011,10 +1039,19 @@
         btnDemo: "🧪 Test Simulation Demo",
         physicsSummary: "🔬 How does early warning work? (Scientific Explanation)",
         physicsBody: "Primary (P) waves are fast (~6 km/s) but gentle. Secondary (S) waves are slower (~3.5 km/s) and cause rolling displacement. For every 100 km of distance to the epicenter, you gain 12 seconds of mathematical advantage (Δt = Distance × 0.12s) to reach a secure spot before motion begins.",
-        sentinelTitle: "🌙 Nighttime Sentinel (Desk Detector)",
-        sentinelSubtitle: "For peaceful sleep: place your phone flat on a nightstand. If its sensor detects the initial vertical P-wave (0ms network delay), it alerts you immediately to gain vital lead time before the strong wave.",
+        sentinelTitle: "🌙 Nighttime Sentinel (Resting Motion Detector)",
+        sentinelSubtitle: "Resting tripwire: place your phone flat on a nightstand. If the surface experiences sudden physical movement while you rest, it will sound an acoustic alarm to awaken you promptly. (Scientific note: smartphone sensors are not professional seismographs and cannot isolate faint distant P-waves; they act as a safety tripwire for direct physical shaking).",
         sentinelBtnStart: "🛡️ Activate Night Sentinel",
         sentinelBtnStop: "⏹️ Deactivate Night Sentinel",
+        sentinelAlertText: "🌙 MECHANICAL SHAKING DETECTED ON RESTING SURFACE!",
+        seismoSensorLabel: "Resting Motion Sensor",
+        offlineBannerTitle: "Offline Mode Active",
+        offlineBannerDesc: "No internet connection. Radar cannot fetch new real-time USGS events. Preserving last data saved on your device.",
+        offlineShieldTitle: "Offline Mode — Live Monitoring Paused",
+        offlineShieldDesc: "Your device has no internet access. Cannot verify new real-time USGS events. Preserving last known record.",
+        geoTransparencyTitle: "⚖️ Scientific Transparency:",
+        geoTransparencyText: "Intensity is estimated mathematically via Wald et al. (1999) attenuation relation using 3D hypocentral distance. No smartphone has seismically calibrated accelerometers to directly measure ground acceleration. Empirical margin of variation: ±1 to 2 MMI degrees depending on local geological site conditions.",
+        pulseBtnLoadMore: "Show more quakes (+10)",
         toolsTitle: "🎒 Digital Family Safety Kit",
         toolsSubtitle: "Discreet and organized tools to care for your family whenever you need them.",
         sosWhistleSummary: "🔊 Acoustic Rescue Whistle (3,500 Hz Morse)",
@@ -1298,11 +1335,61 @@
 
     let lastNearbyCalmEventId = null;
 
+    function updateNetworkStatus(forcedOnlineState) {
+      const isOnline = typeof forcedOnlineState === 'boolean' ? forcedOnlineState : navigator.onLine;
+      const offlineBanner = document.getElementById('offlineStatusBanner');
+      const radarBadge = document.getElementById('radarBadge');
+      const lastFeedCheck = document.getElementById('lastFeedCheck');
+      const sTitle = document.getElementById('shieldStatusTitle');
+      const sDesc = document.getElementById('shieldStatusDesc');
+      const d = STRINGS[currentLang] || STRINGS.es;
+
+      if (!isOnline) {
+        if (offlineBanner) offlineBanner.style.display = 'flex';
+        if (radarBadge) {
+          radarBadge.textContent = currentLang === 'es' ? "Modo Offline (Pausa)" : "Offline Mode (Paused)";
+          radarBadge.className = "badge-status badge-yellow";
+        }
+        if (lastFeedCheck) {
+          lastFeedCheck.textContent = currentLang === 'es'
+            ? "⚠️ Sin conexión a internet. Monitoreo en vivo detenido temporalmente."
+            : "⚠️ No internet connection. Real-time live monitoring temporarily paused.";
+        }
+        if (sTitle && sDesc) {
+          sTitle.textContent = d.offlineShieldTitle || "Modo Sin Conexión — Monitoreo en Pausa";
+          sDesc.textContent = d.offlineShieldDesc || "Tu dispositivo no tiene acceso a internet. No es posible verificar nuevos sismos en tiempo real con la red del USGS. Conservando el último registro conocido.";
+        }
+      } else {
+        if (offlineBanner) offlineBanner.style.display = 'none';
+        if (radarBadge) {
+          radarBadge.textContent = currentLang === 'es' ? "🟢 Monitoreo Activo" : "🟢 Active Monitoring";
+          radarBadge.className = "badge-status badge-green";
+        }
+        if (sTitle && sDesc) {
+          sTitle.textContent = d.shieldTitle;
+          sDesc.textContent = d.shieldDesc;
+        }
+      }
+    }
+
+    window.addEventListener('online', () => {
+      updateNetworkStatus(true);
+      checkLiveQuakesFeed();
+      fetchWorldPulse();
+    });
+    window.addEventListener('offline', () => updateNetworkStatus(false));
+
     async function checkLiveQuakesFeed() {
+      if (!navigator.onLine) {
+        updateNetworkStatus(false);
+        return;
+      }
       try {
         const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson");
         const data = await res.json();
-        lastFeedCheck.textContent = `Última revisión: ${new Date().toLocaleTimeString()} • ${data.features.length} eventos monitoreados en la Tierra`;
+        lastFeedCheck.textContent = currentLang === 'es'
+          ? `Última revisión: ${new Date().toLocaleTimeString()} • ${data.features.length} eventos monitoreados en la Tierra`
+          : `Last review: ${new Date().toLocaleTimeString()} • ${data.features.length} events monitored on Earth`;
 
         const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
         let nearbyImperceptibleFound = null;
@@ -1363,6 +1450,9 @@
         }
       } catch (e) {
         console.log("Feed check status:", e);
+        if (!navigator.onLine) {
+          updateNetworkStatus(false);
+        }
       }
     }
 
@@ -1467,7 +1557,7 @@
       if (delta > threshold) {
         triggerEmergencySiren();
         alertBanner.style.display = 'block';
-        alertDetails.textContent = `🌙 ¡MICRO-VIBRACIÓN INICIAL (ONDA P) DETECTADA EN MESA!`;
+        alertDetails.textContent = STRINGS[currentLang].sentinelAlertText || '🌙 ¡SACUDIDA MECÁNICA DETECTADA EN LA SUPERFICIE DE REPOSO!';
         countdownSec.textContent = `¡ALERTA!`;
       }
     }
@@ -1692,6 +1782,7 @@
     let worldPulseEvents = [];
     let currentPulseRegion = 'all';
     let pulseSearchQuery = '';
+    let pulseDisplayLimit = 10;
 
     const pulseListContainer = document.getElementById('pulseListContainer');
     const pulseCountText = document.getElementById('pulseCountText');
@@ -1771,8 +1862,8 @@
         return;
       }
 
-      // Render top 35 events for optimal DOM rendering speed
-      const displayEvents = filtered.slice(0, 35);
+      // Progressive pagination: render up to pulseDisplayLimit (smooth 60 FPS on modest mobile devices)
+      const displayEvents = filtered.slice(0, pulseDisplayLimit);
       let html = '';
 
       for (const ev of displayEvents) {
@@ -1813,7 +1904,27 @@
         `;
       }
 
+      if (filtered.length > pulseDisplayLimit) {
+        const remaining = filtered.length - pulseDisplayLimit;
+        const loadMoreLabel = STRINGS[currentLang].pulseBtnLoadMore || 'Mostrar más sismos (+10)';
+        html += `
+          <div style="text-align: center; margin-top: 14px; margin-bottom: 6px;">
+            <button id="btnLoadMorePulse" class="btn-secondary" style="padding: 10px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 10px; width: 100%; max-width: 320px;">
+              🔽 ${loadMoreLabel} (${remaining} ${isEs ? 'restantes' : 'remaining'})
+            </button>
+          </div>
+        `;
+      }
+
       pulseListContainer.innerHTML = html;
+
+      const btnMore = document.getElementById('btnLoadMorePulse');
+      if (btnMore) {
+        btnMore.addEventListener('click', () => {
+          pulseDisplayLimit += 10;
+          renderWorldPulseCards();
+        });
+      }
     }
 
     async function fetchWorldPulse() {
@@ -1862,6 +1973,7 @@
         filterPills.forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         currentPulseRegion = pill.getAttribute('data-region');
+        pulseDisplayLimit = 10;
         renderWorldPulseCards();
       });
     });
@@ -1869,12 +1981,14 @@
     if (pulseSearchInput) {
       pulseSearchInput.addEventListener('input', (e) => {
         pulseSearchQuery = e.target.value;
+        pulseDisplayLimit = 10;
         renderWorldPulseCards();
       });
     }
 
     if (btnRefreshPulse) {
       btnRefreshPulse.addEventListener('click', () => {
+        pulseDisplayLimit = 10;
         fetchWorldPulse();
       });
     }
@@ -2014,6 +2128,18 @@
       const pillNortham = document.getElementById('pillNortham'); if (pillNortham) pillNortham.textContent = d.pulseRegNortham;
       if (pulseSearchInput) pulseSearchInput.placeholder = d.pulseSearchPlaceholder;
 
+      // Transparency and Offline safety labels
+      const offlineTitleEl = document.getElementById('offlineBannerTitle');
+      if (offlineTitleEl) offlineTitleEl.textContent = d.offlineBannerTitle;
+      const offlineDescEl = document.getElementById('offlineBannerDesc');
+      if (offlineDescEl) offlineDescEl.textContent = d.offlineBannerDesc;
+      const geoTranspTitleEl = document.getElementById('geoTransparencyTitle');
+      if (geoTranspTitleEl) geoTranspTitleEl.textContent = d.geoTransparencyTitle;
+      const geoTranspTextEl = document.getElementById('geoTransparencyText');
+      if (geoTranspTextEl) geoTranspTextEl.textContent = d.geoTransparencyText;
+      const seismoSensorLabelEl = document.getElementById('seismoSensorLabel');
+      if (seismoSensorLabelEl) seismoSensorLabelEl.textContent = d.seismoSensorLabel;
+
       updateThemeButtonLabel();
       renderChecklist();
       renderWorldPulseCards();
@@ -2054,6 +2180,7 @@
       radarBadge.className = "badge-status badge-green";
       startAdaptiveMonitoring();
     }
+    updateNetworkStatus();
     fetchWorldPulse();
   </script>
 </body>
