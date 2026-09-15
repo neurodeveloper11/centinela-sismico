@@ -992,10 +992,10 @@
       </details>
     </section>
 
-    <!-- 3. RADAR SÍSMICO PROTECTOR (GPS EARLY WARNING) -->
+    <!-- 3. RADAR SÍSMICO ANTICIPADO (GPS EARLY WARNING) -->
     <section class="card" style="border-top: 4px solid var(--primary);">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-        <h2 class="card-title" id="radarTitle">📍 Radar Sísmico Protector (GPS)</h2>
+        <h2 class="card-title" id="radarTitle">📡 Radar Sísmico Anticipado (GPS)</h2>
         <span class="badge-status badge-blue" id="radarBadge">Listo para activar</span>
       </div>
       <p class="card-subtitle" id="radarSubtitle">
@@ -1004,7 +1004,7 @@
 
       <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
         <button class="btn-action" id="btnGetLocation" style="flex: 2; min-width: 220px;">
-          📍 Conectar mi Ubicación Protectora
+          📍 Conectar mi Ubicación GPS
         </button>
         <button class="btn-secondary" id="btnSimulateAlert" style="flex: 1; min-width: 140px;">
           🧪 Probar Demostración
@@ -1314,9 +1314,9 @@
         btnBreathing: "Iniciar Respiración de Calma",
         groundingSummary: "🧘 Técnica de Enraizamiento Sensorial (5-4-3-2-1)",
         groundingBody: "Mira a tu alrededor con serenidad: Nombra 5 cosas que ves, toca 4 cosas firmes con tus manos, identifica 3 sonidos reales, percibe 2 olores y evoca 1 recuerdo que te transmita gratitud y afecto.",
-        radarTitle: "📍 Radar Sísmico Protector (GPS)",
+        radarTitle: "📡 Radar Sísmico Anticipado (GPS)",
         radarSubtitle: "El Centinela calcula de forma anticipada el tiempo de viaje de la onda destructiva secundaria (S) directamente en tu dispositivo, avisándote segundos antes del temblor fuerte.",
-        btnGetLoc: "📍 Conectar mi Ubicación Protectora",
+        btnGetLoc: "📍 Conectar mi Ubicación GPS",
         btnDemo: "🧪 Probar Demostración",
         modalDemoTitle: "Simulacro Didáctico de Alerta",
         modalDemoReassurance: "🌿 Tranquilidad absoluta: No hay ningún sismo ocurriendo en este momento.",
@@ -1401,8 +1401,8 @@
         ],
         // GPS Button States
         btnGetLocConnecting: "🛰️ Obteniendo GPS satelital...",
-        btnGetLocConnected: "✅ Ubicación Activa y Protegida",
-        btnGetLocPersist: "✅ Ubicación Protegida",
+        btnGetLocConnected: "✅ Ubicación Sincronizada",
+        btnGetLocPersist: "✅ Ubicación Sincronizada",
         btnGetLocUpdateGPS: "Actualizar GPS",
         btnGetLocError: "⚠️ Activa tu GPS en el celular",
         // GPS Guide Modal
@@ -1481,9 +1481,9 @@
         btnBreathing: "Begin Calm Breathing",
         groundingSummary: "🧘 Sensory Grounding Technique (5-4-3-2-1)",
         groundingBody: "Look around with composure: Name 5 things you see, touch 4 solid objects, identify 3 real sounds, sense 2 subtle smells, recall 1 memory that fills you with gratitude.",
-        radarTitle: "📍 Protective Seismic Radar (GPS)",
+        radarTitle: "📡 Early Warning Seismic Radar (GPS)",
         radarSubtitle: "The Sentinel calculates in advance the arrival time of the secondary shear wave (S) directly on your device, providing seconds of warning before strong shaking.",
-        btnGetLoc: "📍 Connect Protective Location",
+        btnGetLoc: "📍 Connect GPS Location",
         btnDemo: "🧪 Test Simulation Demo",
         modalDemoTitle: "Educational Alert Drill",
         modalDemoReassurance: "🌿 Total peace of mind: No earthquake is occurring right now.",
@@ -1568,8 +1568,8 @@
         ],
         // GPS Button States
         btnGetLocConnecting: "🛰️ Acquiring satellite GPS...",
-        btnGetLocConnected: "✅ Location Active & Protected",
-        btnGetLocPersist: "✅ Location Protected",
+        btnGetLocConnected: "✅ Location Synchronized",
+        btnGetLocPersist: "✅ Location Synchronized",
         btnGetLocUpdateGPS: "Update GPS",
         btnGetLocError: "⚠️ Enable GPS on your phone",
         // GPS Guide Modal
@@ -2164,7 +2164,9 @@
 
         locationInfo.textContent = cityName
           ? `📍 ${cityName} (${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° • Precisión: ~${Math.round(pos.coords.accuracy)}m)`
-          : `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`;
+          : (currentLang === 'es'
+              ? `📍 Ubicación sincronizada: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`
+              : `📍 Location synchronized: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Accuracy: ~${Math.round(pos.coords.accuracy)}m)`);
 
         startAdaptiveMonitoring();
         fetchWorldPulse();
@@ -4066,7 +4068,9 @@
       const savedCity = localStorage.getItem('qm_user_city');
       locationInfo.textContent = savedCity
         ? `📍 ${savedCity} (${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°)`
-        : `📍 Ubicación protegida: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`;
+        : (currentLang === 'es'
+            ? `📍 Ubicación sincronizada: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`
+            : `📍 Location synchronized: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}°`);
       radarBadge.textContent = "🟢 Monitoreo Activo";
       radarBadge.className = "badge-status badge-green";
       btnGetLocation.className = 'btn-action is-connected';
