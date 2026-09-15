@@ -902,7 +902,7 @@
     <!-- MODAL GUÍA ACELERÓMETRO (SENSORES DE MOVIMIENTO) -->
     <div class="modal-backdrop" id="modalSensorGuide" role="dialog" aria-modal="true">
       <div class="modal-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.5rem;">📳</span>
             <h3 id="sensorGuideTitle" style="font-size: 1.15rem; font-weight: 800; color: var(--text); margin: 0;">
@@ -911,24 +911,47 @@
           </div>
           <button id="btnCloseSensorModal" class="btn-alert-close" style="background: var(--inner-bg); border-color: var(--border); color: var(--text);">✕</button>
         </div>
-        <div style="background: var(--inner-bg); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
-          <p id="sensorGuideAndroid" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 10px;">
-            <strong>📱 En Chrome / Android:</strong> Toca el candado o icono de ajustes (🔒 / 🎚️) arriba a la izquierda junto a la dirección web → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → Cambiar a <strong>Permitir</strong>.
-          </p>
-          <p id="sensorGuideAndroidSettings" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 10px;">
-            <strong>⚙️ Ajustes de Chrome:</strong> Si no aparece el icono, toca los 3 puntos ⋮ → Configuración → Configuración de sitios → Sensores de movimiento → <strong>Permitido</strong>.
-          </p>
-          <p id="sensorGuideBrave" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 10px;">
-            <strong>🦁 Navegadores con escudo (Brave):</strong> Toca el escudo de la barra y permite los sensores de movimiento para esta página.
-          </p>
-          <p id="sensorGuideIOS" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin: 0;">
-            <strong>🍎 En iPhone / Safari:</strong> Ajustes de iPhone → Safari → Movimiento y orientación → Activar.
-          </p>
+
+        <!-- Aclaración clave para el usuario que busca en Aplicaciones del teléfono -->
+        <div id="sensorAppClarification" style="background: rgba(2, 132, 199, 0.08); border-left: 4px solid var(--primary); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.82rem; color: var(--text); line-height: 1.45;">
+          <strong>💡 ¿Por qué no encuentras "Centinela" en las aplicaciones de tu celular?</strong><br>
+          Porque la estás usando dentro de tu navegador (<strong>Google Chrome</strong>). En los Ajustes de tu teléfono, la aplicación dueña de los permisos es <strong>Chrome</strong>.<br>
+          <em>Para que Centinela aparezca con su propio icono en tus aplicaciones, pulsa el botón "Instalar como App".</em>
         </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button class="btn-action" id="btnRetrySensor" style="flex: 1; background: linear-gradient(135deg, #059669, #0284c7);">
-            🔄 Reintentar Activar Centinela
+
+        <div style="background: var(--inner-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <span style="display: inline-block; background: var(--primary); color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">OPCIÓN 1: EN 5 SEGUNDOS (RECOMENDADO)</span>
+            <p id="sensorGuideAndroid" style="font-size: 0.84rem; color: var(--text); line-height: 1.45; margin: 0;">
+              <strong>Sin salir de esta pantalla:</strong> Mira arriba en la barra de tu navegador donde dice la dirección web. Toca el candado o interruptores <strong>(🔒 / 🎚️)</strong> → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → <strong>Permitir</strong>.
+            </p>
+          </div>
+          <div>
+            <span style="display: inline-block; background: #64748b; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">OPCIÓN 2: DESDE AJUSTES DEL TELÉFONO</span>
+            <p id="sensorGuideAndroidSettings" style="font-size: 0.84rem; color: var(--text); line-height: 1.45; margin: 0;">
+              <strong>Si vas a los Ajustes de tu teléfono:</strong> Entra a <em>Ajustes → Aplicaciones → Administrar aplicaciones</em> y busca <strong>"Chrome"</strong> (no Centinela) → <strong>Permisos</strong> → <strong>Actividad física / Sensores</strong> → <strong>Permitir</strong>.
+            </p>
+          </div>
+          <div>
+            <span style="display: inline-block; background: #059669; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">EN IPHONE / SAFARI</span>
+            <p id="sensorGuideIOS" style="font-size: 0.84rem; color: var(--text); line-height: 1.45; margin: 0;">
+              <strong>En iPhone:</strong> Ve a Ajustes del iPhone → <strong>Safari</strong> → <strong>Movimiento y orientación</strong> → Activar.
+            </p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-direction: column;">
+          <button class="btn-action" id="btnModalInstallApp" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-size: 0.88rem; padding: 11px;">
+            📲 Instalar como App en mi Celular
           </button>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-secondary" id="btnCloseSensorModalFooter" style="flex: 1; font-size: 0.85rem;">
+              Cerrar
+            </button>
+            <button class="btn-action" id="btnRetrySensor" style="flex: 1.4; background: linear-gradient(135deg, #059669, #0d9488); font-size: 0.85rem;">
+              🔄 Reintentar Activar
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1405,12 +1428,13 @@
         optSensLow: "Baja (0.40 m/s²)",
         btnPreview: "▶️ Probar",
         btnStopPreview: "⏹️ Detener",
-        sensorGuideTitle: "¿Cómo activar el Acelerómetro?",
-        sensorGuideAndroid: "<strong>📱 En Chrome / Android:</strong> Toca el candado o icono de ajustes (🔒 / 🎚️) arriba a la izquierda junto a la dirección web → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → Cambiar a <strong>Permitir</strong>.",
-        sensorGuideAndroidSettings: "<strong>⚙️ Ajustes de Chrome:</strong> Si no aparece el icono, toca los 3 puntos ⋮ → Configuración → Configuración de sitios → Sensores de movimiento → <strong>Permitido</strong>.",
-        sensorGuideBrave: "<strong>🦁 Navegadores con escudo (Brave):</strong> Toca el escudo de la barra y permite los sensores de movimiento para esta página.",
-        sensorGuideIOS: "<strong>🍎 En iPhone / Safari:</strong> Ajustes de iPhone → Safari → Movimiento y orientación → Activar.",
-        btnRetrySensor: "🔄 Reintentar Activar Centinela"
+        sensorGuideTitle: "Activar Sensores de Movimiento",
+        sensorAppClarification: "<strong>💡 ¿Por qué no encuentras \"Centinela\" en las aplicaciones de tu celular?</strong><br>Porque la estás usando dentro de tu navegador (<strong>Google Chrome</strong>). En los Ajustes del teléfono, la aplicación dueña de los permisos es <strong>Chrome</strong>.<br><em>Para que Centinela aparezca con su propio icono en tus aplicaciones, pulsa el botón \"Instalar como App\".</em>",
+        sensorGuideAndroid: "<strong>Sin salir de esta pantalla:</strong> Mira arriba en la barra de tu navegador donde dice la dirección web. Toca el candado o interruptores <strong>(🔒 / 🎚️)</strong> → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → <strong>Permitir</strong>.",
+        sensorGuideAndroidSettings: "<strong>Si vas a los Ajustes de tu teléfono:</strong> Entra a <em>Ajustes → Aplicaciones → Administrar aplicaciones</em> y busca <strong>\"Chrome\"</strong> (no Centinela) → <strong>Permisos</strong> → <strong>Actividad física / Sensores</strong> → <strong>Permitir</strong>.",
+        sensorGuideIOS: "<strong>En iPhone:</strong> Ve a Ajustes del iPhone → <strong>Safari</strong> → <strong>Movimiento y orientación</strong> → Activar.",
+        btnModalInstall: "📲 Instalar como App en mi Celular",
+        btnRetrySensor: "🔄 Reintentar Activar"
       },
       en: {
         themeBtnGray: "🏛️ Grayish White",
@@ -1557,12 +1581,13 @@
         optSensLow: "Low (0.40 m/s²)",
         btnPreview: "▶️ Test",
         btnStopPreview: "⏹️ Stop",
-        sensorGuideTitle: "How to enable the Accelerometer?",
-        sensorGuideAndroid: "<strong>📱 Android / Chrome:</strong> Tap the lock or tune icon (🔒 / 🎚️) next to the web URL → <strong>Permissions</strong> → <strong>Motion sensors</strong> → Set to <strong>Allow</strong>.",
-        sensorGuideAndroidSettings: "<strong>⚙️ Chrome Settings:</strong> Or tap 3 dots ⋮ → Settings → Site settings → Motion sensors → <strong>Allowed</strong>.",
-        sensorGuideBrave: "<strong>🦁 Shield Browsers (Brave):</strong> Tap the shield icon and allow motion sensors for this site.",
-        sensorGuideIOS: "<strong>🍎 iPhone / Safari:</strong> iPhone Settings → Safari → Motion & Orientation Access → <strong>Enable</strong>.",
-        btnRetrySensor: "🔄 Retry Activating Sentinel"
+        sensorGuideTitle: "Enable Motion Sensors",
+        sensorAppClarification: "<strong>💡 Why doesn't \"Sentinel\" appear in your phone's app list?</strong><br>Because it's running inside your browser (<strong>Google Chrome</strong>). In your phone's Android Settings, the app holding the permissions is <strong>Chrome</strong>.<br><em>To make Sentinel a standalone app with its own icon on your phone, tap \"Install as App\".</em>",
+        sensorGuideAndroid: "<strong>Right on this screen (without leaving):</strong> Look at the top web address bar. Tap the lock or tune icon <strong>(🔒 / 🎚️)</strong> → <strong>Permissions</strong> → <strong>Motion sensors</strong> → <strong>Allow</strong>.",
+        sensorGuideAndroidSettings: "<strong>If searching in phone Settings:</strong> Go to Settings → Apps → Manage apps and search for <strong>\"Chrome\"</strong> (not Sentinel) → <strong>Permissions</strong> → Enable <strong>Physical activity / Sensors</strong>.",
+        sensorGuideIOS: "<strong>On iPhone:</strong> iPhone Settings → <strong>Safari</strong> → <strong>Motion & Orientation Access</strong> → Enable.",
+        btnModalInstall: "📲 Install as App on Phone",
+        btnRetrySensor: "🔄 Retry Activating"
       }
     };
 
@@ -2919,9 +2944,23 @@
 
     const modalSensorGuide = document.getElementById('modalSensorGuide');
     const btnCloseSensorModal = document.getElementById('btnCloseSensorModal');
+    const btnCloseSensorModalFooter = document.getElementById('btnCloseSensorModalFooter');
     const btnRetrySensor = document.getElementById('btnRetrySensor');
+    const btnModalInstallApp = document.getElementById('btnModalInstallApp');
+
     if (btnCloseSensorModal) {
       btnCloseSensorModal.addEventListener('click', closeSensorModal);
+    }
+    if (btnCloseSensorModalFooter) {
+      btnCloseSensorModalFooter.addEventListener('click', closeSensorModal);
+    }
+    if (btnModalInstallApp) {
+      btnModalInstallApp.addEventListener('click', () => {
+        closeSensorModal();
+        if (btnInstallApp) {
+          btnInstallApp.click();
+        }
+      });
     }
     if (btnRetrySensor) {
       btnRetrySensor.addEventListener('click', () => {
@@ -2957,7 +2996,7 @@
         sentinelBadge.textContent = currentLang === 'es' ? "🟢 Centinela Vigilando" : "🟢 Sentinel Watching";
         sentinelBadge.className = "badge-status badge-green";
 
-        // Verificación activa de hardware: si en 1.2s no llegan lecturas reales, abrir guía
+        // Verificación activa de hardware: en teléfonos móviles esperar hasta 2.5s para evitar falsos negativos
         let receivedMotionData = false;
         function verifyHardwareSensor(e) {
           const a = e.accelerationIncludingGravity || e.acceleration;
@@ -2968,9 +3007,11 @@
         }
         window.addEventListener('devicemotion', verifyHardwareSensor);
 
+        const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+
         setTimeout(() => {
           window.removeEventListener('devicemotion', verifyHardwareSensor);
-          if (!receivedMotionData && isSentinelActive) {
+          if (isMobile && !receivedMotionData && isSentinelActive) {
             sentinelGuard.deactivate();
             window.removeEventListener('devicemotion', handleDeviceMotion);
             isSentinelActive = false;
@@ -2979,8 +3020,12 @@
             sentinelBadge.className = "badge-status badge-yellow";
             drawSeismograph();
             openSensorModal();
+          } else if (!isMobile && !receivedMotionData && isSentinelActive) {
+            seismoValue.textContent = currentLang === 'es'
+              ? "Modo Computadora: Red sísmica global activa (El sensor de reposo opera en celulares)"
+              : "Desktop Mode: Global seismic network active (Resting shock sensor operates on mobile)";
           }
-        }, 1200);
+        }, 2500);
 
       } else {
         sentinelGuard.deactivate();
@@ -3579,14 +3624,18 @@
       // Sensor Guide Modal Labels
       const sensorGuideTitleEl = document.getElementById('sensorGuideTitle');
       if (sensorGuideTitleEl) sensorGuideTitleEl.textContent = d.sensorGuideTitle;
+      const sensorAppClarificationEl = document.getElementById('sensorAppClarification');
+      if (sensorAppClarificationEl) sensorAppClarificationEl.innerHTML = d.sensorAppClarification;
       const sensorGuideAndroidEl = document.getElementById('sensorGuideAndroid');
       if (sensorGuideAndroidEl) sensorGuideAndroidEl.innerHTML = d.sensorGuideAndroid;
       const sensorGuideAndroidSettingsEl = document.getElementById('sensorGuideAndroidSettings');
       if (sensorGuideAndroidSettingsEl) sensorGuideAndroidSettingsEl.innerHTML = d.sensorGuideAndroidSettings;
-      const sensorGuideBraveEl = document.getElementById('sensorGuideBrave');
-      if (sensorGuideBraveEl) sensorGuideBraveEl.innerHTML = d.sensorGuideBrave;
       const sensorGuideIOSEl = document.getElementById('sensorGuideIOS');
       if (sensorGuideIOSEl) sensorGuideIOSEl.innerHTML = d.sensorGuideIOS;
+      const btnModalInstallAppEl = document.getElementById('btnModalInstallApp');
+      if (btnModalInstallAppEl) btnModalInstallAppEl.textContent = d.btnModalInstall;
+      const btnCloseSensorFooterEl = document.getElementById('btnCloseSensorModalFooter');
+      if (btnCloseSensorFooterEl) btnCloseSensorFooterEl.textContent = d.btnCancelDemo || "Cerrar";
       const btnRetrySensorEl = document.getElementById('btnRetrySensor');
       if (btnRetrySensorEl) btnRetrySensorEl.textContent = d.btnRetrySensor;
 
