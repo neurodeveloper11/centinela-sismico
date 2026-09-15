@@ -298,4 +298,11 @@ class TestSensorAndPWAArchitecture:
         assert "startNetworkPulse" in self.html_content
         assert "sentinelBadgeNetwork" in self.html_content
 
+    def test_location_button_uses_synchronized_not_protected(self):
+        assert "Ubicación Sincronizada" in self.html_content
+        assert "Location Synchronized" in self.html_content
+        assert "Ubicación Activa y Protegida" not in self.html_content
+        assert "Ubicación Protegida" not in self.html_content
+        assert "Radar Sísmico Protector" not in self.html_content
+
 
