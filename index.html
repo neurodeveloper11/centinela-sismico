@@ -899,6 +899,40 @@
       </div>
     </div>
 
+    <!-- MODAL GUÍA ACELERÓMETRO (SENSORES DE MOVIMIENTO) -->
+    <div class="modal-backdrop" id="modalSensorGuide" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.5rem;">📳</span>
+            <h3 id="sensorGuideTitle" style="font-size: 1.15rem; font-weight: 800; color: var(--text); margin: 0;">
+              Activar Sensores de Movimiento
+            </h3>
+          </div>
+          <button id="btnCloseSensorModal" class="btn-alert-close" style="background: var(--inner-bg); border-color: var(--border); color: var(--text);">✕</button>
+        </div>
+        <div style="background: var(--inner-bg); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+          <p id="sensorGuideAndroid" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 10px;">
+            <strong>📱 En Chrome / Android:</strong> Toca el candado o icono de ajustes (🔒 / 🎚️) arriba a la izquierda junto a la dirección web → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → Cambiar a <strong>Permitir</strong>.
+          </p>
+          <p id="sensorGuideAndroidSettings" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 10px;">
+            <strong>⚙️ Ajustes de Chrome:</strong> Si no aparece el icono, toca los 3 puntos ⋮ → Configuración → Configuración de sitios → Sensores de movimiento → <strong>Permitido</strong>.
+          </p>
+          <p id="sensorGuideBrave" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin-bottom: 10px;">
+            <strong>🦁 Navegadores con escudo (Brave):</strong> Toca el escudo de la barra y permite los sensores de movimiento para esta página.
+          </p>
+          <p id="sensorGuideIOS" style="font-size: 0.88rem; color: var(--text); line-height: 1.5; margin: 0;">
+            <strong>🍎 En iPhone / Safari:</strong> Ajustes de iPhone → Safari → Movimiento y orientación → Activar.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button class="btn-action" id="btnRetrySensor" style="flex: 1; background: linear-gradient(135deg, #059669, #0284c7);">
+            🔄 Reintentar Activar Centinela
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 2. PAUSA DE SERENIDAD & REGULACIÓN NEUROCOGNITIVA (PAP) -->
     <section class="card" style="border-top: 4px solid var(--accent);">
       <h2 class="card-title" id="papTitle">🫁 Pausa de Serenidad (60 Segundos)</h2>
@@ -1370,7 +1404,13 @@
         optSensMed: "Normal (0.25 m/s²)",
         optSensLow: "Baja (0.40 m/s²)",
         btnPreview: "▶️ Probar",
-        btnStopPreview: "⏹️ Detener"
+        btnStopPreview: "⏹️ Detener",
+        sensorGuideTitle: "¿Cómo activar el Acelerómetro?",
+        sensorGuideAndroid: "<strong>📱 En Chrome / Android:</strong> Toca el candado o icono de ajustes (🔒 / 🎚️) arriba a la izquierda junto a la dirección web → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → Cambiar a <strong>Permitir</strong>.",
+        sensorGuideAndroidSettings: "<strong>⚙️ Ajustes de Chrome:</strong> Si no aparece el icono, toca los 3 puntos ⋮ → Configuración → Configuración de sitios → Sensores de movimiento → <strong>Permitido</strong>.",
+        sensorGuideBrave: "<strong>🦁 Navegadores con escudo (Brave):</strong> Toca el escudo de la barra y permite los sensores de movimiento para esta página.",
+        sensorGuideIOS: "<strong>🍎 En iPhone / Safari:</strong> Ajustes de iPhone → Safari → Movimiento y orientación → Activar.",
+        btnRetrySensor: "🔄 Reintentar Activar Centinela"
       },
       en: {
         themeBtnGray: "🏛️ Grayish White",
@@ -1516,7 +1556,13 @@
         optSensMed: "Normal (0.25 m/s²)",
         optSensLow: "Low (0.40 m/s²)",
         btnPreview: "▶️ Test",
-        btnStopPreview: "⏹️ Stop"
+        btnStopPreview: "⏹️ Stop",
+        sensorGuideTitle: "How to enable the Accelerometer?",
+        sensorGuideAndroid: "<strong>📱 Android / Chrome:</strong> Tap the lock or tune icon (🔒 / 🎚️) next to the web URL → <strong>Permissions</strong> → <strong>Motion sensors</strong> → Set to <strong>Allow</strong>.",
+        sensorGuideAndroidSettings: "<strong>⚙️ Chrome Settings:</strong> Or tap 3 dots ⋮ → Settings → Site settings → Motion sensors → <strong>Allowed</strong>.",
+        sensorGuideBrave: "<strong>🦁 Shield Browsers (Brave):</strong> Tap the shield icon and allow motion sensors for this site.",
+        sensorGuideIOS: "<strong>🍎 iPhone / Safari:</strong> iPhone Settings → Safari → Motion & Orientation Access → <strong>Enable</strong>.",
+        btnRetrySensor: "🔄 Retry Activating Sentinel"
       }
     };
 
@@ -2862,17 +2908,46 @@
       seismoValue.textContent = `Ratio STA/LTA: ${result.ratio.toFixed(2)} (Umbral Alerta: ${thresh}) • Anti-Golpes Activo`;
     }
 
+    function openSensorModal() {
+      const modal = document.getElementById('modalSensorGuide');
+      if (modal) modal.classList.add('is-active');
+    }
+    function closeSensorModal() {
+      const modal = document.getElementById('modalSensorGuide');
+      if (modal) modal.classList.remove('is-active');
+    }
+
+    const modalSensorGuide = document.getElementById('modalSensorGuide');
+    const btnCloseSensorModal = document.getElementById('btnCloseSensorModal');
+    const btnRetrySensor = document.getElementById('btnRetrySensor');
+    if (btnCloseSensorModal) {
+      btnCloseSensorModal.addEventListener('click', closeSensorModal);
+    }
+    if (btnRetrySensor) {
+      btnRetrySensor.addEventListener('click', () => {
+        closeSensorModal();
+        if (btnSentinel) btnSentinel.click();
+      });
+    }
+    if (modalSensorGuide) {
+      modalSensorGuide.addEventListener('click', (e) => {
+        if (e.target === modalSensorGuide) closeSensorModal();
+      });
+    }
+
     btnSentinel.addEventListener('click', async () => {
       initAudio();
       if (!isSentinelActive) {
         if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
           try {
             const perm = await DeviceMotionEvent.requestPermission();
-            if (perm !== 'granted') {
-              alert(currentLang === 'es' ? "Permiso de acelerómetro necesario para el Centinela." : "Accelerometer permission required for Sentinel.");
+            if (perm === 'denied') {
+              openSensorModal();
               return;
             }
-          } catch(e) {}
+          } catch(e) {
+            console.warn("DeviceMotionEvent.requestPermission aviso:", e);
+          }
         }
         await sentinelGuard.activate();
         pWaveEngine.triggerThreshold = getSentinelThreshold();
@@ -2881,6 +2956,32 @@
         btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStop;
         sentinelBadge.textContent = currentLang === 'es' ? "🟢 Centinela Vigilando" : "🟢 Sentinel Watching";
         sentinelBadge.className = "badge-status badge-green";
+
+        // Verificación activa de hardware: si en 1.2s no llegan lecturas reales, abrir guía
+        let receivedMotionData = false;
+        function verifyHardwareSensor(e) {
+          const a = e.accelerationIncludingGravity || e.acceleration;
+          if (a && (a.x !== null || a.y !== null || a.z !== null)) {
+            receivedMotionData = true;
+            window.removeEventListener('devicemotion', verifyHardwareSensor);
+          }
+        }
+        window.addEventListener('devicemotion', verifyHardwareSensor);
+
+        setTimeout(() => {
+          window.removeEventListener('devicemotion', verifyHardwareSensor);
+          if (!receivedMotionData && isSentinelActive) {
+            sentinelGuard.deactivate();
+            window.removeEventListener('devicemotion', handleDeviceMotion);
+            isSentinelActive = false;
+            btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStart;
+            sentinelBadge.textContent = currentLang === 'es' ? "Descanso" : "Resting";
+            sentinelBadge.className = "badge-status badge-yellow";
+            drawSeismograph();
+            openSensorModal();
+          }
+        }, 1200);
+
       } else {
         sentinelGuard.deactivate();
         window.removeEventListener('devicemotion', handleDeviceMotion);
@@ -3474,6 +3575,21 @@
       if (gpsGuideIOSEl) gpsGuideIOSEl.innerHTML = d.gpsGuideIOS;
       const btnRetryGpsEl = document.getElementById('btnRetryGps');
       if (btnRetryGpsEl) btnRetryGpsEl.textContent = d.gpsGuideRetry;
+
+      // Sensor Guide Modal Labels
+      const sensorGuideTitleEl = document.getElementById('sensorGuideTitle');
+      if (sensorGuideTitleEl) sensorGuideTitleEl.textContent = d.sensorGuideTitle;
+      const sensorGuideAndroidEl = document.getElementById('sensorGuideAndroid');
+      if (sensorGuideAndroidEl) sensorGuideAndroidEl.innerHTML = d.sensorGuideAndroid;
+      const sensorGuideAndroidSettingsEl = document.getElementById('sensorGuideAndroidSettings');
+      if (sensorGuideAndroidSettingsEl) sensorGuideAndroidSettingsEl.innerHTML = d.sensorGuideAndroidSettings;
+      const sensorGuideBraveEl = document.getElementById('sensorGuideBrave');
+      if (sensorGuideBraveEl) sensorGuideBraveEl.innerHTML = d.sensorGuideBrave;
+      const sensorGuideIOSEl = document.getElementById('sensorGuideIOS');
+      if (sensorGuideIOSEl) sensorGuideIOSEl.innerHTML = d.sensorGuideIOS;
+      const btnRetrySensorEl = document.getElementById('btnRetrySensor');
+      if (btnRetrySensorEl) btnRetrySensorEl.textContent = d.btnRetrySensor;
+
       btnSimulateAlert.textContent = d.btnDemo;
       const modalDemoTitleEl = document.getElementById('modalDemoTitle');
       if (modalDemoTitleEl) modalDemoTitleEl.textContent = d.modalDemoTitle;
