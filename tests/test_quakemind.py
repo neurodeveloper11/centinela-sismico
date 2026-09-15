@@ -241,3 +241,61 @@ class TestEEWKinematicsEngine:
         # Non hazardous: should not cause alarm panic
         assert res["is_hazardous"] is False
 
+
+class TestSensorAndPWAArchitecture:
+    """
+    Unit and static analysis tests for PWA WebAPK sensor architecture,
+    Chromium permissions API query, Generic Sensor fallback, Xiaomi HyperOS guidance,
+    and 100% parity across pwa/, docs/, and root distributions.
+    """
+
+    @pytest.fixture(autouse=True)
+    def setup_paths(self):
+        self.root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.index_html_path = os.path.join(self.root_dir, "index.html")
+        self.pwa_html_path = os.path.join(self.root_dir, "pwa", "index.html")
+        self.docs_html_path = os.path.join(self.root_dir, "docs", "index.html")
+        with open(self.index_html_path, "r", encoding="utf-8") as f:
+            self.html_content = f.read()
+
+    def test_hash_parity_across_distributions(self):
+        import hashlib
+        def sha256_file(path):
+            with open(path, "rb") as f:
+                return hashlib.sha256(f.read()).hexdigest()
+
+        hash_root = sha256_file(self.index_html_path)
+        hash_pwa = sha256_file(self.pwa_html_path)
+        hash_docs = sha256_file(self.docs_html_path)
+
+        assert hash_root == hash_pwa == hash_docs, "Root index.html, pwa/index.html, and docs/index.html must be strictly identical"
+
+    def test_pwa_standalone_detection_logic_present(self):
+        assert "function isRunningStandalone()" in self.html_content
+        assert "(display-mode: standalone)" in self.html_content
+        assert "navigator.standalone" in self.html_content
+        assert "android-app://" in self.html_content
+
+    def test_permissions_api_query_implemented(self):
+        assert "navigator.permissions" in self.html_content
+        assert "name: 'accelerometer'" in self.html_content
+        assert "checkAccelerometerPermission" in self.html_content
+
+    def test_dual_sensor_and_generic_sensor_fallback(self):
+        assert "CentinelaMotionController" in self.html_content
+        assert "devicemotion" in self.html_content
+        assert "new window.Accelerometer" in self.html_content or "new Accelerometer" in self.html_content
+        assert "frequency: 50" in self.html_content
+
+    def test_xiaomi_hyperos_guidance_present(self):
+        assert "XIAOMI / HYPEROS / MIUI" in self.html_content
+        assert "Sin restricciones" in self.html_content
+        assert "Inicio automático" in self.html_content
+
+    def test_graceful_degradation_to_network_mode(self):
+        assert "sentinelMode = 'network_only'" in self.html_content
+        assert "btnContinueNetworkOnly" in self.html_content
+        assert "startNetworkPulse" in self.html_content
+        assert "sentinelBadgeNetwork" in self.html_content
+
+

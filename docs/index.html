@@ -912,36 +912,49 @@
           <button id="btnCloseSensorModal" class="btn-alert-close" style="background: var(--inner-bg); border-color: var(--border); color: var(--text);">✕</button>
         </div>
 
-        <!-- Aclaración clave para el usuario que busca en Aplicaciones del teléfono -->
+        <!-- Aclaración clave adaptativa para PWA vs Navegador -->
         <div id="sensorAppClarification" style="background: rgba(2, 132, 199, 0.08); border-left: 4px solid var(--primary); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.82rem; color: var(--text); line-height: 1.45;">
           <strong>💡 ¿Por qué no encuentras "Centinela" en las aplicaciones de tu celular?</strong><br>
-          Porque la estás usando dentro de tu navegador (<strong>Google Chrome</strong>). En los Ajustes de tu teléfono, la aplicación dueña de los permisos es <strong>Chrome</strong>.<br>
+          Porque la estás usando dentro de tu navegador (<strong>Google Chrome</strong>). En los Ajustes del teléfono, la aplicación dueña de los permisos es <strong>Chrome</strong>.<br>
           <em>Para que Centinela aparezca con su propio icono en tus aplicaciones, pulsa el botón "Instalar como App".</em>
         </div>
 
-        <div style="background: var(--inner-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: var(--inner-bg); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;">
           <div>
-            <span style="display: inline-block; background: var(--primary); color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">OPCIÓN 1: EN 5 SEGUNDOS (RECOMENDADO)</span>
+            <span id="sensorGuideBadgeOpt1" style="display: inline-block; background: var(--primary); color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">OPCIÓN 1: EN 5 SEGUNDOS (RECOMENDADO)</span>
             <p id="sensorGuideAndroid" style="font-size: 0.84rem; color: var(--text); line-height: 1.45; margin: 0;">
               <strong>Sin salir de esta pantalla:</strong> Mira arriba en la barra de tu navegador donde dice la dirección web. Toca el candado o interruptores <strong>(🔒 / 🎚️)</strong> → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → <strong>Permitir</strong>.
             </p>
           </div>
           <div>
-            <span style="display: inline-block; background: #64748b; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">OPCIÓN 2: DESDE AJUSTES DEL TELÉFONO</span>
+            <span id="sensorGuideBadgeOpt2" style="display: inline-block; background: #64748b; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">OPCIÓN 2: DESDE AJUSTES DEL TELÉFONO</span>
             <p id="sensorGuideAndroidSettings" style="font-size: 0.84rem; color: var(--text); line-height: 1.45; margin: 0;">
               <strong>Si vas a los Ajustes de tu teléfono:</strong> Entra a <em>Ajustes → Aplicaciones → Administrar aplicaciones</em> y busca <strong>"Chrome"</strong> (no Centinela) → <strong>Permisos</strong> → <strong>Actividad física / Sensores</strong> → <strong>Permitir</strong>.
             </p>
           </div>
           <div>
-            <span style="display: inline-block; background: #059669; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">EN IPHONE / SAFARI</span>
+            <span id="sensorGuideBadgeOpt3" style="display: inline-block; background: #d97706; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">XIAOMI / HYPEROS / MIUI / SAMSUNG</span>
+            <p id="sensorGuideXiaomi" style="font-size: 0.84rem; color: var(--text); line-height: 1.45; margin: 0;">
+              <strong>Ahorro de batería y reposo:</strong> En <em>Ajustes → Aplicaciones → Administrar aplicaciones → Centinela (o Chrome)</em> → <strong>Ahorro de batería</strong>: elige <strong>"Sin restricciones"</strong> y activa <strong>"Inicio automático"</strong> para que el sensor no se suspenda al bloquear la pantalla.
+            </p>
+          </div>
+          <div>
+            <span id="sensorGuideBadgeIOS" style="display: inline-block; background: #059669; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.70rem; font-weight: 700; margin-bottom: 4px;">EN IPHONE / SAFARI</span>
             <p id="sensorGuideIOS" style="font-size: 0.84rem; color: var(--text); line-height: 1.45; margin: 0;">
               <strong>En iPhone:</strong> Ve a Ajustes del iPhone → <strong>Safari</strong> → <strong>Movimiento y orientación</strong> → Activar.
             </p>
           </div>
         </div>
 
+        <div id="sensorReassuranceNote" style="background: rgba(16, 185, 129, 0.08); border-left: 4px solid #10b981; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; font-size: 0.80rem; color: var(--text); line-height: 1.4;">
+          🛡️ <strong>Tu protección continúa:</strong> Aunque el acelerómetro local esté en reposo, el <strong>Radar Sísmico GPS</strong> y el flujo <strong>WebSocket EMSC en vivo</strong> siguen vigilando 24/7 para alertarte si ocurre un sismo regional.
+        </div>
+
         <div style="display: flex; gap: 8px; flex-direction: column;">
-          <button class="btn-action" id="btnModalInstallApp" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-size: 0.88rem; padding: 11px;">
+          <button class="btn-action" id="btnContinueNetworkOnly" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-size: 0.86rem; padding: 10px;">
+            📡 Continuar con Red Sísmica Global
+          </button>
+          <button class="btn-action" id="btnModalInstallApp" style="background: linear-gradient(135deg, #475569, #334155); font-size: 0.86rem; padding: 10px;">
             📲 Instalar como App en mi Celular
           </button>
           <div style="display: flex; gap: 8px;">
@@ -1429,12 +1442,26 @@
         btnPreview: "▶️ Probar",
         btnStopPreview: "⏹️ Detener",
         sensorGuideTitle: "Activar Sensores de Movimiento",
+        sensorGuideTitleStandalone: "Permisos de Movimiento en App Instalada",
         sensorAppClarification: "<strong>💡 ¿Por qué no encuentras \"Centinela\" en las aplicaciones de tu celular?</strong><br>Porque la estás usando dentro de tu navegador (<strong>Google Chrome</strong>). En los Ajustes del teléfono, la aplicación dueña de los permisos es <strong>Chrome</strong>.<br><em>Para que Centinela aparezca con su propio icono en tus aplicaciones, pulsa el botón \"Instalar como App\".</em>",
+        sensorAppClarificationStandalone: "📱 <strong>Estás ejecutando Centinela como App Instalada (WebAPK / PWA)</strong>.<br>En este modo no existe barra de navegación web ni candado (🔒). Los sensores de movimiento son administrados por Android y las directivas del navegador anfitrión (Google Chrome).",
+        sensorGuideBadgeOpt1: "OPCIÓN 1: EN 5 SEGUNDOS (RECOMENDADO)",
+        sensorGuideBadgeOpt1Standalone: "OPCIÓN 1: MENÚ DE LA APP (⋮)",
         sensorGuideAndroid: "<strong>Sin salir de esta pantalla:</strong> Mira arriba en la barra de tu navegador donde dice la dirección web. Toca el candado o interruptores <strong>(🔒 / 🎚️)</strong> → <strong>Permisos</strong> → <strong>Sensores de movimiento</strong> → <strong>Permitir</strong>.",
+        sensorGuideAndroidStandalone: "<strong>Dentro de la app:</strong> Toca los 3 puntos <strong>(⋮)</strong> en la barra superior o marco del sistema ➔ <strong>Información de la app</strong> (o ícono ℹ️) ➔ <strong>Permisos</strong> ➔ Activa <strong>Sensores de movimiento</strong> o <strong>Actividad física</strong>.",
+        sensorGuideBadgeOpt2: "OPCIÓN 2: DESDE AJUSTES DEL TELÉFONO",
+        sensorGuideBadgeOpt2Standalone: "OPCIÓN 2: AJUSTES DE GOOGLE CHROME",
         sensorGuideAndroidSettings: "<strong>Si vas a los Ajustes de tu teléfono:</strong> Entra a <em>Ajustes → Aplicaciones → Administrar aplicaciones</em> y busca <strong>\"Chrome\"</strong> (no Centinela) → <strong>Permisos</strong> → <strong>Actividad física / Sensores</strong> → <strong>Permitir</strong>.",
+        sensorGuideAndroidSettingsStandalone: "<strong>Ajustes del motor anfitrión:</strong> Abre <em>Google Chrome ➔ Ajustes (⋮) ➔ Configuración ➔ Configuración de sitios ➔ Sensores de movimiento</em> ➔ Asegúrate de que esté en <strong>'Permitido'</strong>.",
+        sensorGuideBadgeOpt3: "OPCIÓN 3: XIAOMI / HYPEROS / MIUI / SAMSUNG",
+        sensorGuideXiaomi: "<strong>Batería y reposo en Xiaomi / HyperOS / Samsung:</strong> Ve a <em>Ajustes ➔ Aplicaciones ➔ Administrar aplicaciones ➔ Centinela (o Chrome)</em> ➔ <strong>Ahorro de batería</strong>: selecciona <strong>'Sin restricciones'</strong> y activa <strong>'Inicio automático'</strong> para que la detección no se suspenda durante la noche.",
         sensorGuideIOS: "<strong>En iPhone:</strong> Ve a Ajustes del iPhone → <strong>Safari</strong> → <strong>Movimiento y orientación</strong> → Activar.",
+        sensorReassurance: "🛡️ <strong>Tu protección continúa:</strong> Aunque el sensor de mesa esté pausado, el <strong>Radar Sísmico GPS</strong> y el flujo <strong>WebSocket EMSC en vivo</strong> siguen vigilando 24/7 para alertarte si ocurre un sismo regional.",
+        btnContinueNetworkOnly: "📡 Continuar con Red Sísmica Global",
         btnModalInstall: "📲 Instalar como App en mi Celular",
-        btnRetrySensor: "🔄 Reintentar Activar"
+        btnRetrySensor: "🔄 Reintentar Activar",
+        sentinelBadgeNetwork: "🌐 Red Sísmica Activa (Sin Acelerómetro)",
+        sentinelValueNetwork: "📡 Modo Respaldo: Red Sísmica Global EMSC y Radar GPS activos 24/7 (Acelerómetro local en pausa)."
       },
       en: {
         themeBtnGray: "🏛️ Grayish White",
@@ -1582,12 +1609,26 @@
         btnPreview: "▶️ Test",
         btnStopPreview: "⏹️ Stop",
         sensorGuideTitle: "Enable Motion Sensors",
+        sensorGuideTitleStandalone: "Motion Permissions in Installed App",
         sensorAppClarification: "<strong>💡 Why doesn't \"Sentinel\" appear in your phone's app list?</strong><br>Because it's running inside your browser (<strong>Google Chrome</strong>). In your phone's Android Settings, the app holding the permissions is <strong>Chrome</strong>.<br><em>To make Sentinel a standalone app with its own icon on your phone, tap \"Install as App\".</em>",
+        sensorAppClarificationStandalone: "📱 <strong>You are running Sentinel as an Installed App (WebAPK / PWA)</strong>.<br>In standalone mode there is no web address bar or lock icon (🔒). Motion sensors are governed by Android and host browser engine directives (Google Chrome).",
+        sensorGuideBadgeOpt1: "OPTION 1: IN 5 SECONDS (RECOMMENDED)",
+        sensorGuideBadgeOpt1Standalone: "OPTION 1: APP MENU (⋮)",
         sensorGuideAndroid: "<strong>Right on this screen (without leaving):</strong> Look at the top web address bar. Tap the lock or tune icon <strong>(🔒 / 🎚️)</strong> → <strong>Permissions</strong> → <strong>Motion sensors</strong> → <strong>Allow</strong>.",
+        sensorGuideAndroidStandalone: "<strong>Inside the app:</strong> Tap the 3 dots <strong>(⋮)</strong> on the top system bar ➔ <strong>App info</strong> (or ℹ️ icon) ➔ <strong>Permissions</strong> ➔ Enable <strong>Motion sensors</strong> or <strong>Physical activity</strong>.",
+        sensorGuideBadgeOpt2: "OPTION 2: PHONE SETTINGS",
+        sensorGuideBadgeOpt2Standalone: "OPTION 2: GOOGLE CHROME SETTINGS",
         sensorGuideAndroidSettings: "<strong>If searching in phone Settings:</strong> Go to Settings → Apps → Manage apps and search for <strong>\"Chrome\"</strong> (not Sentinel) → <strong>Permissions</strong> → Enable <strong>Physical activity / Sensors</strong>.",
+        sensorGuideAndroidSettingsStandalone: "<strong>Host browser engine:</strong> Open <em>Google Chrome ➔ Settings (⋮) ➔ Site settings ➔ Motion sensors</em> ➔ Ensure it is set to <strong>'Allow'</strong>.",
+        sensorGuideBadgeOpt3: "OPTION 3: XIAOMI / HYPEROS / MIUI / SAMSUNG",
+        sensorGuideXiaomi: "<strong>Battery & sleep policy on Xiaomi / HyperOS / Samsung:</strong> Go to <em>Settings ➔ Apps ➔ Manage apps ➔ Sentinel (or Chrome)</em> ➔ <strong>Battery saver</strong>: select <strong>'No restrictions'</strong> and enable <strong>'Autostart'</strong> so sleep mode doesn't freeze the sensor.",
         sensorGuideIOS: "<strong>On iPhone:</strong> iPhone Settings → <strong>Safari</strong> → <strong>Motion & Orientation Access</strong> → Enable.",
+        sensorReassurance: "🛡️ <strong>Continuous Protection:</strong> Even if resting desk sensor is paused, the <strong>GPS Radar</strong> and <strong>live EMSC WebSocket</strong> remain active 24/7 to alert you if a regional earthquake occurs.",
+        btnContinueNetworkOnly: "📡 Continue with Global Seismic Network",
         btnModalInstall: "📲 Install as App on Phone",
-        btnRetrySensor: "🔄 Retry Activating"
+        btnRetrySensor: "🔄 Retry Activating",
+        sentinelBadgeNetwork: "🌐 Seismic Network Active (No Accelerometer)",
+        sentinelValueNetwork: "📡 Backup Mode: EMSC Global Seismic Network & GPS Radar active 24/7 (Accelerometer paused)."
       }
     };
 
@@ -1620,8 +1661,19 @@
       });
     }
 
+    // Strict detection of installed Standalone PWA / WebAPK execution environment
+    function isRunningStandalone() {
+      return (window.matchMedia && (
+                window.matchMedia('(display-mode: standalone)').matches ||
+                window.matchMedia('(display-mode: fullscreen)').matches ||
+                window.matchMedia('(display-mode: minimal-ui)').matches
+             )) ||
+             window.navigator.standalone === true ||
+             (typeof document !== 'undefined' && document.referrer && document.referrer.includes('android-app://'));
+    }
+
     // Hide install banner if already running in standalone PWA mode
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    if (isRunningStandalone()) {
       if (installBanner) installBanner.style.display = 'none';
     }
 
@@ -2744,13 +2796,11 @@
         this.wakeLock = null;
         this.audioCtx = null;
         this.silentSource = null;
+        this.onVisibilityChange = this.onVisibilityChange.bind(this);
       }
       async activate() {
-        if ('wakeLock' in navigator) {
-          try {
-            this.wakeLock = await navigator.wakeLock.request('screen');
-          } catch(e) {}
-        }
+        await this.requestWakeLock();
+        document.addEventListener('visibilitychange', this.onVisibilityChange);
         try {
           const AC = window.AudioContext || window.webkitAudioContext;
           if (AC) {
@@ -2770,7 +2820,20 @@
           }
         } catch(e) {}
       }
+      async requestWakeLock() {
+        if ('wakeLock' in navigator && navigator.wakeLock.request) {
+          try {
+            this.wakeLock = await navigator.wakeLock.request('screen');
+          } catch(e) {}
+        }
+      }
+      onVisibilityChange() {
+        if (document.visibilityState === 'visible' && isSentinelActive) {
+          this.requestWakeLock();
+        }
+      }
       deactivate() {
+        document.removeEventListener('visibilitychange', this.onVisibilityChange);
         if (this.wakeLock) {
           try { this.wakeLock.release(); } catch(e) {}
           this.wakeLock = null;
@@ -2893,6 +2956,33 @@
       });
     }
 
+    let sentinelMode = 'idle'; // 'idle' | 'hardware' | 'network_only'
+    let networkPulseTimer = null;
+
+    function startNetworkPulse() {
+      if (networkPulseTimer) clearInterval(networkPulseTimer);
+      let pulseAngle = 0;
+      networkPulseTimer = setInterval(() => {
+        if (!isSentinelActive || sentinelMode !== 'network_only') {
+          clearInterval(networkPulseTimer);
+          networkPulseTimer = null;
+          return;
+        }
+        pulseAngle += 0.25;
+        const pulse = Math.sin(pulseAngle) * 0.05;
+        seismoHistory.push(pulse);
+        seismoHistory.shift();
+        drawSeismograph();
+      }, 150);
+    }
+
+    function stopNetworkPulse() {
+      if (networkPulseTimer) {
+        clearInterval(networkPulseTimer);
+        networkPulseTimer = null;
+      }
+    }
+
     function drawSeismograph() {
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       sCtx.fillStyle = isDark ? '#0b1120' : '#f8fafc';
@@ -2913,29 +3003,176 @@
         if (i === 0) sCtx.moveTo(0, y);
         else sCtx.lineTo(i * step, y);
       }
-      sCtx.strokeStyle = isSentinelActive ? '#10b981' : '#94a3b8';
+      if (sentinelMode === 'hardware') {
+        sCtx.strokeStyle = '#10b981';
+      } else if (sentinelMode === 'network_only') {
+        sCtx.strokeStyle = '#0284c7';
+      } else {
+        sCtx.strokeStyle = '#94a3b8';
+      }
       sCtx.stroke();
     }
     drawSeismograph();
 
-    function handleDeviceMotion(event) {
-      if (!isSentinelActive) return;
-      const acc = event.accelerationIncludingGravity || event.acceleration;
-      if (!acc) return;
-
-      const result = pWaveEngine.processSample(acc);
-
-      seismoHistory.push(result.filteredZ);
-      seismoHistory.shift();
-      drawSeismograph();
-
-      const thresh = pWaveEngine.triggerThreshold.toFixed(1);
-      seismoValue.textContent = `Ratio STA/LTA: ${result.ratio.toFixed(2)} (Umbral Alerta: ${thresh}) • Anti-Golpes Activo`;
+    async function checkAccelerometerPermission() {
+      if (navigator.permissions && typeof navigator.permissions.query === 'function') {
+        try {
+          const status = await navigator.permissions.query({ name: 'accelerometer' });
+          return status.state;
+        } catch (e) {
+          return 'unknown';
+        }
+      }
+      return 'unknown';
     }
 
-    function openSensorModal() {
+    class CentinelaMotionController {
+      constructor(onSampleCallback, onFallbackCallback) {
+        this.onSample = onSampleCallback;
+        this.onFallback = onFallbackCallback;
+        this.isActive = false;
+        this.hasReceivedMotionData = false;
+        this.motionSource = null;
+        this.genericSensor = null;
+        this.verificationTimer = null;
+        this.handleDeviceMotion = this.handleDeviceMotion.bind(this);
+      }
+
+      handleDeviceMotion(event) {
+        if (!this.isActive) return;
+        const acc = event.accelerationIncludingGravity || event.acceleration;
+        if (acc && (acc.x !== null || acc.y !== null || acc.z !== null)) {
+          this.hasReceivedMotionData = true;
+          this.motionSource = 'devicemotion';
+          this.onSample({
+            x: acc.x || 0,
+            y: acc.y || 0,
+            z: (acc.z !== null && acc.z !== undefined) ? acc.z : 9.81
+          });
+        }
+      }
+
+      async start() {
+        this.isActive = true;
+        this.hasReceivedMotionData = false;
+        this.motionSource = null;
+
+        const permState = await checkAccelerometerPermission();
+        if (permState === 'denied') {
+          console.warn("⚠️ [Centinela] Permiso de acelerómetro en estado 'denied'.");
+        }
+
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+          try {
+            const iosPerm = await DeviceMotionEvent.requestPermission();
+            if (iosPerm === 'denied') {
+              this.fallbackToNetworkMode('permission_denied_ios');
+              return;
+            }
+          } catch (e) {
+            console.warn("DeviceMotionEvent.requestPermission aviso:", e);
+          }
+        }
+
+        try {
+          window.addEventListener('devicemotion', this.handleDeviceMotion, { passive: true });
+        } catch (e) {
+          window.addEventListener('devicemotion', this.handleDeviceMotion);
+        }
+
+        if ('Accelerometer' in window) {
+          try {
+            this.genericSensor = new window.Accelerometer({ frequency: 50 });
+            this.genericSensor.addEventListener('reading', () => {
+              if (!this.isActive) return;
+              if (!this.hasReceivedMotionData || this.motionSource === 'generic-sensor') {
+                this.hasReceivedMotionData = true;
+                this.motionSource = 'generic-sensor';
+                this.onSample({
+                  x: this.genericSensor.x || 0,
+                  y: this.genericSensor.y || 0,
+                  z: (this.genericSensor.z !== undefined && this.genericSensor.z !== null) ? this.genericSensor.z : 9.81
+                });
+              }
+            });
+            this.genericSensor.addEventListener('error', (err) => {
+              console.warn("Generic Sensor Accelerometer aviso:", err.error?.name || err);
+            });
+            this.genericSensor.start();
+          } catch (e) {
+            console.warn("Generic Sensor Accelerometer no disponible:", e);
+          }
+        }
+
+        if (this.verificationTimer) clearTimeout(this.verificationTimer);
+        this.verificationTimer = setTimeout(() => {
+          if (!this.isActive) return;
+          if (!this.hasReceivedMotionData) {
+            console.warn("⚠️ [Centinela] Sin telemetría de acelerómetro tras 2.5s. Conmutando a Modo Red Sísmica Global.");
+            this.fallbackToNetworkMode(permState === 'denied' ? 'permission_denied' : 'no_hardware_data');
+          }
+        }, 2500);
+      }
+
+      fallbackToNetworkMode(reason) {
+        this.motionSource = 'network-only';
+        if (this.onFallback) {
+          this.onFallback(reason);
+        }
+      }
+
+      stop() {
+        this.isActive = false;
+        if (this.verificationTimer) {
+          clearTimeout(this.verificationTimer);
+          this.verificationTimer = null;
+        }
+        window.removeEventListener('devicemotion', this.handleDeviceMotion);
+        if (this.genericSensor) {
+          try {
+            this.genericSensor.stop();
+          } catch (e) {}
+          this.genericSensor = null;
+        }
+      }
+    }
+
+    const motionController = new CentinelaMotionController(
+      (acc) => {
+        if (!isSentinelActive) return;
+        if (sentinelMode !== 'hardware') {
+          sentinelMode = 'hardware';
+          stopNetworkPulse();
+          sentinelBadge.textContent = currentLang === 'es' ? "🟢 Centinela Vigilando" : "🟢 Sentinel Watching";
+          sentinelBadge.className = "badge-status badge-green";
+        }
+        const result = pWaveEngine.processSample(acc);
+        seismoHistory.push(result.filteredZ);
+        seismoHistory.shift();
+        drawSeismograph();
+
+        const thresh = pWaveEngine.triggerThreshold.toFixed(1);
+        const srcLabel = motionController.motionSource === 'generic-sensor' ? 'Sensor API' : 'Motion';
+        seismoValue.textContent = `Ratio STA/LTA: ${result.ratio.toFixed(2)} (Umbral Alerta: ${thresh}) • Anti-Golpes Activo [${srcLabel}]`;
+      },
+      (reason) => {
+        if (!isSentinelActive) return;
+        sentinelMode = 'network_only';
+        btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStop;
+        sentinelBadge.textContent = STRINGS[currentLang].sentinelBadgeNetwork;
+        sentinelBadge.className = "badge-status badge-blue";
+        seismoValue.textContent = STRINGS[currentLang].sentinelValueNetwork;
+        startNetworkPulse();
+        openSensorModal({ reason });
+      }
+    );
+
+    function openSensorModal(options = {}) {
       const modal = document.getElementById('modalSensorGuide');
-      if (modal) modal.classList.add('is-active');
+      if (modal) {
+        applyLanguage(currentLang);
+        modal.classList.add('is-active');
+      }
     }
     function closeSensorModal() {
       const modal = document.getElementById('modalSensorGuide');
@@ -2947,6 +3184,7 @@
     const btnCloseSensorModalFooter = document.getElementById('btnCloseSensorModalFooter');
     const btnRetrySensor = document.getElementById('btnRetrySensor');
     const btnModalInstallApp = document.getElementById('btnModalInstallApp');
+    const btnContinueNetworkOnly = document.getElementById('btnContinueNetworkOnly');
 
     if (btnCloseSensorModal) {
       btnCloseSensorModal.addEventListener('click', closeSensorModal);
@@ -2962,10 +3200,33 @@
         }
       });
     }
-    if (btnRetrySensor) {
-      btnRetrySensor.addEventListener('click', () => {
+    if (btnContinueNetworkOnly) {
+      btnContinueNetworkOnly.addEventListener('click', () => {
         closeSensorModal();
-        if (btnSentinel) btnSentinel.click();
+        if (!isSentinelActive) {
+          initAudio();
+          sentinelGuard.activate();
+          isSentinelActive = true;
+          sentinelMode = 'network_only';
+          btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStop;
+          sentinelBadge.textContent = STRINGS[currentLang].sentinelBadgeNetwork;
+          sentinelBadge.className = "badge-status badge-blue";
+          seismoValue.textContent = STRINGS[currentLang].sentinelValueNetwork;
+          startNetworkPulse();
+        }
+      });
+    }
+    if (btnRetrySensor) {
+      btnRetrySensor.addEventListener('click', async () => {
+        closeSensorModal();
+        motionController.stop();
+        stopNetworkPulse();
+        sentinelMode = 'hardware';
+        isSentinelActive = true;
+        btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStop;
+        sentinelBadge.textContent = currentLang === 'es' ? "🟢 Centinela Vigilando" : "🟢 Sentinel Watching";
+        sentinelBadge.className = "badge-status badge-green";
+        await motionController.start();
       });
     }
     if (modalSensorGuide) {
@@ -2977,64 +3238,26 @@
     btnSentinel.addEventListener('click', async () => {
       initAudio();
       if (!isSentinelActive) {
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-          try {
-            const perm = await DeviceMotionEvent.requestPermission();
-            if (perm === 'denied') {
-              openSensorModal();
-              return;
-            }
-          } catch(e) {
-            console.warn("DeviceMotionEvent.requestPermission aviso:", e);
-          }
-        }
         await sentinelGuard.activate();
         pWaveEngine.triggerThreshold = getSentinelThreshold();
-        window.addEventListener('devicemotion', handleDeviceMotion);
         isSentinelActive = true;
+        sentinelMode = 'hardware';
         btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStop;
         sentinelBadge.textContent = currentLang === 'es' ? "🟢 Centinela Vigilando" : "🟢 Sentinel Watching";
         sentinelBadge.className = "badge-status badge-green";
-
-        // Verificación activa de hardware: en teléfonos móviles esperar hasta 2.5s para evitar falsos negativos
-        let receivedMotionData = false;
-        function verifyHardwareSensor(e) {
-          const a = e.accelerationIncludingGravity || e.acceleration;
-          if (a && (a.x !== null || a.y !== null || a.z !== null)) {
-            receivedMotionData = true;
-            window.removeEventListener('devicemotion', verifyHardwareSensor);
-          }
-        }
-        window.addEventListener('devicemotion', verifyHardwareSensor);
-
-        const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-
-        setTimeout(() => {
-          window.removeEventListener('devicemotion', verifyHardwareSensor);
-          if (isMobile && !receivedMotionData && isSentinelActive) {
-            sentinelGuard.deactivate();
-            window.removeEventListener('devicemotion', handleDeviceMotion);
-            isSentinelActive = false;
-            btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStart;
-            sentinelBadge.textContent = currentLang === 'es' ? "Descanso" : "Resting";
-            sentinelBadge.className = "badge-status badge-yellow";
-            drawSeismograph();
-            openSensorModal();
-          } else if (!isMobile && !receivedMotionData && isSentinelActive) {
-            seismoValue.textContent = currentLang === 'es'
-              ? "Modo Computadora: Red sísmica global activa (El sensor de reposo opera en celulares)"
-              : "Desktop Mode: Global seismic network active (Resting shock sensor operates on mobile)";
-          }
-        }, 2500);
-
+        await motionController.start();
       } else {
+        motionController.stop();
+        stopNetworkPulse();
         sentinelGuard.deactivate();
-        window.removeEventListener('devicemotion', handleDeviceMotion);
         isSentinelActive = false;
+        sentinelMode = 'idle';
         btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStart;
         sentinelBadge.textContent = currentLang === 'es' ? "Descanso" : "Resting";
         sentinelBadge.className = "badge-status badge-yellow";
+        seismoHistory.fill(0);
         drawSeismograph();
+        seismoValue.textContent = STRINGS[currentLang].seismoSensorLabel;
       }
     });
 
@@ -3621,19 +3844,57 @@
       const btnRetryGpsEl = document.getElementById('btnRetryGps');
       if (btnRetryGpsEl) btnRetryGpsEl.textContent = d.gpsGuideRetry;
 
-      // Sensor Guide Modal Labels
+      // Sensor Guide Modal Labels (Adaptive: Standalone PWA vs Browser)
+      const isStandalone = isRunningStandalone();
       const sensorGuideTitleEl = document.getElementById('sensorGuideTitle');
-      if (sensorGuideTitleEl) sensorGuideTitleEl.textContent = d.sensorGuideTitle;
+      if (sensorGuideTitleEl) {
+        sensorGuideTitleEl.textContent = isStandalone ? d.sensorGuideTitleStandalone : d.sensorGuideTitle;
+      }
       const sensorAppClarificationEl = document.getElementById('sensorAppClarification');
-      if (sensorAppClarificationEl) sensorAppClarificationEl.innerHTML = d.sensorAppClarification;
+      if (sensorAppClarificationEl) {
+        sensorAppClarificationEl.innerHTML = isStandalone ? d.sensorAppClarificationStandalone : d.sensorAppClarification;
+      }
+      const sensorGuideBadgeOpt1El = document.getElementById('sensorGuideBadgeOpt1');
+      if (sensorGuideBadgeOpt1El) {
+        sensorGuideBadgeOpt1El.textContent = isStandalone ? d.sensorGuideBadgeOpt1Standalone : d.sensorGuideBadgeOpt1;
+      }
       const sensorGuideAndroidEl = document.getElementById('sensorGuideAndroid');
-      if (sensorGuideAndroidEl) sensorGuideAndroidEl.innerHTML = d.sensorGuideAndroid;
+      if (sensorGuideAndroidEl) {
+        sensorGuideAndroidEl.innerHTML = isStandalone ? d.sensorGuideAndroidStandalone : d.sensorGuideAndroid;
+      }
+      const sensorGuideBadgeOpt2El = document.getElementById('sensorGuideBadgeOpt2');
+      if (sensorGuideBadgeOpt2El) {
+        sensorGuideBadgeOpt2El.textContent = isStandalone ? d.sensorGuideBadgeOpt2Standalone : d.sensorGuideBadgeOpt2;
+      }
       const sensorGuideAndroidSettingsEl = document.getElementById('sensorGuideAndroidSettings');
-      if (sensorGuideAndroidSettingsEl) sensorGuideAndroidSettingsEl.innerHTML = d.sensorGuideAndroidSettings;
+      if (sensorGuideAndroidSettingsEl) {
+        sensorGuideAndroidSettingsEl.innerHTML = isStandalone ? d.sensorGuideAndroidSettingsStandalone : d.sensorGuideAndroidSettings;
+      }
+      const sensorGuideBadgeOpt3El = document.getElementById('sensorGuideBadgeOpt3');
+      if (sensorGuideBadgeOpt3El) {
+        sensorGuideBadgeOpt3El.textContent = d.sensorGuideBadgeOpt3;
+      }
+      const sensorGuideXiaomiEl = document.getElementById('sensorGuideXiaomi');
+      if (sensorGuideXiaomiEl) {
+        sensorGuideXiaomiEl.innerHTML = d.sensorGuideXiaomi;
+      }
       const sensorGuideIOSEl = document.getElementById('sensorGuideIOS');
-      if (sensorGuideIOSEl) sensorGuideIOSEl.innerHTML = d.sensorGuideIOS;
+      if (sensorGuideIOSEl) {
+        sensorGuideIOSEl.innerHTML = d.sensorGuideIOS;
+      }
+      const sensorReassuranceNoteEl = document.getElementById('sensorReassuranceNote');
+      if (sensorReassuranceNoteEl) {
+        sensorReassuranceNoteEl.innerHTML = d.sensorReassurance;
+      }
+      const btnContinueNetworkOnlyEl = document.getElementById('btnContinueNetworkOnly');
+      if (btnContinueNetworkOnlyEl) {
+        btnContinueNetworkOnlyEl.textContent = d.btnContinueNetworkOnly;
+      }
       const btnModalInstallAppEl = document.getElementById('btnModalInstallApp');
-      if (btnModalInstallAppEl) btnModalInstallAppEl.textContent = d.btnModalInstall;
+      if (btnModalInstallAppEl) {
+        btnModalInstallAppEl.textContent = d.btnModalInstall;
+        btnModalInstallAppEl.style.display = isStandalone ? 'none' : 'block';
+      }
       const btnCloseSensorFooterEl = document.getElementById('btnCloseSensorModalFooter');
       if (btnCloseSensorFooterEl) btnCloseSensorFooterEl.textContent = d.btnCancelDemo || "Cerrar";
       const btnRetrySensorEl = document.getElementById('btnRetrySensor');
