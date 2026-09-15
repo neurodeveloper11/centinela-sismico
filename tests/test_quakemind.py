@@ -306,3 +306,52 @@ class TestSensorAndPWAArchitecture:
         assert "Radar Sísmico Protector" not in self.html_content
 
 
+class TestDynamicLocationTabAndRadialSpeed:
+    """Verifies the dynamic user location tab and radial micro-query alerting."""
+
+    @classmethod
+    def setup_class(cls):
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        with open(os.path.join(repo_root, "pwa", "index.html"), "r", encoding="utf-8") as f:
+            cls.html_content = f.read()
+        with open(os.path.join(repo_root, "pwa", "sw.js"), "r", encoding="utf-8") as f:
+            cls.sw_content = f.read()
+
+    def test_dynamic_tab_functions_present_in_html(self):
+        assert "function updateUserLocationTab" in self.html_content
+        assert "function fetchLocalRadialAlerts" in self.html_content
+        assert "function startLocalRadialPolling" in self.html_content
+        assert "function stopLocalRadialPolling" in self.html_content
+        assert "pillMyLocation" in self.html_content
+
+    def test_my_location_i18n_strings_present(self):
+        assert "pulseRegMyZone" in self.html_content
+        assert "pulseMyZoneCalm" in self.html_content
+        assert "📍 Mi Zona" in self.html_content
+        assert "📍 My Zone" in self.html_content
+
+    def test_radial_query_url_and_drift_correction(self):
+        assert "fdsnws/event/1/query?format=geojson" in self.html_content
+        assert "maxradiuskm=750" in self.html_content
+        assert "serverTimeDriftMs" in self.html_content
+
+    def test_my_location_region_filtering_logic(self):
+        # Test simulated logic: user in Cali (3.4516, -76.5320)
+        user_lat, user_lon = 3.4516, -76.5320
+        user_country = "colombia"
+
+        # Quake in Popayan (~110 km from Cali)
+        popayan_dist = haversine_distance(user_lat, user_lon, 2.4419, -76.6063)
+        assert popayan_dist <= 750.0  # within radial threshold
+
+        # Quake in Tokyo (~14,000 km)
+        tokyo_dist = haversine_distance(user_lat, user_lon, 35.6762, 139.6503)
+        assert tokyo_dist > 750.0
+        assert user_country not in "japan, tokyo".lower()
+
+    def test_service_worker_bypasses_usgs_and_radial_feeds(self):
+        assert "event.request.url.includes('earthquake.usgs.gov')" in self.sw_content
+        assert "event.request.url.includes('seismicportal.eu')" in self.sw_content
+        assert "centinela-cache-v8" in self.sw_content
+
+

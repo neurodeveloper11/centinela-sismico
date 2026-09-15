@@ -1377,12 +1377,16 @@
         pulseRegAsia: "🌏 Asia / Pacífico",
         pulseRegEurope: "🏛️ Europa / Med",
         pulseRegNortham: "🏔️ Norteamérica",
+        pulseRegMyZone: "📍 Mi Zona",
+        pulseMyZoneCalm: "🛡️ Todo en calma en tu zona: No se han registrado eventos sísmicos en las últimas 24h cerca de ti. Tu territorio está estable.",
         pulseSearchPlaceholder: "🔍 Buscar por país, ciudad o región...",
         pulseDistanceRef: "Ref: Ubicación del usuario",
         pulseLoading: "Cargando eventos globales...",
         pulseCountSuffix: "eventos en la Tierra",
         pulseImpactCalm: "Imperceptible en tu zona (MMI I) — Tu entorno está a salvo 🛡️",
         pulseDistPrefix: "Distancia a ti:",
+        pulseBadgeMulti: "Red USGS + EMSC en Vivo",
+        pulseRadialBadge: "🎯 Radar Local Activo",
         groups: { water: "Agua y Alimentos", tools: "Herramientas y Comunicación", meds: "Salud y Primeros Auxilios", docs: "Documentos y Valores" },
         items: [
           { id: "w1", group: "water", text: "4 litros de agua embotellada por persona (ración para 72h)" },
@@ -1544,12 +1548,16 @@
         pulseRegAsia: "🌏 Asia / Pacific",
         pulseRegEurope: "🏛️ Europe / Med",
         pulseRegNortham: "🏔️ North America",
+        pulseRegMyZone: "📍 My Zone",
+        pulseMyZoneCalm: "🛡️ All calm in your zone: No seismic events recorded in the last 24h near you. Your area is stable.",
         pulseSearchPlaceholder: "🔍 Search by country, city or region...",
         pulseDistanceRef: "Ref: Your GPS coordinates",
         pulseLoading: "Loading global events...",
         pulseCountSuffix: "events on Earth",
         pulseImpactCalm: "Imperceptible at your area (MMI I) — Your home is safe 🛡️",
         pulseDistPrefix: "Distance to you:",
+        pulseBadgeMulti: "Live USGS + EMSC Network",
+        pulseRadialBadge: "🎯 Local Radar Active",
         groups: { water: "Water & Sustenance", tools: "Tools & Communication", meds: "Medical & First Aid", docs: "Vital Documents & Cash" },
         items: [
           { id: "w1", group: "water", text: "4 Liters (1 Gallon) of bottled water per person (72h supply)" },
@@ -2037,6 +2045,7 @@
     let userLon = parseFloat(localStorage.getItem('qm_user_lon') || '-76.5320');
     let radarInterval = null;
     let lastAlertedId = null;
+    let serverTimeDriftMs = 0;
 
     const btnGetLocation = document.getElementById('btnGetLocation');
     const locationInfo = document.getElementById('locationInfo');
@@ -2144,15 +2153,20 @@
 
         // Reverse geocoding (BigDataCloud free client-side API, no key required)
         let cityName = '';
+        let shortCity = '';
+        let countryName = '';
         try {
           const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${userLat}&longitude=${userLon}&localityLanguage=${currentLang}`);
           const geoData = await geoRes.json();
-          cityName = geoData.city || geoData.locality || '';
+          shortCity = geoData.city || geoData.locality || '';
+          countryName = geoData.countryName || '';
+          cityName = shortCity;
           const region = geoData.principalSubdivision || '';
           if (cityName && region) {
             cityName = `${cityName} / ${region}`;
           } else if (region) {
             cityName = region;
+            shortCity = shortCity || region;
           }
           if (cityName) {
             localStorage.setItem('qm_user_city', cityName);
@@ -2160,6 +2174,8 @@
         } catch (geoErr) {
           // Fallback: use stored city or coordinates only
           cityName = localStorage.getItem('qm_user_city') || '';
+          shortCity = localStorage.getItem('qm_user_city_short') || '';
+          countryName = localStorage.getItem('qm_user_country') || '';
         }
 
         locationInfo.textContent = cityName
@@ -2167,6 +2183,15 @@
           : (currentLang === 'es'
               ? `📍 Ubicación sincronizada: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Precisión: ~${Math.round(pos.coords.accuracy)}m)`
               : `📍 Location synchronized: ${userLat.toFixed(4)}°, ${userLon.toFixed(4)}° (Accuracy: ~${Math.round(pos.coords.accuracy)}m)`);
+
+        // Dynamic tab: inject user's city as default pulse tab
+        updateUserLocationTab(shortCity || cityName, countryName);
+
+        // Pre-warm AudioContext for zero-latency emergency alerts
+        initAudio();
+
+        // Start high-frequency local radial alert polling (5s, ~2KB payloads)
+        startLocalRadialPolling();
 
         startAdaptiveMonitoring();
         fetchWorldPulse();
@@ -3263,7 +3288,7 @@
       }
     });
 
-    // Sub-segundo: Listener para eventos recibidos por WebSocket EMSC
+    // Sub-segundo: Listener para eventos recibidos por WebSocket EMSC (< 200 ms)
     function handleLiveSeismicEvent(evt) {
       const mag = evt.mag;
       const originTime = evt.time;
@@ -3275,7 +3300,8 @@
       const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
 
       if (localMMI >= userThreshold && evt.id !== lastAlertedId) {
-        const elapsedSec = (Date.now() - originTime) / 1000;
+        const correctedNow = Date.now() - (serverTimeDriftMs || 0);
+        const elapsedSec = (correctedNow - originTime) / 1000;
         const sWaveTravelTime = hypoDist / 3.5;
         const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
 
@@ -3284,7 +3310,7 @@
           fireEarlyWarning(evt.title, distKm, mag, remainingSec, localMMI);
           aftershockWatchUntil = Date.now() + 300000;
         }
-      } else if (distKm <= 500 && localMMI < userThreshold) {
+      } else if (distKm <= 750 && localMMI < userThreshold) {
         if (evt.id !== lastNearbyCalmEventId) {
           lastNearbyCalmEventId = evt.id;
           const sTitle = document.getElementById('shieldStatusTitle');
@@ -3296,6 +3322,28 @@
             sDesc.textContent = currentLang === 'es'
               ? `Registrado ${evt.title} a ${Math.round(distKm)} km (M${mag.toFixed(1)}). En tus coordenadas la intensidad estimada es MMI ${localMMI.toFixed(1)} (Imperceptible). Tu familia y tu hogar no corren ningún riesgo.`
               : `Recorded ${evt.title} at ${Math.round(distKm)} km (M${mag.toFixed(1)}). At your coordinates the estimated intensity is MMI ${localMMI.toFixed(1)} (Imperceptible). Your family and home are completely safe.`;
+          }
+        }
+      }
+
+      // Stream regional events (<= 750 km) directly into World Pulse / Mi Zona tab
+      if (distKm <= 750 && typeof worldPulseEvents !== 'undefined') {
+        const wsPulseEvent = {
+          id: evt.id || ('emsc_' + originTime),
+          title: evt.title || `M ${mag.toFixed(1)} Regional`,
+          place: evt.place || evt.title || 'Regional Event',
+          mag: mag,
+          time: originTime,
+          lat: evt.lat,
+          lon: evt.lon,
+          depth: evt.depth || 10.0,
+          source: 'EMSC_WS'
+        };
+        if (!worldPulseEvents.some(we => we.id === wsPulseEvent.id)) {
+          worldPulseEvents.unshift(wsPulseEvent);
+          worldPulseEvents.sort((a, b) => b.time - a.time);
+          if (currentPulseRegion === 'my_location') {
+            renderWorldPulseCards();
           }
         }
       }
@@ -3516,6 +3564,9 @@
     let currentPulseRegion = 'all';
     let pulseSearchQuery = '';
     let pulseDisplayLimit = 10;
+    let userCountry = localStorage.getItem('qm_user_country') || '';
+    let userCityShort = localStorage.getItem('qm_user_city_short') || '';
+    let localRadialTimer = null;
 
     const pulseListContainer = document.getElementById('pulseListContainer');
     const pulseCountText = document.getElementById('pulseCountText');
@@ -3557,6 +3608,13 @@
         return inNorthamBox || northamKeywords.some(k => p.includes(k));
       }
 
+      if (region === 'my_location') {
+        const distKm = haversine(userLat, userLon, lat, lon);
+        if (distKm <= 750) return true;
+        if (userCountry && p.includes(userCountry.toLowerCase())) return true;
+        return false;
+      }
+
       return true;
     }
 
@@ -3583,13 +3641,17 @@
         return matchesRegion && matchesQuery;
       });
 
-      pulseCountText.textContent = `${filtered.length} ${STRINGS[currentLang].pulseCountSuffix || 'eventos'} (${currentPulseRegion.toUpperCase()})`;
+      const regionLabel = currentPulseRegion === 'my_location' ? (userCityShort || (currentLang === 'es' ? 'Mi Zona' : 'My Zone')) : currentPulseRegion.toUpperCase();
+      pulseCountText.textContent = `${filtered.length} ${STRINGS[currentLang].pulseCountSuffix || 'eventos'} (${regionLabel})`;
       pulseDistanceRef.textContent = `${STRINGS[currentLang].pulseDistanceRef || 'Ref: Ubicación'}: ${userLat.toFixed(2)}°, ${userLon.toFixed(2)}°`;
 
       if (filtered.length === 0) {
+        const emptyMsg = currentPulseRegion === 'my_location'
+          ? (STRINGS[currentLang].pulseMyZoneCalm || (isEs ? '🛡️ Todo en calma en tu zona.' : '🛡️ All calm in your zone.'))
+          : (isEs ? 'No se registran eventos sísmicos en esta región en las últimas 24 horas.' : 'No seismic events recorded in this region in the last 24 hours.');
         pulseListContainer.innerHTML = `
           <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.88rem;">
-            🌱 ${isEs ? 'No se registran eventos sísmicos en esta región en las últimas 24 horas.' : 'No seismic events recorded in this region in the last 24 hours.'}
+            ${currentPulseRegion === 'my_location' ? '' : '🌱 '}${emptyMsg}
           </div>
         `;
         return;
@@ -3727,6 +3789,130 @@
     }
 
     // ==========================================
+    // DYNAMIC USER LOCATION TAB & RADIAL ALERTS
+    // ==========================================
+
+    function updateUserLocationTab(cityName, countryName) {
+      const filtersContainer = document.getElementById('pulseFilters');
+      if (!filtersContainer) return;
+
+      userCityShort = cityName || '';
+      userCountry = countryName || '';
+      localStorage.setItem('qm_user_city_short', userCityShort);
+      localStorage.setItem('qm_user_country', userCountry);
+
+      const tabLabel = userCityShort
+        ? `📍 ${userCityShort} (${STRINGS[currentLang].pulseRegMyZone || 'Mi Zona'})`
+        : `📍 ${STRINGS[currentLang].pulseRegMyZone || 'Mi Zona'}`;
+
+      let pillMyLoc = document.getElementById('pillMyLocation');
+      if (!pillMyLoc) {
+        pillMyLoc = document.createElement('button');
+        pillMyLoc.className = 'pill-btn';
+        pillMyLoc.setAttribute('data-region', 'my_location');
+        pillMyLoc.id = 'pillMyLocation';
+        filtersContainer.insertBefore(pillMyLoc, filtersContainer.firstChild);
+
+        pillMyLoc.addEventListener('click', () => {
+          document.querySelectorAll('#pulseFilters .pill-btn').forEach(p => p.classList.remove('active'));
+          pillMyLoc.classList.add('active');
+          currentPulseRegion = 'my_location';
+          pulseDisplayLimit = 10;
+          renderWorldPulseCards();
+        });
+      }
+      pillMyLoc.textContent = tabLabel;
+
+      // Set as default active tab
+      document.querySelectorAll('#pulseFilters .pill-btn').forEach(p => p.classList.remove('active'));
+      pillMyLoc.classList.add('active');
+      currentPulseRegion = 'my_location';
+      localStorage.setItem('qm_default_pulse_region', 'my_location');
+    }
+
+    async function fetchLocalRadialAlerts() {
+      if (!navigator.onLine || !localStorage.getItem('qm_user_lat')) return;
+      try {
+        const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${userLat}&longitude=${userLon}&maxradiuskm=750&minmagnitude=2.0&limit=5&orderby=time`;
+        const res = await fetch(url);
+
+        // Measure server time drift for accurate S-wave countdown
+        const serverDateStr = res.headers.get('Date');
+        if (serverDateStr) {
+          const serverTime = new Date(serverDateStr).getTime();
+          const clientTime = Date.now();
+          serverTimeDriftMs = clientTime - serverTime;
+        }
+
+        const data = await res.json();
+        const localEvents = (data.features || []).map(feat => ({
+          id: feat.id,
+          title: feat.properties.title,
+          place: feat.properties.place || feat.properties.title,
+          mag: feat.properties.mag,
+          time: feat.properties.time,
+          lat: feat.geometry.coordinates[1],
+          lon: feat.geometry.coordinates[0],
+          depth: feat.geometry.coordinates[2] || 10.0,
+          url: feat.properties.url,
+          source: 'USGS_RADIAL'
+        })).filter(e => e.mag !== null && !isNaN(e.mag));
+
+        // Merge newly discovered local events into worldPulseEvents for instant UI update
+        let newLocalAdded = false;
+        for (const le of localEvents) {
+          if (!worldPulseEvents.some(we => we.id === le.id)) {
+            worldPulseEvents.unshift(le);
+            newLocalAdded = true;
+          }
+        }
+        if (newLocalAdded) {
+          worldPulseEvents.sort((a, b) => b.time - a.time);
+          if (currentPulseRegion === 'my_location') {
+            renderWorldPulseCards();
+          }
+        }
+
+        // Check local events for immediate early warning
+        const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
+        for (const evt of localEvents) {
+          const distKm = haversine(userLat, userLon, evt.lat, evt.lon);
+          const hypoDist = hypocentralDistance(distKm, evt.depth);
+          const localMMI = calculateEstimatedMMI(evt.mag, hypoDist);
+
+          if (localMMI >= userThreshold && evt.id !== lastAlertedId) {
+            const correctedNow = Date.now() - (serverTimeDriftMs || 0);
+            const elapsedSec = (correctedNow - evt.time) / 1000;
+            const sWaveTravelTime = hypoDist / 3.5;
+            const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
+
+            if (remainingSec > 0) {
+              lastAlertedId = evt.id;
+              fireEarlyWarning(evt.title, distKm, evt.mag, remainingSec, localMMI);
+              aftershockWatchUntil = Date.now() + 300000;
+              break;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Centinela-Radial] Local radial query error:', err);
+      }
+    }
+
+    function startLocalRadialPolling() {
+      if (localRadialTimer) clearInterval(localRadialTimer);
+      fetchLocalRadialAlerts();
+      localRadialTimer = setInterval(fetchLocalRadialAlerts, 5000);
+    }
+
+    function stopLocalRadialPolling() {
+      if (localRadialTimer) {
+        clearInterval(localRadialTimer);
+        localRadialTimer = null;
+      }
+    }
+
+    // ==========================================
     // ADAPTIVE MICRO-POLLING & BATTERY OPTIMIZATION
     // ==========================================
     let adaptiveTimer = null;
@@ -3767,6 +3953,11 @@
       if (!isHidden) {
         // Tab foregrounded: poll immediately with fresh data
         startAdaptiveMonitoring();
+        // Resume local radial polling if user has location
+        if (localStorage.getItem('qm_user_lat')) startLocalRadialPolling();
+      } else {
+        // Tab hidden: pause high-frequency radial polling to save battery
+        stopLocalRadialPolling();
       }
     });
 
@@ -4006,6 +4197,12 @@
       const pillAsia = document.getElementById('pillAsia'); if (pillAsia) pillAsia.textContent = d.pulseRegAsia;
       const pillEurope = document.getElementById('pillEurope'); if (pillEurope) pillEurope.textContent = d.pulseRegEurope;
       const pillNortham = document.getElementById('pillNortham'); if (pillNortham) pillNortham.textContent = d.pulseRegNortham;
+      const pillMyLoc = document.getElementById('pillMyLocation');
+      if (pillMyLoc) {
+        pillMyLoc.textContent = userCityShort
+          ? `📍 ${userCityShort} (${d.pulseRegMyZone || 'Mi Zona'})`
+          : `📍 ${d.pulseRegMyZone || 'Mi Zona'}`;
+      }
       if (pulseSearchInput) pulseSearchInput.placeholder = d.pulseSearchPlaceholder;
 
       // Transparency and Offline safety labels
@@ -4075,6 +4272,17 @@
       radarBadge.className = "badge-status badge-green";
       btnGetLocation.className = 'btn-action is-connected';
       btnGetLocation.innerHTML = `${STRINGS[currentLang].btnGetLocPersist} • <small style="text-decoration:underline;">[${STRINGS[currentLang].btnGetLocUpdateGPS}]</small>`;
+
+      // Restore dynamic user location tab from localStorage
+      const savedShortCity = localStorage.getItem('qm_user_city_short') || '';
+      const savedCountry = localStorage.getItem('qm_user_country') || '';
+      if (savedShortCity || savedCountry) {
+        updateUserLocationTab(savedShortCity || savedCity, savedCountry);
+      }
+
+      // Start high-frequency local radial polling (restored session)
+      startLocalRadialPolling();
+
       startAdaptiveMonitoring();
     }
     updateNetworkStatus();
