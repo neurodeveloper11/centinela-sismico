@@ -23,6 +23,7 @@ from quakemind_engine import (
     fetch_emsc_earthquakes,
     fetch_multi_source,
     _deduplicate_quakes,
+    calculate_eew_kinematics,
     SEISMIC_FEEDS,
     USGS_FEEDS
 )
@@ -199,3 +200,44 @@ class TestMultiSourceIngestion:
         quakes = fetch_multi_source("day_45", timeout=10)
         assert isinstance(quakes, list)
         assert len(quakes) > 0
+
+
+class TestEEWKinematicsEngine:
+
+    def test_eew_kinematics_warning_window(self):
+        # M 6.5 at 120 km epicentral, 15 km depth
+        user_lat, user_lon = 3.4516, -76.5320
+        # Simulated epicenter ~120 km away
+        eq = {
+            "id": "test-eew-1",
+            "lat": 4.53,
+            "lon": -76.53,
+            "depth_km": 15.0,
+            "mag": 6.5,
+            "time_epoch": int((pytest.importorskip("time").time() - 10) * 1000) # occurred 10s ago
+        }
+        res = calculate_eew_kinematics(user_lat, user_lon, eq)
+        assert res["hypocentral_dist_km"] >= 100.0
+        assert res["p_wave_travel_sec"] < res["s_wave_travel_sec"]
+        assert res["warning_window_p_s_sec"] > 0
+        assert res["estimated_local_mmi"] >= 4.0
+        # If S-wave takes ~35s and 10s elapsed, remaining should be ~25s
+        assert res["remaining_s_wave_seconds"] > 15.0
+        assert res["is_hazardous"] is True
+
+    def test_eew_kinematics_imperceptible_event(self):
+        # M 3.0 at 250 km away -> Imperceptible
+        user_lat, user_lon = 3.4516, -76.5320
+        eq = {
+            "id": "test-eew-small",
+            "lat": 5.70,
+            "lon": -76.53,
+            "depth_km": 30.0,
+            "mag": 3.0,
+            "time_epoch": int((pytest.importorskip("time").time() - 2) * 1000)
+        }
+        res = calculate_eew_kinematics(user_lat, user_lon, eq)
+        assert res["estimated_local_mmi"] < 3.0
+        # Non hazardous: should not cause alarm panic
+        assert res["is_hazardous"] is False
+

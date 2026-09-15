@@ -2273,7 +2273,24 @@
     let alertCountdownTimer = null;
     let alertAutoDismissTimer = null;
 
+    function announceVoiceAlert(text) {
+      const alertMode = localStorage.getItem('qm_alert_mode') || 'sound_vibrate';
+      if (alertMode === 'silent_vibrate') return;
+      if (!('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = currentLang === 'es' ? 'es-ES' : 'en-US';
+        u.rate = 1.25;
+        u.volume = 1.0;
+        window.speechSynthesis.speak(u);
+      } catch(e) {}
+    }
+
     function dismissEarlyWarning() {
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch(e) {}
+      }
       clearTimeout(alertAutoDismissTimer);
       clearInterval(alertCountdownTimer);
       stopEmergencySiren();
@@ -2367,6 +2384,9 @@
       } else {
         if (alertMode === 'sound_vibrate') {
           triggerEmergencySiren();
+          announceVoiceAlert(currentLang === 'es'
+            ? `Alerta sísmica. Magnitud ${mag.toFixed(1)}. Protéjase.`
+            : `Seismic alert. Magnitude ${mag.toFixed(1)}. Take cover.`);
         } else if (alertMode === 'silent_vibrate') {
           if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 800]);
         }
@@ -2377,6 +2397,9 @@
         rem--;
         if (rem > 0) {
           if (countdownSec) countdownSec.textContent = `${rem}s`;
+          if (!isDemo && rem <= 10) {
+            announceVoiceAlert(`${rem}`);
+          }
         } else {
           clearInterval(alertCountdownTimer);
           stopEmergencySiren();
@@ -2406,6 +2429,7 @@
               dismissEarlyWarning();
             }, 7000);
           } else {
+            announceVoiceAlert(currentLang === 'es' ? "¡Onda destructiva en zona! Mantenga la posición." : "Destructive wave in zone! Hold on.");
             if (countdownSec) countdownSec.textContent = currentLang === 'es' ? `¡ONDA EN ZONA!` : `WAVE IN ZONE!`;
           }
         }
@@ -2530,11 +2554,236 @@
     }
 
     // ==========================================
-    // MODO CENTINELA (ACCELEROMETER P-WAVE SEISMOMETER)
+    // MODO CENTINELA (DSP: BIQUAD BANDPASS + ALLEN STA/LTA + ANTI-JERK)
     // ==========================================
+    class LocalPWaveSeismometer {
+      constructor(options = {}) {
+        this.fs = options.sampleRate || 50;
+        this.tSta = 0.35;
+        this.tLta = 10.0;
+        this.triggerThreshold = options.threshold || 5.2;
+        this.persistenceRequired = Math.round(0.18 * this.fs); // 180 ms sostenidos (9 muestras @ 50Hz)
+
+        this.cSta = Math.exp(-1 / (this.fs * this.tSta));
+        this.cLta = Math.exp(-1 / (this.fs * this.tLta));
+
+        this.sta = 0.001;
+        this.lta = 0.001;
+        this.ratio = 1.0;
+        this.consecutiveHits = 0;
+        this.knockCooldown = 0;
+
+        // Biquad Pasa-Banda (1.0 - 9.0 Hz @ 50 Hz) Direct Form II
+        this.b0 = 0.3913; this.b1 = 0.0000; this.b2 = -0.3913;
+        this.a1 = -1.0645; this.a2 = 0.2174;
+
+        this.w = {
+          x: [0, 0],
+          y: [0, 0],
+          z: [0, 0]
+        };
+        this.prevFiltered = { x: 0, y: 0, z: 0 };
+        this.prevRawAcc = { x: 0, y: 0, z: 9.81 };
+        this.onPWaveDetected = options.onPWaveDetected || (() => {});
+      }
+
+      filterAxis(val, state) {
+        const w0 = val - this.a1 * state[0] - this.a2 * state[1];
+        const out = this.b0 * w0 + this.b1 * state[0] + this.b2 * state[1];
+        state[1] = state[0];
+        state[0] = w0;
+        return out;
+      }
+
+      processSample(acc) {
+        const rawX = acc.x || 0;
+        const rawY = acc.y || 0;
+        const rawZ = acc.z || 9.81;
+
+        // 1. Anti-Jerk: Descarte de impactos mecánicos rígidos (toques o golpes en la mesa)
+        const dt = 1 / this.fs;
+        const jerkX = Math.abs(rawX - this.prevRawAcc.x) / dt;
+        const jerkY = Math.abs(rawY - this.prevRawAcc.y) / dt;
+        const jerkZ = Math.abs(rawZ - this.prevRawAcc.z) / dt;
+        const totalJerk = Math.sqrt(jerkX * jerkX + jerkY * jerkY + jerkZ * jerkZ);
+
+        this.prevRawAcc.x = rawX;
+        this.prevRawAcc.y = rawY;
+        this.prevRawAcc.z = rawZ;
+
+        if (totalJerk > 35.0) {
+          this.knockCooldown = Math.round(this.fs * 0.5); // Bloqueo de seguridad de 500 ms
+          this.consecutiveHits = 0;
+          return { ratio: this.ratio, filteredZ: 0, isAlert: false, reason: "anti-knock" };
+        }
+
+        if (this.knockCooldown > 0) {
+          this.knockCooldown--;
+          return { ratio: this.ratio, filteredZ: 0, isAlert: false, reason: "cooldown" };
+        }
+
+        // 2. Filtro Digital Pasa-Banda Sísmico (1.0 - 9.0 Hz)
+        const fx = this.filterAxis(rawX, this.w.x);
+        const fy = this.filterAxis(rawY, this.w.y);
+        const fz = this.filterAxis(rawZ - 9.81, this.w.z);
+
+        // 3. Función Característica de Allen triaxial
+        const dfx = fx - this.prevFiltered.x;
+        const dfy = fy - this.prevFiltered.y;
+        const dfz = fz - this.prevFiltered.z;
+        this.prevFiltered.x = fx;
+        this.prevFiltered.y = fy;
+        this.prevFiltered.z = fz;
+
+        const cf = (fx * fx + 1.8 * dfx * dfx) +
+                   (fy * fy + 1.8 * dfy * dfy) +
+                   1.5 * (fz * fz + 2.0 * dfz * dfz);
+
+        // 4. Actualización STA/LTA Recursiva
+        this.sta = this.cSta * this.sta + (1 - this.cSta) * cf;
+        if (this.ratio < 2.0) {
+          this.lta = this.cLta * this.lta + (1 - this.cLta) * cf;
+        }
+        if (this.lta < 0.00001) this.lta = 0.00001;
+        this.ratio = this.sta / this.lta;
+
+        // 5. Persistencia Sísmica
+        if (this.ratio >= this.triggerThreshold) {
+          this.consecutiveHits++;
+          if (this.consecutiveHits >= this.persistenceRequired) {
+            this.onPWaveDetected({
+              ratio: this.ratio,
+              sta: this.sta,
+              lta: this.lta,
+              timestamp: Date.now()
+            });
+            this.consecutiveHits = 0;
+            return { ratio: this.ratio, filteredZ: fz, isAlert: true };
+          }
+        } else {
+          if (this.consecutiveHits > 0) this.consecutiveHits--;
+        }
+
+        return { ratio: this.ratio, filteredZ: fz, isAlert: false };
+      }
+    }
+
+    class SentinelKeepAlive {
+      constructor() {
+        this.wakeLock = null;
+        this.audioCtx = null;
+        this.silentSource = null;
+      }
+      async activate() {
+        if ('wakeLock' in navigator) {
+          try {
+            this.wakeLock = await navigator.wakeLock.request('screen');
+          } catch(e) {}
+        }
+        try {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) {
+            this.audioCtx = new AC();
+            if (this.audioCtx.state === 'suspended') {
+              await this.audioCtx.resume();
+            }
+            const buffer = this.audioCtx.createBuffer(1, this.audioCtx.sampleRate, this.audioCtx.sampleRate);
+            this.silentSource = this.audioCtx.createBufferSource();
+            this.silentSource.buffer = buffer;
+            this.silentSource.loop = true;
+            const gain = this.audioCtx.createGain();
+            gain.gain.value = 0.00001;
+            this.silentSource.connect(gain);
+            gain.connect(this.audioCtx.destination);
+            this.silentSource.start(0);
+          }
+        } catch(e) {}
+      }
+      deactivate() {
+        if (this.wakeLock) {
+          try { this.wakeLock.release(); } catch(e) {}
+          this.wakeLock = null;
+        }
+        if (this.silentSource) {
+          try { this.silentSource.stop(); } catch(e) {}
+          this.silentSource = null;
+        }
+        if (this.audioCtx && this.audioCtx.state !== 'closed') {
+          try { this.audioCtx.close(); } catch(e) {}
+          this.audioCtx = null;
+        }
+      }
+    }
+
+    class EMSCSeismicStream {
+      constructor(onEventReceived) {
+        this.wsUrl = "wss://www.seismicportal.eu/standing_order/websocket";
+        this.onEventReceived = onEventReceived;
+        this.ws = null;
+        this.reconnectBackoff = 1000;
+        this.heartbeatTimer = null;
+      }
+      connect() {
+        if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
+        try {
+          this.ws = new WebSocket(this.wsUrl);
+          this.ws.onopen = () => {
+            this.reconnectBackoff = 1000;
+            console.log("⚡ [Centinela-Live] Enlace WebSocket EMSC activo (< 200 ms)");
+            this.startHeartbeat();
+          };
+          this.ws.onmessage = (event) => {
+            try {
+              const raw = JSON.parse(event.data);
+              if (raw && raw.data && raw.data.properties) {
+                const p = raw.data.properties;
+                const coords = raw.data.geometry?.coordinates || [0, 0, 10];
+                const mag = parseFloat(p.mag || 0);
+                if (isNaN(mag) || mag <= 0) return;
+                const timeMs = new Date(p.time).getTime();
+                this.onEventReceived({
+                  id: raw.data.id || `emsc-${p.unid || timeMs}`,
+                  title: `M ${mag.toFixed(1)} - ${p.flynn_region || p.place || 'Región Sísmica'}`,
+                  mag: mag,
+                  time: timeMs,
+                  lat: parseFloat(coords[1]),
+                  lon: parseFloat(coords[0]),
+                  depth: Math.abs(parseFloat(coords[2]) || 10.0),
+                  source: 'EMSC_WEBSOCKET'
+                });
+              }
+            } catch(e) {}
+          };
+          this.ws.onclose = () => {
+            this.cleanup();
+            setTimeout(() => this.connect(), this.reconnectBackoff);
+            this.reconnectBackoff = Math.min(10000, this.reconnectBackoff * 1.5);
+          };
+          this.ws.onerror = () => {
+            if (this.ws) this.ws.close();
+          };
+        } catch(e) {
+          setTimeout(() => this.connect(), this.reconnectBackoff);
+        }
+      }
+      startHeartbeat() {
+        if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = setInterval(() => {
+          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ action: "ping" }));
+          }
+        }, 25000);
+      }
+      cleanup() {
+        if (this.heartbeatTimer) {
+          clearInterval(this.heartbeatTimer);
+          this.heartbeatTimer = null;
+        }
+      }
+    }
+
     let isSentinelActive = false;
     let seismoHistory = new Array(80).fill(0);
-    let baselineMag = 9.81;
     const btnSentinel = document.getElementById('btnSentinel');
     const sentinelBadge = document.getElementById('sentinelBadge');
     const seismoCanvas = document.getElementById('seismoCanvas');
@@ -2542,6 +2791,36 @@
     const sentinelSens = document.getElementById('sentinelSens');
     const btnTestSiren = document.getElementById('btnTestSiren');
     const sCtx = seismoCanvas.getContext('2d');
+
+    function getSentinelThreshold() {
+      const sensVal = parseFloat(sentinelSens ? sentinelSens.value : '0.25');
+      if (sensVal <= 0.18) return 4.5;
+      if (sensVal <= 0.30) return 5.2;
+      return 6.5;
+    }
+
+    const sentinelGuard = new SentinelKeepAlive();
+
+    const pWaveEngine = new LocalPWaveSeismometer({
+      sampleRate: 50,
+      threshold: getSentinelThreshold(),
+      onPWaveDetected: (meta) => {
+        triggerEmergencySiren('sentinel');
+        alertBanner.style.display = 'block';
+        alertDetails.textContent = STRINGS[currentLang].sentinelAlertText || '🌙 ¡ONDA P SÍSMICA DETECTADA LOCALMENTE! Protéjase antes de las ondas secundarias.';
+        countdownSec.textContent = `¡ALERTA!`;
+        if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 800]);
+        announceVoiceAlert(currentLang === 'es'
+          ? "¡Atención! Sacudida sísmica detectada por sensor de reposo. Protéjase."
+          : "Attention! Seismic shaking detected by resting sensor. Take cover.");
+      }
+    });
+
+    if (sentinelSens) {
+      sentinelSens.addEventListener('change', () => {
+        pWaveEngine.triggerThreshold = getSentinelThreshold();
+      });
+    }
 
     function drawSeismograph() {
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -2573,27 +2852,14 @@
       const acc = event.accelerationIncludingGravity || event.acceleration;
       if (!acc) return;
 
-      const x = acc.x || 0;
-      const y = acc.y || 0;
-      const z = acc.z || 9.81;
-      const total = Math.sqrt(x*x + y*y + z*z);
+      const result = pWaveEngine.processSample(acc);
 
-      baselineMag = (baselineMag * 0.95) + (total * 0.05);
-      const delta = Math.abs(total - baselineMag);
-
-      seismoHistory.push(delta);
+      seismoHistory.push(result.filteredZ);
       seismoHistory.shift();
       drawSeismograph();
 
-      seismoValue.textContent = `Δa: ${delta.toFixed(3)} m/s² (Base: ${baselineMag.toFixed(2)})`;
-
-      const threshold = parseFloat(sentinelSens.value);
-      if (delta > threshold) {
-        triggerEmergencySiren('sentinel');
-        alertBanner.style.display = 'block';
-        alertDetails.textContent = STRINGS[currentLang].sentinelAlertText || '🌙 ¡SACUDIDA MECÁNICA DETECTADA EN LA SUPERFICIE DE REPOSO!';
-        countdownSec.textContent = `¡ALERTA!`;
-      }
+      const thresh = pWaveEngine.triggerThreshold.toFixed(1);
+      seismoValue.textContent = `Ratio STA/LTA: ${result.ratio.toFixed(2)} (Umbral Alerta: ${thresh}) • Anti-Golpes Activo`;
     }
 
     btnSentinel.addEventListener('click', async () => {
@@ -2603,25 +2869,69 @@
           try {
             const perm = await DeviceMotionEvent.requestPermission();
             if (perm !== 'granted') {
-              alert("Permiso de acelerómetro necesario para el Centinela.");
+              alert(currentLang === 'es' ? "Permiso de acelerómetro necesario para el Centinela." : "Accelerometer permission required for Sentinel.");
               return;
             }
           } catch(e) {}
         }
+        await sentinelGuard.activate();
+        pWaveEngine.triggerThreshold = getSentinelThreshold();
         window.addEventListener('devicemotion', handleDeviceMotion);
         isSentinelActive = true;
         btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStop;
-        sentinelBadge.textContent = "🟢 Centinela Vigilando";
+        sentinelBadge.textContent = currentLang === 'es' ? "🟢 Centinela Vigilando" : "🟢 Sentinel Watching";
         sentinelBadge.className = "badge-status badge-green";
       } else {
+        sentinelGuard.deactivate();
         window.removeEventListener('devicemotion', handleDeviceMotion);
         isSentinelActive = false;
         btnSentinel.textContent = STRINGS[currentLang].sentinelBtnStart;
-        sentinelBadge.textContent = "Descanso";
+        sentinelBadge.textContent = currentLang === 'es' ? "Descanso" : "Resting";
         sentinelBadge.className = "badge-status badge-yellow";
         drawSeismograph();
       }
     });
+
+    // Sub-segundo: Listener para eventos recibidos por WebSocket EMSC
+    function handleLiveSeismicEvent(evt) {
+      const mag = evt.mag;
+      const originTime = evt.time;
+      if (!mag || isNaN(mag) || !originTime) return;
+
+      const distKm = haversine(userLat, userLon, evt.lat, evt.lon);
+      const hypoDist = hypocentralDistance(distKm, evt.depth);
+      const localMMI = calculateEstimatedMMI(mag, hypoDist);
+      const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
+
+      if (localMMI >= userThreshold && evt.id !== lastAlertedId) {
+        const elapsedSec = (Date.now() - originTime) / 1000;
+        const sWaveTravelTime = hypoDist / 3.5;
+        const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
+
+        if (remainingSec > 0) {
+          lastAlertedId = evt.id;
+          fireEarlyWarning(evt.title, distKm, mag, remainingSec, localMMI);
+          aftershockWatchUntil = Date.now() + 300000;
+        }
+      } else if (distKm <= 500 && localMMI < userThreshold) {
+        if (evt.id !== lastNearbyCalmEventId) {
+          lastNearbyCalmEventId = evt.id;
+          const sTitle = document.getElementById('shieldStatusTitle');
+          const sDesc = document.getElementById('shieldStatusDesc');
+          if (sTitle && sDesc) {
+            sTitle.textContent = currentLang === 'es' 
+              ? "Todo en Orden: Sismo Regional Imperceptible en tu Zona" 
+              : "All is Well: Regional Quake Imperceptible in Your Area";
+            sDesc.textContent = currentLang === 'es'
+              ? `Registrado ${evt.title} a ${Math.round(distKm)} km (M${mag.toFixed(1)}). En tus coordenadas la intensidad estimada es MMI ${localMMI.toFixed(1)} (Imperceptible). Tu familia y tu hogar no corren ningún riesgo.`
+              : `Recorded ${evt.title} at ${Math.round(distKm)} km (M${mag.toFixed(1)}). At your coordinates the estimated intensity is MMI ${localMMI.toFixed(1)} (Imperceptible). Your family and home are completely safe.`;
+          }
+        }
+      }
+    }
+
+    const emscLiveStream = new EMSCSeismicStream(handleLiveSeismicEvent);
+    emscLiveStream.connect();
 
     const selectSentinelTone = document.getElementById('selectSentinelTone');
     const btnPreviewSentinelTone = document.getElementById('btnPreviewSentinelTone');
