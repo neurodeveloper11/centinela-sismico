@@ -759,3 +759,53 @@ def debunk_seismic_myth(claim: str, lang: str = "es") -> Dict[str, Any]:
             ),
             "action": "Always corroborate seismic reports through recognized geological authorities (USGS, EMSC, local geological services)."
         }
+
+
+# =====================================================================
+# 5. ULTRA-LOW LATENCY KINEMATIC EEW ENGINE (CENTINELA SÍSMICO)
+# =====================================================================
+
+V_P_KM_S = 6.0   # Crustal primary wave velocity (~6.0 km/s)
+V_S_KM_S = 3.5   # Crustal shear/destructive wave velocity (~3.5 km/s)
+
+def calculate_eew_kinematics(user_lat: float, user_lon: float, eq: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Calculate high-precision arrival kinematics and survival window for Centinela Sísmico.
+    Computes 3D slant hypocentral distance, P-wave and S-wave travel times,
+    estimated local MMI attenuation, and remaining S-wave warning seconds.
+    """
+    d_epi = haversine_distance(user_lat, user_lon, float(eq.get("lat", 0.0)), float(eq.get("lon", 0.0)))
+    depth = max(float(eq.get("depth_km", 10.0)), 1.0)
+    r_hypo = hypocentral_distance(d_epi, depth)
+
+    # Local ground motion attenuation
+    mag = float(eq.get("mag", 4.0))
+    local_mmi = calculate_attenuation_mmi(mag, r_hypo)
+
+    # Wave arrival mechanics
+    p_travel_time = round(r_hypo / V_P_KM_S, 1)
+    s_travel_time = round(r_hypo / V_S_KM_S, 1)
+    warning_window_p_s = max(0.0, round(s_travel_time - p_travel_time, 1))
+
+    # Elapsed time from origin
+    origin_ms = eq.get("time_epoch", 0)
+    current_ms = int(time.time() * 1000)
+    elapsed_sec = max(0.0, (current_ms - origin_ms) / 1000.0) if origin_ms > 0 else 0.0
+    remaining_seconds = round(s_travel_time - elapsed_sec, 1)
+
+    # Danger evaluation: Hazardous if local MMI >= 4.0 and S-wave has not hit yet
+    is_hazardous = local_mmi >= 4.0 and remaining_seconds > 0.0
+
+    return {
+        "epicentral_dist_km": d_epi,
+        "hypocentral_dist_km": r_hypo,
+        "depth_km": depth,
+        "magnitude": mag,
+        "estimated_local_mmi": local_mmi,
+        "p_wave_travel_sec": p_travel_time,
+        "s_wave_travel_sec": s_travel_time,
+        "warning_window_p_s_sec": warning_window_p_s,
+        "remaining_s_wave_seconds": remaining_seconds,
+        "is_hazardous": is_hazardous
+    }
+
