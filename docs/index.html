@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta name="theme-color" content="#0284c7">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://earthquake.usgs.gov https://www.seismicportal.eu wss://www.seismicportal.eu https://api.bigdatacloud.net; media-src 'self' data: blob:; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Centinela">
   <meta name="description" content="Centinela Sísmico — El vigía que calcula la onda destructiva antes de que llegue a tu hogar. Alerta temprana sin falsas alarmas, tecnología calmada y 100% sin internet.">
-  
+
   <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://neurodeveloper11.github.io/centinela-sismico/">
@@ -297,6 +299,12 @@
       border: 2px solid #fdba74;
       margin-bottom: 20px;
       animation: alertPulse 2s infinite ease-in-out;
+    }
+
+    .alert-countdown-banner.is-felt {
+      background: linear-gradient(135deg, #78350f, #92400e);
+      border: 2px solid #fcd34d;
+      animation: none;
     }
 
     .alert-countdown-banner.is-demo {
@@ -594,6 +602,13 @@
     .checklist-item span { font-size: 0.9rem; }
     .checklist-item.checked span { text-decoration: line-through; color: var(--text-muted); }
 
+    :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      .alert-countdown-banner, .pulse-indicator, .btn-action.is-connecting { animation: none !important; }
+      .pacer-bubble { transition-duration: 0.01s; }
+    }
+    .notif-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; font-size: 0.78rem; color: var(--text-muted); flex-wrap: wrap; }
+
     /* Strobe Overlay */
     #strobeOverlay {
       display: none;
@@ -799,7 +814,7 @@
       <div class="shield-text">
         <h2 id="shieldStatusTitle">Todo en Orden: Tu Entorno Está en Calma</h2>
         <p id="shieldStatusDesc">
-          El Centinela vigila en silencio las fallas tectónicas con la Red Global. No se registran alertas cercanas a tu ubicación. 
+          El Centinela vigila en silencio las fallas tectónicas con la Red Global. No se registran alertas cercanas a tu ubicación.
           Descansa con tranquilidad; estás en un espacio seguro que cuida a tu familia.
         </p>
       </div>
@@ -852,7 +867,7 @@
         </div>
 
         <p id="modalDemoBody" style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
-          Esta demostración te muestra cómo funcionaría el <strong>radar de alerta temprana</strong> si un sismo lejano ocurriera. 
+          Esta demostración te muestra cómo funcionaría el <strong>radar de alerta temprana</strong> si un sismo lejano ocurriera.
           Podrás ver el conteo regresivo de segundos de ventaja y escuchar un tono suave de práctica para familiarizarte sin sobresaltos.
         </p>
 
@@ -1014,8 +1029,12 @@
       <div id="locationInfo" style="font-size: 0.85rem; color: var(--text-muted);">
         Ubicación: No asignada (Presiona el botón para verificar tu entorno)
       </div>
-      <div id="lastFeedCheck" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+      <div id="lastFeedCheck" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;" aria-live="polite">
         Última comprobación de sismos: En espera...
+      </div>
+      <div class="notif-row">
+        <span id="notifStatusText">🔔 Avisos del sistema: desactivados (solo verás la alerta con la app abierta).</span>
+        <button type="button" class="btn-sm" id="btnEnableNotifications">🔔 Activar avisos</button>
       </div>
 
       <!-- Sub-Box: Configuración de Cero Fatiga de Alarma & Umbral Geodésico -->
@@ -1076,7 +1095,7 @@
       <details>
         <summary id="physicsSummary">🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)</summary>
         <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5;" id="physicsBody">
-          La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. 
+          La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas.
           Por cada 100 km de distancia al epicentro, <strong>dispones de 12 segundos de ventaja matemática</strong> (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.
         </div>
       </details>
@@ -1084,7 +1103,7 @@
       <div style="background: rgba(2, 132, 199, 0.06); border-left: 3px solid var(--primary); padding: 10px 12px; border-radius: 6px; margin-top: 12px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.45;">
         <strong id="geoTransparencyTitle" style="color: var(--text);">⚖️ Transparencia Científica:</strong>
         <span id="geoTransparencyText">
-          La intensidad se estima matemáticamente con la relación de atenuación de Wald et al. (1999) usando distancia hipocentral 3D. Ningún celular inteligente tiene acelerómetros con calibración sísmica para medir directamente la aceleración del suelo. Margen de variación empírico: ±1 a 2 grados MMI según las condiciones geológicas locales.
+          La intensidad se estima con la ecuación de predicción de intensidad de Allen, Wald y Worden (2012) usando distancia hipocentral 3D, y se muestra con su incertidumbre (±1σ ≈ 0.8–1.2 grados MMI). El suelo local puede amplificar o atenuar la sacudida. Ningún celular tiene acelerómetros con calibración sísmica para medir directamente la aceleración del suelo.
         </span>
       </div>
     </section>
@@ -1096,8 +1115,8 @@
         <span class="badge-status badge-yellow" id="sentinelBadge">Descanso</span>
       </div>
       <p class="card-subtitle" id="sentinelSubtitle">
-        Vigía de reposo: coloca tu celular plano sobre la mesa o mesita de noche. 
-        Si la superficie sufre un movimiento físico brusco mientras descansas, emitirá una alarma acústica para despertarte oportunamente. 
+        Vigía de reposo: coloca tu celular plano sobre la mesa o mesita de noche.
+        Si la superficie sufre un movimiento físico brusco mientras descansas, emitirá una alarma acústica para despertarte oportunamente.
         (Nota científica: los sensores de teléfonos comerciales no son sismógrafos profesionales ni aíslan ondas P débiles lejanas; actúan como interruptor de seguridad ante sacudidas físicas directas).
       </p>
 
@@ -1289,6 +1308,7 @@
 
   </main>
 
+  <script src="seismic-core.js"></script>
   <script>
     // ==========================================
     // I18N STRINGS (CENTINELA SÍSMICO)
@@ -1325,7 +1345,7 @@
         btnCancelDemo: "Cancelar",
         btnStartDemo: "▶️ Iniciar Práctica Segura",
         physicsSummary: "🔬 ¿Cómo funciona la ventaja de tiempo? (Explicación científica)",
-        physicsBody: "La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. Por cada 100 km de distancia al epicentro, dispones de 12 segundos de ventaja matemática (Δt = Distancia × 0.12s) para ponerte en un lugar seguro antes de que comience el movimiento.",
+        physicsBody: "La onda primaria (P) es rápida (~6 km/s) pero no destructiva. La onda secundaria (S) es más lenta (~3.5 km/s) y es la que produce sacudidas. Por cada 100 km de distancia al epicentro, la onda S llega unos <strong>12 segundos</strong> después de la P (Δt ≈ Distancia × 0.12 s). Ese es el margen <strong>teórico máximo</strong>: el aviso real depende de cuánto tarda cada agencia en publicar el sismo (segundos por el canal en vivo de EMSC, minutos por los boletines). Si la onda ya pasó, Centinela te avisa igualmente que el sismo pudo sentirse en tu zona.",
         sentinelTitle: "🌙 Centinela Nocturno (Detector de Sacudida en Reposo)",
         sentinelSubtitle: "Vigía de reposo: coloca tu celular plano sobre la mesa o mesita de noche. Si la superficie sufre un movimiento físico brusco mientras descansas, emitirá una alarma acústica para despertarte oportunamente. (Nota científica: los sensores de teléfonos comerciales no son sismógrafos profesionales ni aíslan ondas P débiles lejanas; actúan como interruptor de seguridad ante sacudidas físicas directas).",
         sentinelBtnStart: "🛡️ Activar Centinela Nocturno",
@@ -1337,7 +1357,7 @@
         offlineShieldTitle: "Modo Sin Conexión — Monitoreo en Pausa",
         offlineShieldDesc: "Tu dispositivo no tiene acceso a internet. No es posible verificar nuevos sismos en tiempo real con el USGS. Conservando el último registro conocido.",
         geoTransparencyTitle: "⚖️ Transparencia Científica:",
-        geoTransparencyText: "La intensidad se estima matemáticamente con la relación de atenuación de Wald et al. (1999) usando distancia hipocentral 3D. Ningún celular inteligente tiene acelerómetros con calibración sísmica para medir directamente la aceleración del suelo. Margen de variación empírico: ±1 a 2 grados MMI según las condiciones geológicas locales.",
+        geoTransparencyText: "La intensidad se estima con la ecuación de predicción de intensidad de Allen, Wald y Worden (2012) usando distancia hipocentral 3D, y se muestra con su incertidumbre (±1σ ≈ 0.8–1.2 grados MMI). El suelo local puede amplificar o atenuar la sacudida. Ningún celular tiene acelerómetros con calibración sísmica para medir directamente la aceleración del suelo.",
         pulseBtnLoadMore: "Mostrar más sismos (+10)",
         toolsTitle: "🎒 Botiquín Digital de Respaldo",
         toolsSubtitle: "Herramientas organizadas y discretas para cuidar a tu familia en caso de que alguna vez las necesites.",
@@ -1465,7 +1485,28 @@
         btnModalInstall: "📲 Instalar como App en mi Celular",
         btnRetrySensor: "🔄 Reintentar Activar",
         sentinelBadgeNetwork: "🌐 Red Sísmica Activa (Sin Acelerómetro)",
-        sentinelValueNetwork: "📡 Modo Respaldo: Red Sísmica Global EMSC y Radar GPS activos 24/7 (Acelerómetro local en pausa)."
+        sentinelValueNetwork: "📡 Modo Respaldo: Red Sísmica Global EMSC y Radar GPS activos 24/7 (Acelerómetro local en pausa).",
+        alertDetailsFmt: "{title} • Distancia: {dist} km • Magnitud: M{mag}",
+        alertMmiFmt: " • Intensidad local estimada: MMI {mmi} (rango {lo}–{hi}, {label})",
+        feltBadge: "📍 SISMO FUERTE CERCANO",
+        feltTitle: "Sismo fuerte probablemente sentido en tu zona",
+        feltAdvice: "SI SIGUE TEMBLANDO: AGÁCHATE, CÚBRETE Y SUJÉTATE • DESPUÉS: REVISA A TU FAMILIA, GAS Y GRIETAS • PREPÁRATE PARA RÉPLICAS",
+        feltAgo: "hace {min} min",
+        feltCountdown: "✔️ Ya pasó",
+        feltDismiss: "Entendido",
+        sentinelBadgeAlert: "📳 SACUDIDA DETECTADA POR TU TELÉFONO",
+        sentinelTitleAlert: "🌙 Movimiento fuerte sobre la superficie",
+        notifOff: "🔔 Avisos del sistema: desactivados (solo verás la alerta con la app abierta).",
+        notifOn: "🔔 Avisos del sistema: activados (te avisamos aunque estés en otra app mientras Centinela siga abierto).",
+        notifDenied: "🔕 Avisos bloqueados en el navegador. Actívalos en los permisos del sitio.",
+        notifUnsupported: "🔕 Este navegador no admite avisos del sistema.",
+        btnEnableNotif: "🔔 Activar avisos",
+        btnTestNotif: "🔔 Probar aviso",
+        notifTestBody: "Así se verá un aviso de Centinela. Todo está en calma.",
+        installHelp: "Para instalar en iPhone: toca Compartir (⎋) en Safari y elige 'Agregar al inicio ➕'. En Android: toca los 3 puntos (⋮) y 'Instalar aplicación'.",
+        feedSourcesFmt: "Última revisión: {time} • {src} • {n} eventos monitoreados",
+        feedAllFailed: "⚠️ No se pudo consultar la red sísmica (reintentando con espera progresiva).",
+        offlineSampleNote: "(datos de ejemplo sin conexión)"
       },
       en: {
         themeBtnGray: "🏛️ Grayish White",
@@ -1496,7 +1537,7 @@
         btnCancelDemo: "Cancel",
         btnStartDemo: "▶️ Begin Safe Drill",
         physicsSummary: "🔬 How does early warning work? (Scientific Explanation)",
-        physicsBody: "Primary (P) waves are fast (~6 km/s) but gentle. Secondary (S) waves are slower (~3.5 km/s) and cause rolling displacement. For every 100 km of distance to the epicenter, you gain 12 seconds of mathematical advantage (Δt = Distance × 0.12s) to reach a secure spot before motion begins.",
+        physicsBody: "Primary (P) waves are fast (~6 km/s) but gentle. Secondary (S) waves are slower (~3.5 km/s) and cause the strong shaking. For every 100 km of distance to the epicenter, the S-wave arrives about <strong>12 seconds</strong> after the P-wave (Δt ≈ Distance × 0.12 s). That is the <strong>theoretical maximum</strong>: the real warning depends on how fast each agency publishes the event (seconds via the EMSC live channel, minutes via bulletins). If the wave has already passed, Sentinel still tells you the quake was likely felt in your area.",
         sentinelTitle: "🌙 Nighttime Sentinel (Resting Motion Detector)",
         sentinelSubtitle: "Resting tripwire: place your phone flat on a nightstand. If the surface experiences sudden physical movement while you rest, it will sound an acoustic alarm to awaken you promptly. (Scientific note: smartphone sensors are not professional seismographs and cannot isolate faint distant P-waves; they act as a safety tripwire for direct physical shaking).",
         sentinelBtnStart: "🛡️ Activate Night Sentinel",
@@ -1508,7 +1549,7 @@
         offlineShieldTitle: "Offline Mode — Live Monitoring Paused",
         offlineShieldDesc: "Your device has no internet access. Cannot verify new real-time USGS events. Preserving last known record.",
         geoTransparencyTitle: "⚖️ Scientific Transparency:",
-        geoTransparencyText: "Intensity is estimated mathematically via Wald et al. (1999) attenuation relation using 3D hypocentral distance. No smartphone has seismically calibrated accelerometers to directly measure ground acceleration. Empirical margin of variation: ±1 to 2 MMI degrees depending on local geological site conditions.",
+        geoTransparencyText: "Intensity is estimated with the Allen, Wald & Worden (2012) intensity prediction equation using 3D hypocentral distance, and shown with its uncertainty (±1σ ≈ 0.8–1.2 MMI units). Local soil can amplify or dampen shaking. No smartphone has seismically calibrated accelerometers to directly measure ground acceleration.",
         pulseBtnLoadMore: "Show more quakes (+10)",
         toolsTitle: "🎒 Digital Family Safety Kit",
         toolsSubtitle: "Discreet and organized tools to care for your family whenever you need them.",
@@ -1636,9 +1677,34 @@
         btnModalInstall: "📲 Install as App on Phone",
         btnRetrySensor: "🔄 Retry Activating",
         sentinelBadgeNetwork: "🌐 Seismic Network Active (No Accelerometer)",
-        sentinelValueNetwork: "📡 Backup Mode: EMSC Global Seismic Network & GPS Radar active 24/7 (Accelerometer paused)."
+        sentinelValueNetwork: "📡 Backup Mode: EMSC Global Seismic Network & GPS Radar active 24/7 (Accelerometer paused).",
+        alertDetailsFmt: "{title} • Distance: {dist} km • Magnitude: M{mag}",
+        alertMmiFmt: " • Estimated local intensity: MMI {mmi} (range {lo}–{hi}, {label})",
+        feltBadge: "📍 STRONG QUAKE NEARBY",
+        feltTitle: "Strong quake likely felt in your area",
+        feltAdvice: "IF STILL SHAKING: DROP, COVER AND HOLD ON • AFTERWARDS: CHECK FAMILY, GAS AND CRACKS • EXPECT AFTERSHOCKS",
+        feltAgo: "{min} min ago",
+        feltCountdown: "✔️ Passed",
+        feltDismiss: "Understood",
+        sentinelBadgeAlert: "📳 SHAKING DETECTED BY YOUR PHONE",
+        sentinelTitleAlert: "🌙 Strong motion on the resting surface",
+        notifOff: "🔔 System notifications: off (you will only see alerts with the app open).",
+        notifOn: "🔔 System notifications: on (we alert you even in another app while Sentinel stays open).",
+        notifDenied: "🔕 Notifications are blocked by the browser. Enable them in site permissions.",
+        notifUnsupported: "🔕 This browser does not support system notifications.",
+        btnEnableNotif: "🔔 Enable notifications",
+        btnTestNotif: "🔔 Test notification",
+        notifTestBody: "This is how a Sentinel notification looks. All is calm.",
+        installHelp: "To install on iPhone: tap Share (⎋) in Safari and choose 'Add to Home Screen ➕'. On Android: tap the 3 dots (⋮) and 'Install app'.",
+        feedSourcesFmt: "Last review: {time} • {src} • {n} events monitored",
+        feedAllFailed: "⚠️ Could not reach the seismic network (retrying with progressive backoff).",
+        offlineSampleNote: "(offline sample data)"
       }
     };
+
+    function fmt(template, values) {
+      return String(template).replace(/\{(\w+)\}/g, (m, k) => (values && values[k] !== undefined ? values[k] : m));
+    }
 
     // ==========================================
     // PWA 1-CLICK INSTALLATION LOGIC
@@ -1664,7 +1730,7 @@
           deferredPrompt = null;
         } else {
           // If iOS or already installed, open instructions
-          alert("Para instalar en iPhone: Toca el icono Compartir (⎋) en Safari y selecciona 'Agregar al inicio ➕'. En Android: Toca los 3 puntos (⋮) y 'Instalar aplicación'.");
+          alert(STRINGS[currentLang].installHelp);
         }
       });
     }
@@ -1731,7 +1797,7 @@
       if (!audioCtx) return;
       try {
         const now = audioCtx.currentTime;
-        
+
         // Tono fundamental (senoidal puro cálido con presencia acústica)
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -2044,7 +2110,6 @@
     let userLat = parseFloat(localStorage.getItem('qm_user_lat') || '3.4516');
     let userLon = parseFloat(localStorage.getItem('qm_user_lon') || '-76.5320');
     let radarInterval = null;
-    let lastAlertedId = null;
     let serverTimeDriftMs = 0;
 
     const btnGetLocation = document.getElementById('btnGetLocation');
@@ -2057,23 +2122,33 @@
     const btnDismissAlert = document.getElementById('btnDismissAlert');
     const btnSimulateAlert = document.getElementById('btnSimulateAlert');
 
-    function haversine(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    // Física compartida con el motor Python (seismic-core.js, IPE Allen et al. 2012)
+    const SC = window.SeismicCore;
+    const haversine = SC.haversine;
+    const hypocentralDistance = SC.hypocentralDistance;
+    const calculateEstimatedMMI = SC.estimateMMI;
+
+    function correctedNow() {
+      return Date.now() - (serverTimeDriftMs || 0);
     }
 
-    function hypocentralDistance(epicentralKm, depthKm) {
-      const h = Math.max(depthKm || 10.0, 1.0);
-      return Math.sqrt(epicentralKm * epicentralKm + h * h);
+    // Petición con límite de tiempo y sin caché HTTP local: los feeds sísmicos llevan
+    // Cache-Control max-age=60, sin esto el navegador reutiliza datos de hasta 1 minuto.
+    async function fetchJson(url, timeoutMs = 8000) {
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+      try {
+        const res = await fetch(url, { cache: 'no-cache', signal: ctrl ? ctrl.signal : undefined });
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
+        return await res.json();
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
     }
 
-    function calculateEstimatedMMI(magnitude, hypoDistKm) {
-      const R = Math.max(hypoDistKm, 3.0);
-      const raw = 1.5 * magnitude - 2.5 * Math.log10(R) + 1.2;
-      return Math.min(12.0, Math.max(1.0, raw));
+    function updateClockDrift(serverGeneratedMs) {
+      const drift = SC.estimateClockDriftMs(Date.now(), serverGeneratedMs);
+      if (drift < 0) serverTimeDriftMs = drift;
     }
 
     function getMmiLabel(mmi) {
@@ -2288,135 +2363,127 @@
     // ==========================================
 
     async function fetchUSGSHourly() {
-      const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson");
-      const data = await res.json();
-      return (data.features || []).map(feat => ({
-        id: feat.id,
-        title: feat.properties.title,
-        mag: feat.properties.mag,
-        time: feat.properties.time,
-        lat: feat.geometry.coordinates[1],
-        lon: feat.geometry.coordinates[0],
-        depth: feat.geometry.coordinates[2] || 10.0,
-        source: 'USGS'
-      })).filter(e => e.mag !== null && !isNaN(e.mag));
+      const data = await fetchJson("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson");
+      if (data.metadata) updateClockDrift(data.metadata.generated);
+      return (data.features || []).map(f => SC.normalizeUSGSFeature(f, 'USGS')).filter(SC.isValidEvent);
     }
 
     async function fetchEMSCRecent() {
-      const res = await fetch("https://www.seismicportal.eu/fdsnws/event/1/query?format=json&limit=30&minmag=2.5&orderby=time");
-      const data = await res.json();
-      return (data.features || []).map(feat => {
-        const p = feat.properties;
-        let timeMs = 0;
-        try {
-          const tStr = p.time || '';
-          timeMs = new Date(tStr.endsWith('Z') ? tStr : tStr + 'Z').getTime();
-        } catch(e) { timeMs = 0; }
-        return {
-          id: feat.id || `emsc-${timeMs}`,
-          title: `M ${parseFloat(p.mag || 0).toFixed(1)} - ${p.flynn_region || p.place || 'Unknown'}`,
-          mag: parseFloat(p.mag || 0),
-          time: timeMs,
-          lat: feat.geometry?.coordinates?.[1] || 0,
-          lon: feat.geometry?.coordinates?.[0] || 0,
-          depth: feat.geometry?.coordinates?.[2] || 10.0,
-          source: 'EMSC'
-        };
-      }).filter(e => !isNaN(e.mag) && e.mag > 0);
+      const data = await fetchJson("https://www.seismicportal.eu/fdsnws/event/1/query?format=json&limit=30&minmag=2.5&orderby=time");
+      return (data.features || []).map(f => SC.normalizeEMSCFeature(f, 'EMSC')).filter(e => SC.isValidEvent(e) && e.mag > 0);
     }
 
-    function deduplicateQuakes(eventsA, eventsB) {
-      const merged = [...eventsA];
-      for (const qb of eventsB) {
-        let isDup = false;
-        for (const qa of merged) {
-          const dist = haversine(qa.lat, qa.lon, qb.lat, qb.lon);
-          const timeDiff = Math.abs((qa.time || 0) - (qb.time || 0)) / 1000;
-          if (dist < 50 && timeDiff < 120) { isDup = true; break; }
+    const deduplicateQuakes = SC.deduplicate;
+
+    // ==========================================
+    // UNIFIED ALERT PIPELINE (feeds, radial query and WebSocket share it)
+    // ==========================================
+    const alertRegistry = new SC.AlertRegistry();
+    try {
+      const saved = JSON.parse(localStorage.getItem('qm_alert_registry') || '[]');
+      if (Array.isArray(saved)) alertRegistry.records = saved;
+      alertRegistry.prune(Date.now());
+    } catch (e) {}
+
+    function persistAlertRegistry() {
+      try { localStorage.setItem('qm_alert_registry', JSON.stringify(alertRegistry.records.slice(-50))); } catch (e) {}
+    }
+
+    function getUserThreshold() {
+      return parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
+    }
+
+    function showCalmShield(evt, a) {
+      if (evt.id === lastNearbyCalmEventId) return;
+      lastNearbyCalmEventId = evt.id;
+      const sTitle = document.getElementById('shieldStatusTitle');
+      const sDesc = document.getElementById('shieldStatusDesc');
+      if (!sTitle || !sDesc) return;
+      sTitle.textContent = currentLang === 'es'
+        ? "Todo en Orden: Sismo Regional Imperceptible en tu Zona"
+        : "All is Well: Regional Quake Imperceptible in Your Area";
+      sDesc.textContent = currentLang === 'es'
+        ? `Registrado ${evt.title} a ${Math.round(a.distKm)} km (M${evt.mag.toFixed(1)}). En tus coordenadas la intensidad estimada es MMI ${a.mmi.toFixed(1)}, por debajo de tu umbral de alerta. Tu familia y tu hogar no corren riesgo por este evento.`
+        : `Recorded ${evt.title} at ${Math.round(a.distKm)} km (M${evt.mag.toFixed(1)}). At your coordinates the estimated intensity is MMI ${a.mmi.toFixed(1)}, below your alert threshold. Your family and home are not at risk from this event.`;
+    }
+
+    /**
+     * Evalúa un lote de sismos y emite como máximo UNA señal: la más urgente.
+     * Prioridad: onda en camino (mayor MMI) > sismo fuerte ya sentido > tranquilidad regional.
+     * Devuelve el nivel emitido ('incoming' | 'felt' | 'calm' | 'none').
+     */
+    function processSeismicEvents(events) {
+      if (!localStorage.getItem('qm_user_lat')) return 'none';
+      const nowMs = correctedNow();
+      const opts = { nowMs, thresholdMmi: getUserThreshold() };
+      let bestIncoming = null, bestFelt = null, calm = null;
+
+      for (const evt of events) {
+        if (!SC.isValidEvent(evt)) continue;
+        const a = SC.assessEvent(evt, userLat, userLon, opts);
+        if (a.level === 'incoming' || a.level === 'felt') {
+          if (!alertRegistry.shouldNotify(evt, a.level, nowMs)) continue;
+          if (a.level === 'incoming' && (!bestIncoming || a.mmi > bestIncoming.a.mmi)) bestIncoming = { evt, a };
+          if (a.level === 'felt' && (!bestFelt || a.mmi > bestFelt.a.mmi)) bestFelt = { evt, a };
+        } else if (a.level === 'calm' && !calm) {
+          calm = { evt, a };
         }
-        if (!isDup) merged.push(qb);
       }
-      return merged.sort((a, b) => (b.time || 0) - (a.time || 0));
+
+      const chosen = bestIncoming || bestFelt;
+      if (chosen) {
+        alertRegistry.record(chosen.evt, chosen.a.level);
+        persistAlertRegistry();
+        aftershockWatchUntil = Date.now() + 300000;
+        if (chosen.a.level === 'incoming') {
+          fireEarlyWarning(chosen.evt.title, chosen.a.distKm, chosen.evt.mag, Math.ceil(chosen.a.remainingSec), chosen.a.mmi, false,
+            { arrivalMs: chosen.a.sArrivalMs, assessment: chosen.a, evt: chosen.evt });
+        } else {
+          showFeltNotice(chosen.evt, chosen.a);
+        }
+        return chosen.a.level;
+      }
+      if (calm) {
+        showCalmShield(calm.evt, calm.a);
+        return 'calm';
+      }
+      return 'none';
     }
 
     // Aftershock watch mode: accelerates polling for 5 min after a nearby event
     let aftershockWatchUntil = 0;
+
+    let feedCheckInFlight = false;
 
     async function checkLiveQuakesFeed() {
       if (!navigator.onLine) {
         updateNetworkStatus(false);
         return;
       }
+      if (feedCheckInFlight) return;
+      feedCheckInFlight = true;
       try {
         // Parallel multi-source fetch
         const results = await Promise.allSettled([fetchUSGSHourly(), fetchEMSCRecent()]);
+        if (results.every(r => r.status === 'rejected')) {
+          lastFeedCheck.textContent = STRINGS[currentLang].feedAllFailed;
+          throw results[0].reason;  // lets pollCycle apply exponential backoff
+        }
         const usgsEvents = results[0].status === 'fulfilled' ? results[0].value : [];
         const emscEvents = results[1].status === 'fulfilled' ? results[1].value : [];
         const allEvents = deduplicateQuakes(usgsEvents, emscEvents);
 
         const activeSources = [];
-        if (usgsEvents.length > 0) activeSources.push('USGS');
-        if (emscEvents.length > 0) activeSources.push('EMSC');
-        const srcLabel = activeSources.join(' + ') || 'USGS';
+        if (results[0].status === 'fulfilled') activeSources.push('USGS');
+        if (results[1].status === 'fulfilled') activeSources.push('EMSC');
 
-        lastFeedCheck.textContent = currentLang === 'es'
-          ? `Última revisión: ${new Date().toLocaleTimeString()} • ${srcLabel} • ${allEvents.length} eventos monitoreados`
-          : `Last review: ${new Date().toLocaleTimeString()} • ${srcLabel} • ${allEvents.length} events monitored`;
+        lastFeedCheck.textContent = fmt(STRINGS[currentLang].feedSourcesFmt, {
+          time: new Date().toLocaleTimeString(), src: activeSources.join(' + '), n: allEvents.length
+        });
 
-        const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
-        let nearbyImperceptibleFound = null;
-
-        for (const evt of allEvents) {
-          const mag = evt.mag;
-          const originTime = evt.time;
-
-          if (mag === null || isNaN(mag)) continue;
-
-          const distKm = haversine(userLat, userLon, evt.lat, evt.lon);
-          const hypoDist = hypocentralDistance(distKm, evt.depth);
-          const localMMI = calculateEstimatedMMI(mag, hypoDist);
-
-          // CERO FATIGA DE ALARMA: Solo disparar sirena/alerta si la intensidad local percibida >= umbral
-          if (localMMI >= userThreshold && evt.id !== lastAlertedId) {
-            const elapsedSec = (Date.now() - originTime) / 1000;
-            const sWaveTravelTime = hypoDist / 3.5;
-            const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
-
-            if (remainingSec > 0) {
-              lastAlertedId = evt.id;
-              fireEarlyWarning(evt.title, distKm, mag, remainingSec, localMMI);
-              // Activate aftershock watch mode for 5 minutes
-              aftershockWatchUntil = Date.now() + 300000;
-              break;
-            }
-          } else if (distKm <= 500 && localMMI < userThreshold) {
-            if (!nearbyImperceptibleFound) {
-              nearbyImperceptibleFound = {
-                id: evt.id, title: evt.title, distKm, mag, localMMI
-              };
-            }
-          }
-        }
-
-        // Si hay un sismo cercano pero imperceptible, actualizar el Escudo de Tranquilidad
-        if (nearbyImperceptibleFound && nearbyImperceptibleFound.id !== lastNearbyCalmEventId) {
-          lastNearbyCalmEventId = nearbyImperceptibleFound.id;
-          const sTitle = document.getElementById('shieldStatusTitle');
-          const sDesc = document.getElementById('shieldStatusDesc');
-          if (sTitle && sDesc) {
-            sTitle.textContent = currentLang === 'es' 
-              ? "Todo en Orden: Sismo Regional Imperceptible en tu Zona" 
-              : "All is Well: Regional Quake Imperceptible in Your Area";
-            sDesc.textContent = currentLang === 'es'
-              ? `Registrado ${nearbyImperceptibleFound.title} a ${Math.round(nearbyImperceptibleFound.distKm)} km (M${nearbyImperceptibleFound.mag.toFixed(1)}). En tus coordenadas la intensidad estimada es MMI ${nearbyImperceptibleFound.localMMI.toFixed(1)} (Imperceptible). Tu familia y tu hogar no corren ningún riesgo.`
-              : `Recorded ${nearbyImperceptibleFound.title} at ${Math.round(nearbyImperceptibleFound.distKm)} km (M${nearbyImperceptibleFound.mag.toFixed(1)}). At your coordinates the estimated intensity is MMI ${nearbyImperceptibleFound.localMMI.toFixed(1)} (Imperceptible). Your family and home are completely safe.`;
-          }
-        }
-      } catch (e) {
-        console.log("Feed check status:", e);
-        if (!navigator.onLine) {
-          updateNetworkStatus(false);
-        }
+        processSeismicEvents(allEvents);
+      } finally {
+        feedCheckInFlight = false;
       }
     }
 
@@ -2454,16 +2521,93 @@
       document.querySelectorAll('.chip-situational').forEach(c => c.classList.remove('active'));
       const reassuranceShield = document.getElementById('reassuranceShield');
       if (reassuranceShield) reassuranceShield.style.display = 'flex';
+      if (alertBanner) alertBanner.classList.remove('is-felt');
     }
 
-    function fireEarlyWarning(title, distKm, mag, remainingSec, localMMI, isDemo = false) {
+    function describeAlertDetails(title, distKm, mag, localMMI, assessment) {
+      const d = STRINGS[currentLang];
+      let text = fmt(d.alertDetailsFmt, { title, dist: Math.round(distKm).toLocaleString(), mag: mag.toFixed(1) });
+      if (localMMI) {
+        const lo = assessment ? assessment.mmiLow : Math.max(1, localMMI - 1);
+        const hi = assessment ? assessment.mmiHigh : Math.min(12, localMMI + 1);
+        text += fmt(d.alertMmiFmt, {
+          mmi: localMMI.toFixed(1), lo: SC.mmiToRoman(lo), hi: SC.mmiToRoman(hi), label: getMmiLabel(localMMI).text
+        });
+      }
+      return text;
+    }
+
+    // Aviso del sistema operativo (funciona con la app en segundo plano mientras siga abierta)
+    async function notifySystem(title, body, urgent) {
+      try {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+        const options = {
+          body,
+          icon: './icon-192.png',
+          badge: './icon-192.png',
+          tag: 'centinela-seismic-alert',
+          renotify: true,
+          requireInteraction: !!urgent,
+          vibrate: urgent ? [400, 150, 400, 150, 800] : [200, 100, 200],
+          data: { url: './index.html' }
+        };
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.getRegistration();
+          if (reg) { await reg.showNotification(title, options); return true; }
+        }
+        new Notification(title, options);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function showFeltNotice(evt, a) {
+      const d = STRINGS[currentLang];
+      clearTimeout(alertAutoDismissTimer);
+      clearInterval(alertCountdownTimer);
+      stopEmergencySiren();
+
+      const reassuranceShield = document.getElementById('reassuranceShield');
+      if (reassuranceShield) reassuranceShield.style.display = 'none';
+      if (!alertBanner) return;
+      alertBanner.classList.remove('is-demo');
+      alertBanner.classList.add('is-felt');
+      alertBanner.style.display = 'block';
+
+      const minutes = Math.max(1, Math.round(a.ageSec / 60));
+      document.getElementById('alertTypeBadge').textContent = d.feltBadge;
+      document.getElementById('alertTypeBadge').className = 'alert-banner-badge is-real';
+      document.getElementById('alertMainTitle').textContent = `${d.feltTitle} (${fmt(d.feltAgo, { min: minutes })})`;
+      alertDetails.textContent = describeAlertDetails(evt.title, a.distKm, evt.mag, a.mmi, a);
+      countdownSec.textContent = d.feltCountdown;
+      document.getElementById('alertActionAdvice').textContent = d.feltAdvice;
+      const sub = document.getElementById('alertSubNote');
+      if (sub) sub.style.display = 'none';
+      const situationalChips = document.getElementById('situationalChips');
+      if (situationalChips) situationalChips.style.display = 'flex';
+      document.getElementById('btnDismissAlert').textContent = d.feltDismiss;
+
+      const alertMode = localStorage.getItem('qm_alert_mode') || 'sound_vibrate';
+      if (alertMode === 'sound_vibrate') {
+        playGentleChime(528, 480, 0.70);
+        setTimeout(() => playGentleChime(660, 520, 0.65), 180);
+      }
+      if (alertMode !== 'visual_only' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      notifySystem(`⚠️ ${d.feltTitle}`, alertDetails.textContent, false);
+    }
+
+    function fireEarlyWarning(title, distKm, mag, remainingSec, localMMI, isDemo = false, opts = {}) {
       clearTimeout(alertAutoDismissTimer);
       clearInterval(alertCountdownTimer);
 
       const reassuranceShield = document.getElementById('reassuranceShield');
       if (reassuranceShield) reassuranceShield.style.display = 'none';
 
-      if (alertBanner) alertBanner.style.display = 'block';
+      if (alertBanner) {
+        alertBanner.classList.remove('is-felt');
+        alertBanner.style.display = 'block';
+      }
 
       // Show situational action chips
       const situationalChips = document.getElementById('situationalChips');
@@ -2520,8 +2664,7 @@
         }
       }
 
-      const mmiStr = localMMI ? ` • Intensidad local: MMI ${localMMI.toFixed(1)} (${getMmiLabel(localMMI).text})` : '';
-      if (alertDetails) alertDetails.textContent = `${title} • Distancia: ${Math.round(distKm)} km • Magnitud: M${mag.toFixed(1)}${mmiStr}`;
+      if (alertDetails) alertDetails.textContent = describeAlertDetails(title, distKm, mag, localMMI, opts.assessment);
       if (countdownSec) countdownSec.textContent = `${remainingSec}s`;
 
       const alertMode = localStorage.getItem('qm_alert_mode') || 'sound_vibrate';
@@ -2540,11 +2683,19 @@
         } else if (alertMode === 'silent_vibrate') {
           if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 800]);
         }
+        notifySystem(
+          currentLang === 'es' ? `🚨 Onda sísmica en camino: ${remainingSec}s` : `🚨 Seismic wave incoming: ${remainingSec}s`,
+          alertDetails ? alertDetails.textContent : title, true);
       }
 
-      let rem = remainingSec;
+      // Cuenta regresiva anclada al reloj absoluto: no se desfasa aunque el
+      // navegador ralentice los temporizadores en segundo plano.
+      const arrivalMs = Number.isFinite(opts.arrivalMs) ? opts.arrivalMs : correctedNow() + remainingSec * 1000;
+      let lastShown = remainingSec;
       alertCountdownTimer = setInterval(() => {
-        rem--;
+        const rem = SC.countdownSeconds(arrivalMs, correctedNow());
+        if (rem === lastShown && rem > 0) return;
+        lastShown = rem;
         if (rem > 0) {
           if (countdownSec) countdownSec.textContent = `${rem}s`;
           if (!isDemo && rem <= 10) {
@@ -2562,8 +2713,8 @@
 
             if (countdownSec) countdownSec.textContent = `✅ 0s`;
             if (alertMainTitle) {
-              alertMainTitle.textContent = currentLang === 'es' 
-                ? '✅ ¡Tiempo de Ventaja Cumplido!' 
+              alertMainTitle.textContent = currentLang === 'es'
+                ? '✅ ¡Tiempo de Ventaja Cumplido!'
                 : '✅ Advantage Time Completed!';
             }
             if (alertActionAdvice) {
@@ -2583,7 +2734,7 @@
             if (countdownSec) countdownSec.textContent = currentLang === 'es' ? `¡ONDA EN ZONA!` : `WAVE IN ZONE!`;
           }
         }
-      }, 1000);
+      }, 200);
     }
 
     if (btnDismissAlert) {
@@ -2633,7 +2784,8 @@
           6.2,
           16,
           demoMMI,
-          true
+          true,
+          { arrivalMs: correctedNow() + 16000 }
         );
       });
     }
@@ -2897,21 +3049,8 @@
             try {
               const raw = JSON.parse(event.data);
               if (raw && raw.data && raw.data.properties) {
-                const p = raw.data.properties;
-                const coords = raw.data.geometry?.coordinates || [0, 0, 10];
-                const mag = parseFloat(p.mag || 0);
-                if (isNaN(mag) || mag <= 0) return;
-                const timeMs = new Date(p.time).getTime();
-                this.onEventReceived({
-                  id: raw.data.id || `emsc-${p.unid || timeMs}`,
-                  title: `M ${mag.toFixed(1)} - ${p.flynn_region || p.place || 'Región Sísmica'}`,
-                  mag: mag,
-                  time: timeMs,
-                  lat: parseFloat(coords[1]),
-                  lon: parseFloat(coords[0]),
-                  depth: Math.abs(parseFloat(coords[2]) || 10.0),
-                  source: 'EMSC_WEBSOCKET'
-                });
+                const evt = SeismicCore.normalizeEMSCFeature(raw.data, 'EMSC_WEBSOCKET');
+                if (SeismicCore.isValidEvent(evt) && evt.mag > 0) this.onEventReceived(evt);
               }
             } catch(e) {}
           };
@@ -2966,10 +3105,21 @@
       sampleRate: 50,
       threshold: getSentinelThreshold(),
       onPWaveDetected: (meta) => {
+        const d = STRINGS[currentLang];
         triggerEmergencySiren('sentinel');
+        clearInterval(alertCountdownTimer);
+        const shield = document.getElementById('reassuranceShield');
+        if (shield) shield.style.display = 'none';
+        alertBanner.classList.remove('is-demo', 'is-felt');
         alertBanner.style.display = 'block';
-        alertDetails.textContent = STRINGS[currentLang].sentinelAlertText || '🌙 ¡ONDA P SÍSMICA DETECTADA LOCALMENTE! Protéjase antes de las ondas secundarias.';
-        countdownSec.textContent = `¡ALERTA!`;
+        document.getElementById('alertTypeBadge').textContent = d.sentinelBadgeAlert;
+        document.getElementById('alertTypeBadge').className = 'alert-banner-badge is-real';
+        document.getElementById('alertMainTitle').textContent = d.sentinelTitleAlert;
+        document.getElementById('alertActionAdvice').textContent = d.alertActionUniversal;
+        document.getElementById('btnDismissAlert').textContent = currentLang === 'es' ? 'Silenciar Alerta' : 'Silence Alert';
+        alertDetails.textContent = d.sentinelAlertText;
+        countdownSec.textContent = currentLang === 'es' ? '¡ALERTA!' : 'ALERT!';
+        notifySystem(d.sentinelTitleAlert, d.sentinelAlertText, true);
         if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 800]);
         announceVoiceAlert(currentLang === 'es'
           ? "¡Atención! Sacudida sísmica detectada por sensor de reposo. Protéjase."
@@ -3290,42 +3440,14 @@
 
     // Sub-segundo: Listener para eventos recibidos por WebSocket EMSC (< 200 ms)
     function handleLiveSeismicEvent(evt) {
+      if (!SC.isValidEvent(evt)) return;
       const mag = evt.mag;
       const originTime = evt.time;
-      if (!mag || isNaN(mag) || !originTime) return;
+
+      // Misma decisión que los feeds; el registro evita alertas duplicadas entre fuentes
+      processSeismicEvents([evt]);
 
       const distKm = haversine(userLat, userLon, evt.lat, evt.lon);
-      const hypoDist = hypocentralDistance(distKm, evt.depth);
-      const localMMI = calculateEstimatedMMI(mag, hypoDist);
-      const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
-
-      if (localMMI >= userThreshold && evt.id !== lastAlertedId) {
-        const correctedNow = Date.now() - (serverTimeDriftMs || 0);
-        const elapsedSec = (correctedNow - originTime) / 1000;
-        const sWaveTravelTime = hypoDist / 3.5;
-        const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
-
-        if (remainingSec > 0) {
-          lastAlertedId = evt.id;
-          fireEarlyWarning(evt.title, distKm, mag, remainingSec, localMMI);
-          aftershockWatchUntil = Date.now() + 300000;
-        }
-      } else if (distKm <= 750 && localMMI < userThreshold) {
-        if (evt.id !== lastNearbyCalmEventId) {
-          lastNearbyCalmEventId = evt.id;
-          const sTitle = document.getElementById('shieldStatusTitle');
-          const sDesc = document.getElementById('shieldStatusDesc');
-          if (sTitle && sDesc) {
-            sTitle.textContent = currentLang === 'es' 
-              ? "Todo en Orden: Sismo Regional Imperceptible en tu Zona" 
-              : "All is Well: Regional Quake Imperceptible in Your Area";
-            sDesc.textContent = currentLang === 'es'
-              ? `Registrado ${evt.title} a ${Math.round(distKm)} km (M${mag.toFixed(1)}). En tus coordenadas la intensidad estimada es MMI ${localMMI.toFixed(1)} (Imperceptible). Tu familia y tu hogar no corren ningún riesgo.`
-              : `Recorded ${evt.title} at ${Math.round(distKm)} km (M${mag.toFixed(1)}). At your coordinates the estimated intensity is MMI ${localMMI.toFixed(1)} (Imperceptible). Your family and home are completely safe.`;
-          }
-        }
-      }
-
       // Stream regional events (<= 750 km) directly into World Pulse / Mi Zona tab
       if (distKm <= 750 && typeof worldPulseEvents !== 'undefined') {
         const wsPulseEvent = {
@@ -3398,10 +3520,12 @@
         strobeOverlay.style.display = 'block';
         strobeText.textContent = STRINGS[currentLang].strobeStop;
         let flip = false;
+        // 200 ms por fase = 2.5 destellos/s: por debajo del límite de 3/s de WCAG 2.3.1
+        // para no provocar crisis fotosensibles en personas con epilepsia.
         strobeInterval = setInterval(() => {
           strobeOverlay.style.backgroundColor = flip ? '#ffffff' : '#0284c7';
           flip = !flip;
-        }, 130);
+        }, 200);
       } else {
         clearInterval(strobeInterval);
         strobeOverlay.style.display = 'none';
@@ -3580,30 +3704,30 @@
 
       if (region === 'latam') {
         const inLatamBox = (lat >= -56 && lat <= 33 && lon >= -120 && lon <= -34);
-        const latamKeywords = ['colombia', 'venezuela', 'chile', 'mexico', 'méxico', 'peru', 'perú', 'ecuador', 
-          'argentina', 'bolivia', 'guatemala', 'costa rica', 'panama', 'panamá', 'el salvador', 'honduras', 
-          'nicaragua', 'dominican', 'puerto rico', 'cuba', 'haiti', 'chocó', 'santander', 'cauca', 'antioquia', 
+        const latamKeywords = ['colombia', 'venezuela', 'chile', 'mexico', 'méxico', 'peru', 'perú', 'ecuador',
+          'argentina', 'bolivia', 'guatemala', 'costa rica', 'panama', 'panamá', 'el salvador', 'honduras',
+          'nicaragua', 'dominican', 'puerto rico', 'cuba', 'haiti', 'chocó', 'santander', 'cauca', 'antioquia',
           'valle del cauca', 'oaxaca', 'guerrero', 'chiapas', 'michoacan', 'coquimbo', 'atacama', 'maule', 'caribbean', 'puerto armuelles'];
         return inLatamBox || latamKeywords.some(k => p.includes(k));
       }
 
       if (region === 'asia') {
         const inAsiaBox = (lat >= -50 && lat <= 65 && ((lon >= 60 && lon <= 180) || (lon >= -180 && lon <= -160)));
-        const asiaKeywords = ['japan', 'japón', 'tokyo', 'indonesia', 'philippines', 'filipinas', 'taiwan', 'taiwán', 
+        const asiaKeywords = ['japan', 'japón', 'tokyo', 'indonesia', 'philippines', 'filipinas', 'taiwan', 'taiwán',
           'china', 'tonga', 'fiji', 'papua', 'vanuatu', 'new zealand', 'solomon', 'kuril', 'kamchatka', 'kermadec', 'mariana'];
         return inAsiaBox || asiaKeywords.some(k => p.includes(k));
       }
 
       if (region === 'europe') {
         const inEuropeBox = (lat >= 30 && lat <= 72 && lon >= -25 && lon <= 50);
-        const europeKeywords = ['italy', 'italia', 'greece', 'grecia', 'turkey', 'turquía', 'turkiye', 'iceland', 
+        const europeKeywords = ['italy', 'italia', 'greece', 'grecia', 'turkey', 'turquía', 'turkiye', 'iceland',
           'islandia', 'spain', 'españa', 'portugal', 'albania', 'croatia', 'cyprus', 'romania', 'crete', 'dodecanese'];
         return inEuropeBox || europeKeywords.some(k => p.includes(k));
       }
 
       if (region === 'northam') {
         const inNorthamBox = (lat >= 24 && lat <= 75 && lon >= -170 && lon <= -50);
-        const northamKeywords = ['alaska', 'california', 'nevada', 'washington', 'oregon', 'canada', 'canadá', 
+        const northamKeywords = ['alaska', 'california', 'nevada', 'washington', 'oregon', 'canada', 'canadá',
           'hawaii', 'oklahoma', 'montana', 'wyoming', 'idaho', 'utah', 'texas', 'baja california'];
         return inNorthamBox || northamKeywords.some(k => p.includes(k));
       }
@@ -3637,7 +3761,7 @@
 
       const filtered = worldPulseEvents.filter(ev => {
         const matchesRegion = isEventInRegion(currentPulseRegion, ev.lat, ev.lon, ev.place);
-        const matchesQuery = !query || ev.place.toLowerCase().includes(query) || ev.title.toLowerCase().includes(query);
+        const matchesQuery = !query || String(ev.place || '').toLowerCase().includes(query) || String(ev.title || '').toLowerCase().includes(query);
         return matchesRegion && matchesQuery;
       });
 
@@ -3682,16 +3806,17 @@
         const timeStr = formatRelativeTime(ev.time);
         const formattedDate = new Date(ev.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+        const safePlace = SC.escapeHtml(ev.place);
         html += `
           <div class="pulse-card">
             <div class="pulse-card-header">
               <span class="mag-badge ${magClass}">M ${ev.mag.toFixed(1)}</span>
-              <span class="pulse-place" title="${ev.place}">${ev.place}</span>
+              <span class="pulse-place" title="${safePlace}">${safePlace}</span>
               <span class="pulse-time">${timeStr}</span>
             </div>
             <div class="pulse-meta">
-              <span>📏 ${isEs ? 'Profundidad' : 'Depth'}: ${ev.depth.toFixed(1)} km</span>
-              <span>🕒 ${formattedDate} (Hora local)</span>
+              <span>📏 ${isEs ? 'Profundidad' : 'Depth'}: ${Number(ev.depth).toFixed(1)} km</span>
+              <span>🕒 ${formattedDate} (${isEs ? 'Hora local' : 'Local time'})</span>
               <span>📍 ${STRINGS[currentLang].pulseDistPrefix || 'Distancia a ti'}: <strong>${Math.round(distKm).toLocaleString()} km</strong></span>
             </div>
             ${impactBadge}
@@ -3725,24 +3850,12 @@
     async function fetchWorldPulse() {
       try {
         pulseCountText.textContent = STRINGS[currentLang].pulseLoading || "Cargando eventos globales...";
-        const res = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
-        const data = await res.json();
-        
-        worldPulseEvents = (data.features || []).map(feat => {
-          const p = feat.properties;
-          const coords = feat.geometry.coordinates;
-          return {
-            id: feat.id,
-            title: p.title || 'Earthquake',
-            place: p.place || 'Unknown location',
-            mag: parseFloat(p.mag || 0),
-            time: p.time,
-            lat: coords[1],
-            lon: coords[0],
-            depth: coords[2] || 10.0,
-            url: p.url
-          };
-        }).filter(e => !isNaN(e.mag));
+        const data = await fetchJson("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson", 12000);
+
+        // Conserva los eventos regionales recibidos en vivo (WebSocket / radial) que el feed aún no publica
+        const liveOnly = worldPulseEvents.filter(e => e.source === 'EMSC_WS' || e.source === 'USGS_RADIAL');
+        const fresh = (data.features || []).map(f => SC.normalizeUSGSFeature(f, 'USGS')).filter(SC.isValidEvent);
+        worldPulseEvents = SC.deduplicate(fresh, liveOnly);
 
         try {
           localStorage.setItem('qm_world_pulse_cache', JSON.stringify(worldPulseEvents.slice(0, 50)));
@@ -3830,33 +3943,19 @@
       localStorage.setItem('qm_default_pulse_region', 'my_location');
     }
 
+    let radialInFlight = false;
+
     async function fetchLocalRadialAlerts() {
-      if (!navigator.onLine || !localStorage.getItem('qm_user_lat')) return;
+      if (!navigator.onLine || !localStorage.getItem('qm_user_lat') || radialInFlight) return;
+      radialInFlight = true;
       try {
-        const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${userLat}&longitude=${userLon}&maxradiuskm=750&minmagnitude=2.0&limit=5&orderby=time`;
-        const res = await fetch(url);
+        const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${userLat.toFixed(3)}&longitude=${userLon.toFixed(3)}&maxradiuskm=750&minmagnitude=2.0&limit=5&orderby=time`;
+        const data = await fetchJson(url, 6000);
 
-        // Measure server time drift for accurate S-wave countdown
-        const serverDateStr = res.headers.get('Date');
-        if (serverDateStr) {
-          const serverTime = new Date(serverDateStr).getTime();
-          const clientTime = Date.now();
-          serverTimeDriftMs = clientTime - serverTime;
-        }
+        // La cabecera Date no es legible por CORS: la deriva del reloj se estima con metadata.generated
+        if (data.metadata) updateClockDrift(data.metadata.generated);
 
-        const data = await res.json();
-        const localEvents = (data.features || []).map(feat => ({
-          id: feat.id,
-          title: feat.properties.title,
-          place: feat.properties.place || feat.properties.title,
-          mag: feat.properties.mag,
-          time: feat.properties.time,
-          lat: feat.geometry.coordinates[1],
-          lon: feat.geometry.coordinates[0],
-          depth: feat.geometry.coordinates[2] || 10.0,
-          url: feat.properties.url,
-          source: 'USGS_RADIAL'
-        })).filter(e => e.mag !== null && !isNaN(e.mag));
+        const localEvents = (data.features || []).map(f => SC.normalizeUSGSFeature(f, 'USGS_RADIAL')).filter(SC.isValidEvent);
 
         // Merge newly discovered local events into worldPulseEvents for instant UI update
         let newLocalAdded = false;
@@ -3873,29 +3972,12 @@
           }
         }
 
-        // Check local events for immediate early warning
-        const userThreshold = parseFloat(localStorage.getItem('qm_alert_threshold') || '4.0');
-        for (const evt of localEvents) {
-          const distKm = haversine(userLat, userLon, evt.lat, evt.lon);
-          const hypoDist = hypocentralDistance(distKm, evt.depth);
-          const localMMI = calculateEstimatedMMI(evt.mag, hypoDist);
-
-          if (localMMI >= userThreshold && evt.id !== lastAlertedId) {
-            const correctedNow = Date.now() - (serverTimeDriftMs || 0);
-            const elapsedSec = (correctedNow - evt.time) / 1000;
-            const sWaveTravelTime = hypoDist / 3.5;
-            const remainingSec = Math.round(sWaveTravelTime - elapsedSec);
-
-            if (remainingSec > 0) {
-              lastAlertedId = evt.id;
-              fireEarlyWarning(evt.title, distKm, evt.mag, remainingSec, localMMI);
-              aftershockWatchUntil = Date.now() + 300000;
-              break;
-            }
-          }
-        }
+        // Check local events through the unified alert pipeline
+        processSeismicEvents(localEvents);
       } catch (err) {
         console.warn('[Centinela-Radial] Local radial query error:', err);
+      } finally {
+        radialInFlight = false;
       }
     }
 
@@ -3916,7 +3998,7 @@
     // ADAPTIVE MICRO-POLLING & BATTERY OPTIMIZATION
     // ==========================================
     let adaptiveTimer = null;
-    let basePollInterval = 12000; // 12 seconds active (refined from 15s)
+    let basePollInterval = 12000; // 12 seconds active (feeds regenerate every 60 s; WebSocket is the fast path)
     let isHidden = false;
     let consecutivePollErrors = 0;
 
@@ -3982,9 +4064,44 @@
     const langToggle = document.getElementById('langToggle');
     const themeBtn = document.getElementById('themeBtn');
 
+    // ==========================================
+    // SYSTEM NOTIFICATIONS (opt-in, no server required)
+    // ==========================================
+    const btnEnableNotifications = document.getElementById('btnEnableNotifications');
+    const notifStatusText = document.getElementById('notifStatusText');
+
+    function updateNotificationUI() {
+      if (!btnEnableNotifications || !notifStatusText) return;
+      const d = STRINGS[currentLang];
+      if (!('Notification' in window)) {
+        notifStatusText.textContent = d.notifUnsupported;
+        btnEnableNotifications.style.display = 'none';
+        return;
+      }
+      const perm = Notification.permission;
+      notifStatusText.textContent = perm === 'granted' ? d.notifOn : (perm === 'denied' ? d.notifDenied : d.notifOff);
+      btnEnableNotifications.textContent = perm === 'granted' ? d.btnTestNotif : d.btnEnableNotif;
+      btnEnableNotifications.style.display = perm === 'denied' ? 'none' : 'inline-flex';
+    }
+
+    if (btnEnableNotifications) {
+      btnEnableNotifications.addEventListener('click', async () => {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'granted') {
+          notifySystem('🛡️ Centinela Sísmico', STRINGS[currentLang].notifTestBody, false);
+          return;
+        }
+        try { await Notification.requestPermission(); } catch (e) {}
+        updateNotificationUI();
+      });
+    }
+
     function applyLanguage(lang) {
-      currentLang = lang;
-      const d = STRINGS[lang];
+      currentLang = STRINGS[lang] ? lang : 'es';
+      const d = STRINGS[currentLang];
+      document.documentElement.lang = currentLang;
+      try { localStorage.setItem('qm_lang', currentLang); } catch (e) {}
+      updateNotificationUI();
       document.getElementById('headerBadge').textContent = d.headerBadge;
       document.getElementById('installBannerTitle').textContent = d.installTitle;
       document.getElementById('installBannerDesc').textContent = d.installDesc;
@@ -4240,7 +4357,8 @@
       applyLanguage(currentLang === 'es' ? 'en' : 'es');
     });
 
-    const savedTheme = localStorage.getItem('qm_theme') || 'grayish-white';
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('qm_theme') || (prefersDark ? 'dark' : 'grayish-white');
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     if ('serviceWorker' in navigator) {
@@ -4250,16 +4368,33 @@
           reg.update();
         }).catch(e => console.log(e));
       });
+      // First install: the new worker just claims the page — no reload needed.
+      // Updates: never reload in the middle of an alert, a drill or an active tool;
+      // apply the new version the next time the app goes to the background.
+      const hadController = !!navigator.serviceWorker.controller;
       let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
-          window.location.reload();
+      const isBusy = () => (alertBanner && alertBanner.style.display === 'block') ||
+        isSentinelActive || isBeeping || isStrobing || isPacing;
+      const reloadSafely = () => {
+        if (refreshing) return;
+        if (isBusy() && !document.hidden) {
+          document.addEventListener('visibilitychange', function onHidden() {
+            if (!document.hidden) return;
+            document.removeEventListener('visibilitychange', onHidden);
+            reloadSafely();
+          });
+          return;
         }
+        refreshing = true;
+        window.location.reload();
+      };
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController) reloadSafely();
       });
     }
 
-    applyLanguage('es');
+    const browserLang = (navigator.language || 'es').toLowerCase().startsWith('es') ? 'es' : 'en';
+    applyLanguage(localStorage.getItem('qm_lang') || browserLang);
 
     if (localStorage.getItem('qm_user_lat')) {
       const savedCity = localStorage.getItem('qm_user_city');

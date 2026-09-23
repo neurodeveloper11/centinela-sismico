@@ -1,0 +1,13 @@
+{
+  "name": "centinela-sismico",
+  "private": true,
+  "description": "Centinela Sísmico — test tooling for the offline PWA (the app itself has no build step).",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"tests/js/*.test.mjs\"",
+    "test:e2e": "node tests/e2e/pwa.e2e.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.55.0"
+  }
+}

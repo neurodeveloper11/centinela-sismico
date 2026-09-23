@@ -4,6 +4,7 @@ Author: Fabio Ignacio Torres Benítez (Psychologist & Data / AI Engineer)
 License: MIT
 """
 
+import datetime
 import math
 import json
 import os
@@ -26,6 +27,9 @@ SEISMIC_FEEDS = {
 }
 # Backward compatibility alias
 USGS_FEEDS = SEISMIC_FEEDS
+
+# Source tag for the offline reference sample (never live data)
+OFFLINE_SAMPLE_SOURCE = "OFFLINE_SAMPLE"
 
 # EMSC / CSEM SeismicPortal FDSN endpoint (latency < 30s for global coverage)
 EMSC_FDSN_URL = "https://www.seismicportal.eu/fdsnws/event/1/query"
@@ -65,6 +69,9 @@ def fetch_global_earthquakes(feed_key: str = "day_45", timeout: int = 8) -> List
     if not data or "features" not in data:
         return _get_fallback_mock_earthquakes()
 
+    if not isinstance(data.get("features"), list):
+        return _get_fallback_mock_earthquakes()
+
     parsed_quakes = []
     for feat in data.get("features", []):
         props = feat.get("properties", {})
@@ -85,12 +92,13 @@ def fetch_global_earthquakes(feed_key: str = "day_45", timeout: int = 8) -> List
             "time_iso": time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(props.get("time", 0) / 1000.0)),
             "lon": float(coords[0]),
             "lat": float(coords[1]),
-            "depth_km": round(float(coords[2]), 1),
+            "depth_km": round(max(0.0, float(coords[2])), 1),
             "url": props.get("url", ""),
             "alert": props.get("alert") or "none",
             "felt": props.get("felt") or 0,
             "mmi_usgs": props.get("mmi"),
-            "tsunami": props.get("tsunami", 0) == 1
+            "tsunami": props.get("tsunami", 0) == 1,
+            "source": "USGS"
         }
         parsed_quakes.append(quake_obj)
         
@@ -98,8 +106,12 @@ def fetch_global_earthquakes(feed_key: str = "day_45", timeout: int = 8) -> List
 
 
 def _get_fallback_mock_earthquakes() -> List[Dict[str, Any]]:
-    """Safe fallback containing recent historical reference quakes in case of zero internet."""
-    return [
+    """
+    Offline reference sample used only when neither the network nor the local cache
+    is available. Every event is tagged with source="OFFLINE_SAMPLE" so the UI can
+    label it clearly and never present it as live data.
+    """
+    samples = [
         {
             "id": "mock-choco-2026",
             "title": "M 7.4 - San José del Palmar, Chocó, Colombia",
@@ -152,6 +164,9 @@ def _get_fallback_mock_earthquakes() -> List[Dict[str, Any]]:
             "tsunami": True
         }
     ]
+    for q in samples:
+        q["source"] = OFFLINE_SAMPLE_SOURCE
+    return samples
 
 
 def fetch_emsc_earthquakes(limit: int = 50, min_mag: float = 2.5, timeout: int = 8) -> List[Dict[str, Any]]:
@@ -181,66 +196,102 @@ def fetch_emsc_earthquakes(limit: int = 50, min_mag: float = 2.5, timeout: int =
 
     parsed = []
     for feat in data.get("features", []):
-        props = feat.get("properties", {})
-        geom = feat.get("geometry", {})
-        coords = geom.get("coordinates", [0.0, 0.0, 0.0])
-
-        mag = props.get("mag")
-        if mag is None:
-            continue
-
-        # EMSC uses ISO time string; convert to epoch ms for compatibility
-        time_str = props.get("time", "")
-        try:
-            import datetime
-            dt = datetime.datetime.fromisoformat(time_str.replace("Z", "+00:00"))
-            time_epoch = int(dt.timestamp() * 1000)
-        except Exception:
-            time_epoch = 0
-
-        quake_obj = {
-            "id": feat.get("id", f"emsc-{time_epoch}"),
-            "title": f"M {float(mag):.1f} - {props.get('flynn_region', props.get('place', 'Unknown'))}",
-            "place": props.get("flynn_region", props.get("place", "Unknown Location")),
-            "mag": round(float(mag), 1),
-            "mag_type": props.get("magtype", "Mw"),
-            "time_epoch": time_epoch,
-            "time_iso": time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(time_epoch / 1000.0)) if time_epoch else time_str,
-            "lon": float(coords[0]),
-            "lat": float(coords[1]),
-            "depth_km": round(float(coords[2]), 1) if len(coords) > 2 else 10.0,
-            "url": props.get("url", ""),
-            "alert": "none",
-            "felt": 0,
-            "mmi_usgs": None,
-            "tsunami": False,
-            "source": "EMSC"
-        }
-        parsed.append(quake_obj)
-
+        quake_obj = normalize_emsc_feature(feat)
+        if quake_obj is not None:
+            parsed.append(quake_obj)
     return parsed
+
+
+def _parse_utc_ms(value: Any) -> int:
+    """Parse an ISO-8601 time (with or without zone, assumed UTC) into epoch milliseconds."""
+    if isinstance(value, (int, float)):
+        return int(value)
+    if not value:
+        return 0
+    text = str(value).replace("Z", "+00:00").replace("z", "+00:00")
+    try:
+        dt = datetime.datetime.fromisoformat(text)
+    except ValueError:
+        return 0
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=datetime.timezone.utc)
+    return int(round(dt.timestamp() * 1000))
+
+
+def normalize_emsc_feature(feat: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    Normalize one EMSC SeismicPortal feature (FDSN JSON or WebSocket payload).
+
+    EMSC encodes the geometry Z coordinate as NEGATIVE depth (e.g. -7.2), while
+    properties.depth holds the positive value. Using the raw Z coordinate made every
+    EMSC event look 1 km deep and overestimated intensity for deep earthquakes.
+    Mirrors SeismicCore.normalizeEMSCFeature in pwa/seismic-core.js.
+    """
+    props = feat.get("properties", {}) or {}
+    coords = (feat.get("geometry", {}) or {}).get("coordinates", []) or []
+    mag = props.get("mag")
+    if mag is None:
+        return None
+    try:
+        mag = float(mag)
+    except (TypeError, ValueError):
+        return None
+
+    if props.get("depth") is not None:
+        depth = abs(float(props["depth"]))
+    elif len(coords) > 2 and coords[2] is not None:
+        depth = abs(float(coords[2]))
+    else:
+        depth = 10.0
+
+    time_epoch = _parse_utc_ms(props.get("time"))
+    region = props.get("flynn_region") or props.get("place") or "Unknown Location"
+    lat = props.get("lat", coords[1] if len(coords) > 1 else 0.0)
+    lon = props.get("lon", coords[0] if coords else 0.0)
+    unid = props.get("unid") or feat.get("id") or f"emsc-{time_epoch}"
+
+    return {
+        "id": unid,
+        "title": f"M {mag:.1f} - {region}",
+        "place": region,
+        "mag": round(mag, 1),
+        "mag_type": props.get("magtype", "Mw"),
+        "time_epoch": time_epoch,
+        "time_iso": time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime(time_epoch / 1000.0)) if time_epoch else str(props.get("time", "")),
+        "lon": float(lon),
+        "lat": float(lat),
+        "depth_km": round(depth, 1),
+        "url": f"https://www.seismicportal.eu/eventdetails.html?unid={unid}" if props.get("unid") else "",
+        "alert": "none",
+        "felt": 0,
+        "mmi_usgs": None,
+        "tsunami": False,
+        "source": "EMSC"
+    }
+
+
+def is_same_event(a: Dict[str, Any], b: Dict[str, Any], max_km: float = 50.0, max_sec: float = 120.0) -> bool:
+    """True when two reports (possibly from different agencies) describe the same earthquake."""
+    if a.get("id") and a.get("id") == b.get("id"):
+        return True
+    time_diff = abs(a.get("time_epoch", 0) - b.get("time_epoch", 0)) / 1000.0
+    if time_diff >= max_sec:
+        return False
+    dist = haversine_distance(a.get("lat", 0), a.get("lon", 0), b.get("lat", 0), b.get("lon", 0))
+    return dist < max_km
 
 
 def _deduplicate_quakes(quakes_a: List[Dict[str, Any]], quakes_b: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Merge and deduplicate earthquake lists from multiple sources.
-    Two events are considered duplicates if:
+    Two events are considered duplicates if they share an id, or if:
       - Epicentral distance < 50 km AND
       - Time difference < 120 seconds
-    When duplicates are found, the event with the earlier ingestion (lower time_epoch) is kept.
-    Returns unified list sorted by time descending.
+    Events from the first list win. Returns unified list sorted by time descending.
     """
     merged = list(quakes_a)
     for qb in quakes_b:
-        is_dup = False
-        for qa in merged:
-            dist = haversine_distance(qa.get("lat", 0), qa.get("lon", 0),
-                                      qb.get("lat", 0), qb.get("lon", 0))
-            time_diff = abs(qa.get("time_epoch", 0) - qb.get("time_epoch", 0)) / 1000.0
-            if dist < 50.0 and time_diff < 120.0:
-                is_dup = True
-                break
-        if not is_dup:
+        if not any(is_same_event(qa, qb) for qa in merged):
             merged.append(qb)
     merged.sort(key=lambda q: q.get("time_epoch", 0), reverse=True)
     return merged
@@ -248,11 +299,10 @@ def _deduplicate_quakes(quakes_a: List[Dict[str, Any]], quakes_b: List[Dict[str,
 
 def fetch_multi_source(feed_key: str = "day_45", timeout: int = 8) -> List[Dict[str, Any]]:
     """
-    Fetch earthquakes from both USGS and EMSC in parallel-sequential fashion,
-    deduplicate, and return a unified global event list.
+    Fetch earthquakes from both USGS and EMSC, deduplicate,
+    and return a unified global event list.
     """
     usgs_quakes = fetch_global_earthquakes(feed_key, timeout=timeout)
-    # Tag USGS events with source
     for q in usgs_quakes:
         q.setdefault("source", "USGS")
 
@@ -262,11 +312,22 @@ def fetch_multi_source(feed_key: str = "day_45", timeout: int = 8) -> List[Dict[
 
 
 # =====================================================================
-# 2. GEODESIC DISTANCE & GROUND MOTION ATTENUATION (GMPE / MMI)
+# 2. GEODESIC DISTANCE & INTENSITY PREDICTION (IPE / MMI)
 # =====================================================================
+
+# Allen, Wald & Worden (2012), "Intensity attenuation for active crustal regions",
+# J. Seismology 16:409-433 — hypocentral-distance model. Coefficients verified against
+# openquake.hazardlib.gsim.allen_2012_ipe.AllenEtAl2012Rhypo.
+AWW12 = {"c0": 2.085, "c1": 1.428, "c2": -1.402, "c4": 0.078,
+         "m1": -0.209, "m2": 2.042, "s1": 0.82, "s2": 0.37, "s3": 22.9}
+
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate the great-circle distance between two points on Earth in kilometers."""
+    return round(_haversine_raw(lat1, lon1, lat2, lon2), 1)
+
+
+def _haversine_raw(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371.0  # Earth radius in km
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
@@ -274,23 +335,36 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
          math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
          math.sin(dlon / 2.0) ** 2)
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
-    return round(R * c, 1)
+    return R * c
 
 
 def hypocentral_distance(epicentral_dist_km: float, depth_km: float) -> float:
-    """Calculate 3D hypocentral slant distance: R = sqrt(D^2 + h^2)."""
+    """Calculate 3D hypocentral slant distance: R = sqrt(D^2 + h^2), with h >= 1 km."""
     return round(math.sqrt(epicentral_dist_km ** 2 + max(depth_km, 1.0) ** 2), 1)
+
+
+def allen2012_mmi_raw(magnitude: float, hypocentral_dist_km: float) -> float:
+    """Unclamped mean MMI from the Allen et al. (2012) Rhypo IPE."""
+    r = max(hypocentral_dist_km, 1.0)
+    r_m = AWW12["m1"] + AWW12["m2"] * math.exp(magnitude - 5.0)
+    mmi = AWW12["c0"] + AWW12["c1"] * magnitude + AWW12["c2"] * math.log(math.sqrt(r ** 2 + r_m ** 2))
+    if r > 50.0:
+        mmi += AWW12["c4"] * math.log(r / 50.0)
+    return mmi
+
+
+def mmi_sigma(hypocentral_dist_km: float) -> float:
+    """Total standard deviation (MMI units) of the Allen et al. (2012) IPE."""
+    return AWW12["s1"] + AWW12["s2"] / (1.0 + (hypocentral_dist_km / AWW12["s3"]) ** 2)
 
 
 def calculate_attenuation_mmi(magnitude: float, hypocentral_dist_km: float) -> float:
     """
-    Calculate estimated local Modified Mercalli Intensity (MMI)
-    using calibrated crustal attenuation relationship (Wald et al. / Worden et al.).
-    Formula: MMI = 1.5 * M - 2.5 * log10(R) + 1.2
+    Estimated local Modified Mercalli Intensity (MMI) using the peer-reviewed
+    Allen, Wald & Worden (2012) intensity prediction equation (hypocentral distance).
     Clamped strictly between 1.0 (imperceptible) and 12.0 (extreme).
     """
-    R = max(hypocentral_dist_km, 3.0)  # avoid singularity at R -> 0
-    raw_mmi = 1.5 * magnitude - 2.5 * math.log10(R) + 1.2
+    raw_mmi = allen2012_mmi_raw(magnitude, hypocentral_dist_km)
     return round(max(1.0, min(12.0, raw_mmi)), 1)
 
 
@@ -348,6 +422,7 @@ def compute_perceived_shaking(user_lat: float, user_lon: float, eq: Dict[str, An
     dist_km = haversine_distance(user_lat, user_lon, eq["lat"], eq["lon"])
     hypo_km = hypocentral_distance(dist_km, eq["depth_km"])
     mmi_val = calculate_attenuation_mmi(eq["mag"], hypo_km)
+    sigma = mmi_sigma(hypo_km)
     desc = get_mmi_description(mmi_val, lang=lang)
     
     return {
@@ -357,6 +432,8 @@ def compute_perceived_shaking(user_lat: float, user_lon: float, eq: Dict[str, An
         "epicentral_dist_km": dist_km,
         "hypocentral_dist_km": hypo_km,
         "mmi_estimated": mmi_val,
+        "mmi_sigma": round(sigma, 2),
+        "mmi_range": (round(max(1.0, mmi_val - sigma), 1), round(min(12.0, mmi_val + sigma), 1)),
         "mmi_title": desc["roman_title"],
         "human_perception": desc["perception"],
         "structural_risk": desc["structural_impact"],
@@ -807,5 +884,48 @@ def calculate_eew_kinematics(user_lat: float, user_lon: float, eq: Dict[str, Any
         "warning_window_p_s_sec": warning_window_p_s,
         "remaining_s_wave_seconds": remaining_seconds,
         "is_hazardous": is_hazardous
+    }
+
+
+def assess_event(eq: Dict[str, Any], user_lat: float, user_lon: float,
+                 now_ms: Optional[int] = None, threshold_mmi: float = 4.0,
+                 calm_radius_km: float = 750.0, felt_window_sec: float = 900.0) -> Dict[str, Any]:
+    """
+    Alert decision for one earthquake, mirroring SeismicCore.assessEvent (pwa/seismic-core.js).
+
+    level:
+      'incoming' -> MMI >= threshold and the S-wave has not arrived yet (countdown)
+      'felt'     -> MMI >= threshold and the S-wave passed within felt_window_sec (post-event notice)
+      'calm'     -> regional event (<= calm_radius_km) below threshold (reassurance)
+      'none'     -> irrelevant for this user
+    """
+    now = int(time.time() * 1000) if now_ms is None else now_ms
+    dist_km = _haversine_raw(user_lat, user_lon, float(eq["lat"]), float(eq["lon"]))
+    depth = eq.get("depth_km", eq.get("depth", 10.0))
+    hypo_km = math.sqrt(dist_km ** 2 + max(float(depth), 1.0) ** 2)
+    mmi = max(1.0, min(12.0, allen2012_mmi_raw(float(eq["mag"]), hypo_km)))
+    origin = eq.get("time_epoch", eq.get("time", 0))
+    s_travel = hypo_km / V_S_KM_S
+    remaining = (origin + s_travel * 1000.0 - now) / 1000.0
+    age = (now - origin) / 1000.0
+
+    level = "none"
+    if mmi >= threshold_mmi:
+        if remaining > 0:
+            level = "incoming"
+        elif age <= felt_window_sec + s_travel:
+            level = "felt"
+    elif dist_km <= calm_radius_km:
+        level = "calm"
+
+    return {
+        "dist_km": dist_km,
+        "hypo_km": hypo_km,
+        "mmi": mmi,
+        "mmi_sigma": mmi_sigma(hypo_km),
+        "p_travel_sec": hypo_km / V_P_KM_S,
+        "s_travel_sec": s_travel,
+        "remaining_sec": remaining,
+        "level": level
     }
 

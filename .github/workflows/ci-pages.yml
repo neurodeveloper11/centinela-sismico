@@ -1,0 +1,81 @@
+name: CI & GitHub Pages
+
+# Quality gate on every push / PR, then deploy docs/ to GitHub Pages from main.
+# Deploying through Actions (instead of "Deploy from a branch") is required because
+# the images are stored in Git LFS: branch-based Pages serves the LFS *pointer* text,
+# which broke the PWA icons and the Open Graph preview.
+#
+# One-time setup: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests pytest
+          npm ci
+
+      - name: Distribution parity, JS syntax, JS + Python unit tests
+        run: python scripts/sync_dist.py --check
+
+      - name: End-to-end alert signal in headless Chrome
+        run: npm run test:e2e
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Refuse to publish Git LFS pointers instead of images
+        run: |
+          for f in docs/*.png; do
+            head -c 8 "$f" | od -An -tx1 | tr -d ' \n' | grep -q '^89504e470d0a1a0a$' || { echo "::error file=$f::not a real PNG (LFS pointer?)"; exit 1; }
+          done
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

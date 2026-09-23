@@ -5,6 +5,12 @@ Verifies geophysics calculations, MMI attenuation, PAP logic, and ATC-20 triage.
 
 import sys
 import os
+import re
+import json
+import math
+import random
+import shutil
+import subprocess
 import pytest
 
 # Ensure parent directory is in python path
@@ -24,6 +30,10 @@ from quakemind_engine import (
     fetch_multi_source,
     _deduplicate_quakes,
     calculate_eew_kinematics,
+    allen2012_mmi_raw,
+    mmi_sigma,
+    assess_event,
+    normalize_emsc_feature,
     SEISMIC_FEEDS,
     USGS_FEEDS
 )
@@ -80,8 +90,8 @@ class TestGeophysicsAndAttenuation:
         # A severe regional quake (M 7.2 at 60 km epicentral, 15 km depth)
         hypo_severe = hypocentral_distance(60.0, 15.0)
         mmi_severe = calculate_attenuation_mmi(7.2, hypo_severe)
-        # Should be high intensity (MMI >= 7.0 - Very Strong)
-        assert mmi_severe >= 7.0, f"Expected severe MMI >= 7.0, got {mmi_severe}"
+        # Allen et al. (2012) IPE: strong shaking (MMI VI+), well above the alarm threshold
+        assert mmi_severe >= 6.0, f"Expected strong MMI >= 6.0, got {mmi_severe}"
 
 
 class TestPsychologicalFirstAid:
@@ -136,9 +146,59 @@ class TestMythBuster:
         assert "TRIÁNGULO" in res["verdict"]
 
 
+class _FakeResponse:
+    def __init__(self, payload, status_code=200):
+        self._payload = payload
+        self.status_code = status_code
+
+    def json(self):
+        return self._payload
+
+
+USGS_FIXTURE = {
+    "type": "FeatureCollection",
+    "features": [
+        {"id": "us7000test", "type": "Feature",
+         "properties": {"mag": 5.4, "place": "12 km W of Test, Colombia", "time": 1790000000000,
+                        "title": "M 5.4 - 12 km W of Test, Colombia", "magType": "mww",
+                        "url": "https://earthquake.usgs.gov/x", "alert": None, "felt": 3, "mmi": 4.1, "tsunami": 0},
+         "geometry": {"type": "Point", "coordinates": [-76.65, 4.95, 103.0]}},
+        {"id": "us7000nomag", "type": "Feature",
+         "properties": {"mag": None, "time": 1790000000000},
+         "geometry": {"type": "Point", "coordinates": [0, 0, 10]}},
+    ],
+}
+
+EMSC_FIXTURE = {
+    "type": "FeatureCollection",
+    "features": [
+        {"id": "20260923_0000277", "type": "Feature",
+         "geometry": {"type": "Point", "coordinates": [-76.66, 4.96, -103.0]},
+         "properties": {"time": "2026-09-23T20:55:51.8Z", "depth": 103.0, "mag": 5.3, "magtype": "mb",
+                        "flynn_region": "NEAR WEST COAST OF COLOMBIA", "unid": "20260923_0000277",
+                        "lat": 4.96, "lon": -76.66}},
+    ],
+}
+
+
+@pytest.fixture
+def offline_network(monkeypatch, tmp_path):
+    """Deterministic network: USGS/EMSC answers come from fixtures, cache goes to tmp."""
+    import quakemind_engine as engine
+
+    def fake_get(url, *args, **kwargs):
+        if "seismicportal" in url:
+            return _FakeResponse(EMSC_FIXTURE)
+        return _FakeResponse(USGS_FIXTURE)
+
+    monkeypatch.setattr(engine.requests, "get", fake_get)
+    monkeypatch.setattr(engine, "CACHE_FILE", str(tmp_path / "cache.json"))
+    return engine
+
+
 class TestDataIngestionFallback:
 
-    def test_fetch_earthquakes_returns_list(self):
+    def test_fetch_earthquakes_returns_list(self, offline_network):
         quakes = fetch_global_earthquakes("day_45", timeout=5)
         assert isinstance(quakes, list)
         assert len(quakes) > 0
@@ -161,7 +221,7 @@ class TestMultiSourceIngestion:
         assert "hour" in USGS_FEEDS
         assert "day_45" in USGS_FEEDS
 
-    def test_fetch_emsc_returns_list(self):
+    def test_fetch_emsc_returns_list(self, offline_network):
         quakes = fetch_emsc_earthquakes(limit=10, min_mag=4.0, timeout=10)
         assert isinstance(quakes, list)
         # EMSC may return 0 if no recent M4+ events, but should not error
@@ -196,10 +256,62 @@ class TestMultiSourceIngestion:
         merged = _deduplicate_quakes(event_a, event_b)
         assert len(merged) == 2
 
-    def test_multi_source_returns_list(self):
+    def test_multi_source_returns_list(self, offline_network):
         quakes = fetch_multi_source("day_45", timeout=10)
         assert isinstance(quakes, list)
         assert len(quakes) > 0
+
+    def test_multi_source_merges_same_quake_from_two_agencies(self, offline_network):
+        # USGS (us7000test) and EMSC (20260923_0000277) describe the same event with different
+        # ids; align the fixture times to check the spatio-temporal merge.
+        usgs = fetch_global_earthquakes("day_45")
+        emsc = fetch_emsc_earthquakes()
+        emsc[0]["time_epoch"] = usgs[0]["time_epoch"] + 20000
+        merged = _deduplicate_quakes(usgs, emsc)
+        assert len(merged) == 1
+        assert merged[0]["source"] == "USGS"
+
+    def test_emsc_depth_is_positive(self, offline_network):
+        # EMSC encodes Z as negative depth; the engine must read 103 km, not -103 (-> 1 km)
+        q = fetch_emsc_earthquakes()[0]
+        assert q["depth_km"] == 103.0
+        assert q["source"] == "EMSC"
+        assert q["time_epoch"] == 1790196951800
+
+    def test_network_failure_uses_labeled_offline_sample(self, monkeypatch, tmp_path):
+        import quakemind_engine as engine
+
+        def boom(*a, **k):
+            raise engine.requests.ConnectionError("offline")
+
+        monkeypatch.setattr(engine.requests, "get", boom)
+        monkeypatch.setattr(engine, "CACHE_FILE", str(tmp_path / "missing.json"))
+        quakes = engine.fetch_global_earthquakes("day_45")
+        assert quakes and all(q["source"] == engine.OFFLINE_SAMPLE_SOURCE for q in quakes)
+        assert engine.fetch_emsc_earthquakes() == []
+
+    def test_cache_used_when_network_drops(self, monkeypatch, tmp_path):
+        import quakemind_engine as engine
+        monkeypatch.setattr(engine, "CACHE_FILE", str(tmp_path / "cache.json"))
+        monkeypatch.setattr(engine.requests, "get", lambda *a, **k: _FakeResponse(USGS_FIXTURE))
+        engine.fetch_global_earthquakes("day_45")
+
+        def boom(*a, **k):
+            raise engine.requests.ConnectionError("offline")
+
+        monkeypatch.setattr(engine.requests, "get", boom)
+        quakes = engine.fetch_global_earthquakes("day_45")
+        assert quakes[0]["id"] == "us7000test"
+        assert quakes[0]["source"] == "USGS"
+
+
+@pytest.mark.skipif(os.environ.get("RUN_NETWORK_TESTS") != "1", reason="live API smoke test (set RUN_NETWORK_TESTS=1)")
+class TestLiveFeedsSmoke:
+
+    def test_live_usgs_and_emsc(self):
+        assert fetch_global_earthquakes("day_45", timeout=10)
+        live = fetch_emsc_earthquakes(limit=5, min_mag=2.0, timeout=10)
+        assert all(q["depth_km"] >= 0 for q in live)
 
 
 class TestEEWKinematicsEngine:
@@ -352,6 +464,99 @@ class TestDynamicLocationTabAndRadialSpeed:
     def test_service_worker_bypasses_usgs_and_radial_feeds(self):
         assert "event.request.url.includes('earthquake.usgs.gov')" in self.sw_content
         assert "event.request.url.includes('seismicportal.eu')" in self.sw_content
-        assert "centinela-cache-v8" in self.sw_content
+        assert re.search(r"centinela-cache-v\d+", self.sw_content)
+        assert "./seismic-core.js" in self.sw_content
 
 
+
+
+class TestIntensityPredictionEquation:
+    """Allen, Wald & Worden (2012) Rhypo IPE — values checked against the OpenQuake formula."""
+
+    @pytest.mark.parametrize("mag,rhypo,expected", [
+        (7.0, 10.0, 8.0293), (7.0, 100.0, 5.6632), (5.0, 20.0, 5.0182), (6.0, 50.0, 5.1604),
+    ])
+    def test_reference_values(self, mag, rhypo, expected):
+        assert abs(allen2012_mmi_raw(mag, rhypo) - expected) < 0.01
+
+    def test_sigma_decreases_with_distance(self):
+        assert abs(mmi_sigma(0.0) - 1.19) < 1e-9
+        assert mmi_sigma(10) > mmi_sigma(300) > 0.82
+
+    def test_deep_event_is_less_intense(self):
+        shallow = calculate_attenuation_mmi(6.0, hypocentral_distance(20, 10))
+        deep = calculate_attenuation_mmi(6.0, hypocentral_distance(20, 150))
+        assert shallow - deep > 1.5
+
+    def test_perceived_shaking_reports_uncertainty(self):
+        eq = {"title": "t", "mag": 6.0, "depth_km": 30.0, "lat": 3.6, "lon": -76.5}
+        rep = compute_perceived_shaking(3.4516, -76.5320, eq, lang="es")
+        lo, hi = rep["mmi_range"]
+        assert lo < rep["mmi_estimated"] < hi
+
+
+class TestAlertDecision:
+    NOW = 1_800_000_000_000
+
+    def test_incoming(self):
+        eq = {"lat": 4.53, "lon": -76.53, "depth_km": 15.0, "mag": 6.5, "time_epoch": self.NOW - 10_000}
+        a = assess_event(eq, 3.4516, -76.5320, now_ms=self.NOW)
+        assert a["level"] == "incoming"
+        assert 20 < a["remaining_sec"] < 30
+
+    def test_felt_after_wave_passed(self):
+        eq = {"lat": 3.6, "lon": -76.5, "depth_km": 20.0, "mag": 6.0, "time_epoch": self.NOW - 180_000}
+        assert assess_event(eq, 3.4516, -76.5320, now_ms=self.NOW)["level"] == "felt"
+
+    def test_calm_and_none(self):
+        small = {"lat": 5.7, "lon": -76.53, "depth_km": 30.0, "mag": 3.0, "time_epoch": self.NOW}
+        tokyo = {"lat": 35.68, "lon": 139.65, "depth_km": 30.0, "mag": 6.8, "time_epoch": self.NOW}
+        assert assess_event(small, 3.4516, -76.5320, now_ms=self.NOW)["level"] == "calm"
+        assert assess_event(tokyo, 3.4516, -76.5320, now_ms=self.NOW)["level"] == "none"
+
+    def test_emsc_websocket_payload_normalization(self):
+        feat = {"geometry": {"coordinates": [-76.6, 4.9, -60.0]},
+                "properties": {"time": "2026-09-23T20:55:51", "mag": "4.8", "unid": "u1", "flynn_region": "COLOMBIA"}}
+        q = normalize_emsc_feature(feat)
+        assert q["depth_km"] == 60.0 and q["mag"] == 4.8 and q["id"] == "u1"
+        assert q["time_epoch"] == 1790196951000
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js not installed")
+class TestPythonJavaScriptParity:
+    """The PWA (seismic-core.js) and the Python engine must produce identical science."""
+
+    def test_random_cases_match(self):
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        rng = random.Random(42)
+        now = 1_800_000_000_000
+        cases = []
+        for i in range(200):
+            ulat, ulon = rng.uniform(-60, 60), rng.uniform(-180, 180)
+            near = i < 100  # half the cases near the user so every alert level is exercised
+            cases.append({
+                "lat": ulat + rng.uniform(-3, 3) if near else rng.uniform(-60, 60),
+                "lon": ulon + rng.uniform(-3, 3) if near else rng.uniform(-180, 180),
+                "depth": rng.uniform(0, 300), "mag": rng.uniform(2.0, 9.0),
+                "time": now - rng.randint(0, 1_200_000), "ulat": ulat, "ulon": ulon,
+            })
+
+        script = (
+            "const core=require(process.argv[1]);let d='';process.stdin.on('data',c=>d+=c);"
+            "process.stdin.on('end',()=>{const out=JSON.parse(d).map(c=>{"
+            "const a=core.assessEvent({lat:c.lat,lon:c.lon,depth:c.depth,mag:c.mag,time:c.time},c.ulat,c.ulon,{nowMs:%d});"
+            "return [a.mmi,a.hypoKm,a.remainingSec,a.level,a.mmiSigma];});process.stdout.write(JSON.stringify(out));});" % now
+        )
+        res = subprocess.run(["node", "-e", script, os.path.join(repo_root, "pwa", "seismic-core.js")],
+                             input=json.dumps(cases), capture_output=True, text=True, encoding="utf-8", check=True)
+        levels = set()
+        for c, (mmi, hypo, rem, level, sigma) in zip(cases, json.loads(res.stdout)):
+            py = assess_event({"lat": c["lat"], "lon": c["lon"], "depth_km": c["depth"], "mag": c["mag"],
+                               "time_epoch": c["time"]}, c["ulat"], c["ulon"], now_ms=now)
+            assert math.isclose(py["mmi"], mmi, abs_tol=1e-9)
+            assert math.isclose(py["hypo_km"], hypo, abs_tol=1e-6)
+            assert math.isclose(py["remaining_sec"], rem, abs_tol=1e-6)
+            assert math.isclose(py["mmi_sigma"], sigma, abs_tol=1e-12)
+            assert py["level"] == level
+            levels.add(level)
+        assert {"incoming", "felt", "calm", "none"} <= levels

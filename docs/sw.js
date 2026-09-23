@@ -1,8 +1,9 @@
 // Service Worker for Centinela Sísmico Offline PWA
-const CACHE_NAME = 'centinela-cache-v8';
+const CACHE_NAME = 'centinela-cache-v9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './seismic-core.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -34,7 +35,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+async function cachedAppShell() {
+  return (await caches.match('./index.html')) ||
+         (await caches.match('./')) ||
+         new Response('Centinela Sísmico: sin conexión.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+}
+
 self.addEventListener('fetch', (event) => {
+  // Only GET requests are cacheable; let the browser handle everything else.
+  if (event.request.method !== 'GET') return;
+
   // Bypass cache for live seismic feeds (USGS + EMSC/CSEM + SGC)
   if (event.request.url.includes('earthquake.usgs.gov') ||
       event.request.url.includes('seismicportal.eu') ||
@@ -54,9 +64,22 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         })
-        .catch(() => {
-          return caches.match('./index.html') || caches.match('./');
-        })
+        .catch(() => cachedAppShell())
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate for the app scripts: instant load, background refresh
+  if (event.request.url.endsWith('/seismic-core.js')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(event.request);
+        const network = fetch(event.request).then((res) => {
+          if (res && res.status === 200) cache.put(event.request, res.clone());
+          return res;
+        }).catch(() => cached);
+        return cached || network;
+      })
     );
     return;
   }
@@ -67,9 +90,7 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => {
-        return caches.match('./index.html');
-      });
+      return fetch(event.request).catch(() => cachedAppShell());
     })
   );
 });
@@ -82,7 +103,8 @@ self.addEventListener('fetch', (event) => {
 // subscribed users. The client subscription is managed in index.html.
 // ===========================================
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data ? event.data.text() : '' }; }
   const title = data.title || '🚨 Centinela Sísmico — Alerta Sísmica';
   const options = {
     body: data.body || 'Se ha detectado actividad sísmica cerca de tu ubicación.',
@@ -100,10 +122,11 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url || './index.html';
+  const scope = self.registration.scope;
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {
-        if (client.url.includes('index.html') && 'focus' in client) {
+        if (client.url.startsWith(scope) && 'focus' in client) {
           return client.focus();
         }
       }

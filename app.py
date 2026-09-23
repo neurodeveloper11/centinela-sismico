@@ -13,6 +13,7 @@ import gradio as gr
 sys.path.insert(0, os.path.dirname(__file__))
 
 from quakemind_engine import (
+    OFFLINE_SAMPLE_SOURCE,
     fetch_global_earthquakes,
     compute_perceived_shaking,
     get_pap_guidance,
@@ -56,7 +57,7 @@ def update_feed_quakes(feed_key: str):
     if not quakes:
         return gr.update(choices=["No earthquakes found"]), pd.DataFrame()
         
-    choices = [f"[{q['mag']} {q['mag_type']}] {q['title']} ({q['time_iso']})" for q in quakes]
+    choices = [_quake_label(q) for q in quakes]
     
     df_data = []
     for q in quakes:
@@ -73,6 +74,14 @@ def update_feed_quakes(feed_key: str):
     df = pd.DataFrame(df_data)
     
     return gr.update(choices=choices, value=choices[0] if choices else None), df
+
+
+def _quake_label(q: dict) -> str:
+    """Dropdown label; offline reference samples are never presented as live data."""
+    label = f"[{q['mag']} {q['mag_type']}] {q['title']} ({q['time_iso']})"
+    if q.get("source") == OFFLINE_SAMPLE_SOURCE:
+        label = "[OFFLINE SAMPLE] " + label
+    return label
 
 
 def on_city_selected(city_name: str):
@@ -93,8 +102,7 @@ def calculate_impact_ui(selected_quake_str: str, user_lat: float, user_lon: floa
     # Match the selected earthquake by string or fallback to first
     target_q = None
     for q in quakes:
-        q_str = f"[{q['mag']} {q['mag_type']}] {q['title']} ({q['time_iso']})"
-        if q_str == selected_quake_str:
+        if _quake_label(q) == selected_quake_str:
             target_q = q
             break
             
@@ -105,12 +113,21 @@ def calculate_impact_ui(selected_quake_str: str, user_lat: float, user_lon: floa
         return "No earthquake data available."
 
     report = compute_perceived_shaking(user_lat, user_lon, target_q, lang=lang)
+    offline_note = ""
+    if target_q.get("source") == OFFLINE_SAMPLE_SOURCE:
+        offline_note = (
+            "<p style='margin:0 0 12px 0;color:#fcd34d;font-weight:700;'>⚠️ "
+            + ("Sin conexión: este es un sismo de EJEMPLO, no datos en vivo." if lang == "es"
+               else "Offline: this is a SAMPLE earthquake, not live data.")
+            + "</p>"
+        )
 
     # HTML Card layout
     is_es = (lang == "es")
     
     html = f"""
     <div style="background: #1e293b; color: #f8fafc; border-radius: 12px; padding: 24px; border-left: 8px solid {report['color_hex']}; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        {offline_note}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 style="margin: 0; color: #f8fafc; font-size: 1.3rem;">{report['earthquake_title']}</h3>
             <span style="background: {report['color_hex']}; color: #000; font-weight: 800; padding: 6px 14px; border-radius: 20px; font-size: 1.1rem;">
@@ -132,8 +149,9 @@ def calculate_impact_ui(selected_quake_str: str, user_lat: float, user_lon: floa
                 <div style="font-size: 1.2rem; font-weight: bold; color: #38bdf8;">{report['hypocentral_dist_km']} km</div>
             </div>
             <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155;">
-                <div style="font-size: 0.8rem; color: #94a3b8;">{'Aceleración Estimada' if is_es else 'Estimated Intensity'}</div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">{'Intensidad Estimada (±1σ)' if is_es else 'Estimated Intensity (±1σ)'}</div>
                 <div style="font-size: 1.2rem; font-weight: bold; color: {report['color_hex']};">MMI {report['mmi_estimated']} / 12</div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">{'Rango probable' if is_es else 'Likely range'}: {report['mmi_range'][0]} – {report['mmi_range'][1]}</div>
             </div>
         </div>
 
@@ -242,7 +260,7 @@ with gr.Blocks(title="QuakeMind Global - Seismic Intelligence and Crisis Hub") a
         gr.Markdown("""
         ### 📡 Radar de Sismicidad en Vivo & Calculadora de Impacto Humano (MMI)
         Conexión directa a los feeds globales del **USGS (United States Geological Survey)**. 
-        Calcula la **Intensidad Mercalli Modificada (MMI)** en tu ciudad exacta mediante ecuaciones empíricas de atenuación de ondas sísmicas (*GMPE*).
+        Calcula la **Intensidad Mercalli Modificada (MMI)** en tu ciudad con la ecuación de predicción de intensidad de *Allen, Wald & Worden (2012)* y su incertidumbre (±1σ).
         """)
 
         with gr.Row():

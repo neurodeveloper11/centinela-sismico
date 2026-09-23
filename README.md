@@ -49,10 +49,11 @@ flowchart TD
         GPS["Browser Geodesic Coordinates / City Preset"]
     end
 
-    subgraph ENGINE ["2. Core Processing Engine (quakemind_engine.py)"]
+    subgraph ENGINE ["2. Shared Science Core (pwa/seismic-core.js ≡ quakemind_engine.py)"]
         HAVERSINE["3D Hypocentral Distance: R = sqrt(D² + h²)"]
-        GMPE["Empirical Attenuation Model (Wald et al.)"]
+        GMPE["Intensity Prediction Equation (Allen, Wald & Worden 2012) ± σ"]
         MMI["Local Modified Mercalli Intensity (MMI I–XII)"]
+        DECIDE["Alert decision: incoming / felt / calm + cross-source de-duplication"]
         PAP["WHO / ABCDE Psychological First Aid Engine"]
         ATC20["ATC-20 Post-Earthquake Building Safety Triage"]
         FACT["NLP Semantic Rumor & Myth Debunker"]
@@ -74,8 +75,12 @@ flowchart TD
 
 ### 1. 📡 Live Global Seismic Monitor & Local Shaking Calculator
 * **Multi-Source Ingestion:** Ingests live USGS feeds (`all_hour`, `day_all`, `4.5_day`, `significant_month`) with local cache fallback in case of connection dropouts.
-* **Ground Motion Prediction Equations (GMPE):** Translates raw geophysical data ($M$, depth $h$, epicentral distance $D$) into the **hypocentral 3D slant distance** $R = \sqrt{D^2 + h^2}$ and calculates the estimated **Modified Mercalli Intensity (MMI I–XII)**:
-  $$\text{MMI}_{\text{local}} \approx 1.5 \cdot M - 2.5 \cdot \log_{10}(R) + 1.2$$
+* **Intensity Prediction Equation (IPE):** Translates raw geophysical data ($M$, depth $h$, epicentral distance $D$) into the **hypocentral 3D slant distance** $R = \sqrt{D^2 + h^2}$ and estimates the **Modified Mercalli Intensity (MMI I–XII)** with the peer-reviewed global model of **Allen, Wald & Worden (2012)** for active crustal regions (coefficients verified against OpenQuake's `AllenEtAl2012Rhypo`):
+  $$\text{MMI} = 2.085 + 1.428\,M - 1.402\,\ln\sqrt{R^2 + R_M^2} + 0.078\,\ln(R/50)\,\big|_{R>50}, \qquad R_M = -0.209 + 2.042\,e^{M-5}$$
+  The app always shows the model uncertainty $\sigma = 0.82 + 0.37/(1+(R/22.9)^2)$ (≈ 0.8–1.2 MMI units) as a likely range.
+* **One science core, two languages:** `pwa/seismic-core.js` (browser, Service Worker, Node tests) and `quakemind_engine.py` implement the same equations; a parity test checks 200 random cases to 1e-9.
+* **Honest early warning:** the S-wave countdown is computed from the absolute arrival time (no drift when the phone throttles timers). Agencies publish events with a delay (seconds via the EMSC live WebSocket, minutes via bulletins), so near the epicenter the wave often arrives first. In that case the app does **not** stay silent: it shows a *"strong quake likely felt in your area"* notice with post-event guidance.
+* **One alert per earthquake:** the same quake reported by EMSC (WebSocket), USGS (feed) and the USGS radial query under different IDs triggers a single alert.
 * **Human-Centric Translation:** Instead of confusing numbers, it tells the citizen: *"At your location, shaking was felt as MMI IV (Light). Structural damage to modern buildings is statistically improbable. Breathe calmly."*
 
 ### 2. 🛡️ Intelligent Geodesic Filtering & Zero Alarm Fatigue (Cero Fatiga de Alarma)
@@ -144,11 +149,22 @@ cd centinela-sismico
 pip install -r requirements.txt
 ```
 
-### 3. Run Automated Unit Tests
+### 3. Run the Automated Quality Gate
 ```bash
-pytest -v tests/test_quakemind.py
+npm install                        # test tooling only (playwright-core uses your installed Chrome)
+python scripts/verify_all.py       # every success criterion → 🟢 ÉXITO / 🔴 FALLO
 ```
-*(All 17 unit tests covering Haversine geophysics, attenuation formulas, PAP logic, and ATC-20 triage will execute and pass).*
+The gate runs, without touching the network:
+* **Python** (`pytest tests/test_quakemind.py`): geophysics, IPE reference values, EMSC/USGS parsing with fixtures, alert decisions, PAP, ATC-20, myth-buster and a **Python ↔ JavaScript parity** test.
+* **JavaScript** (`npm test`): the shared `seismic-core.js`, including a speed budget (10 000 evaluations < 200 ms).
+* **End-to-end** (`npm run test:e2e`): the real PWA in headless Chrome with a simulated EMSC WebSocket and USGS feeds — alert latency, countdown accuracy, no duplicate alerts, no false alarm for deep quakes, "felt" notice, XSS, photosensitive-safe strobe, language persistence and full offline load.
+
+Optional live checks against the real agencies: `RUN_NETWORK_TESTS=1 pytest -k Live` and `node tests/e2e/live-smoke.mjs`.
+
+After editing anything in `pwa/`, run `python scripts/sync_dist.py` to copy it to `docs/` (GitHub Pages) and the repository root (Hugging Face Space). It refuses to publish Git LFS pointer files instead of images.
+
+### Continuous Integration & GitHub Pages
+`.github/workflows/ci-pages.yml` runs the whole gate on every push and pull request and deploys `docs/` to GitHub Pages from `main`, checking out Git LFS so icons and the preview image are real PNGs. **One-time setup:** *Settings → Pages → Build and deployment → Source: GitHub Actions*.
 
 ### 4. Launch the Hugging Face Space App Locally
 ```bash
@@ -182,6 +198,7 @@ Variables included: `event_id`, `title`, `place`, `magnitude`, `magnitude_type`,
 
 ## 🔬 Scientific & Bibliographical References
 
+1. **Allen, T. I., Wald, D. J., & Worden, C. B. (2012).** *Intensity attenuation for active crustal regions.* Journal of Seismology, 16(3), 409-433. (Intensity prediction equation used by the app.)
 1. **Wald, D. J., Quitoriano, V., Heaton, T. H., & Kanamori, H. (1999).** *Relationships between Peak Ground Acceleration, Peak Ground Velocity, and Modified Mercalli Intensity in California.* Earthquake Spectra, 15(3), 557-564.
 2. **Worden, C. B., Gerstenberger, M. C., Rhoades, D. A., & Wald, D. J. (2012).** *Probabilistic relationships between ground-motion parameters and Modified Mercalli Intensity in New Zealand.* Bulletin of the Seismological Society of America, 102(3), 893-921.
 3. **World Health Organization (WHO), War Trauma Foundation & World Vision International (2011).** *Psychological first aid: Guide for field workers.* WHO, Geneva.
